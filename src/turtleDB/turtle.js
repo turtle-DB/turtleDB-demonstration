@@ -1,10 +1,10 @@
 import uuidv4 from 'uuid/v4';
-import IDBAdapter from './idb-adapter';
+import IDBShell from './idb-adapter';
 import md5 from 'md5';
 
 class TurtleDB {
   constructor() {
-    this.idb = new IDBAdapter('turtleDB');
+    this.idb = new IDBShell('turtleDB');
   }
 
   create(data) {

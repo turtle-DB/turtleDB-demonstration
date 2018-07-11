@@ -1,5 +1,4 @@
-
-class IDBAdapter {
+class IDBShell {
   constructor(name) {
     this._store = 'store';
     this.ready = new Promise((resolve, reject) => {
@@ -241,4 +240,4 @@ class IDBAdapter {
 
 // export { turtleDB  };
 
-export default IDBAdapter;
+export default IDBShell;
