@@ -10,16 +10,6 @@ class Table extends React.Component {
     docObj: null
   }
 
-  // componentDidMount = () => {
-  //   let results = {};
-  //   this.props.data.forEach( doc => {
-  //     results[doc.id] ? results[doc.id] += 1 : results[doc.id] = 1;
-  //   })
-  //
-  //   console.log(Object.values(results).sort((a, b) => { a - b }));
-  // }
-
-
   handleOpenModal = (obj) => {
     this.setState({ showUpdateModal: true, docObj: obj });
   }
@@ -74,7 +64,6 @@ class Table extends React.Component {
       headerComponents = this.generateHeaders();
       rowComponents = this.generateRows()
     }
-
 
     return (
       <div>

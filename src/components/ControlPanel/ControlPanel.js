@@ -25,6 +25,3 @@ class ControlPanel extends React.Component {
 }
 
 export default ControlPanel
-{/* <PropertyFilter
-  data={this.props.data}
-/> */}

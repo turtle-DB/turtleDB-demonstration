@@ -20,7 +20,6 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     this.syncStateWithTurtleDB();
-    console.log(hearthstoneData);
   }
 
   syncStateWithTurtleDB = () => {
@@ -39,8 +38,7 @@ class Dashboard extends React.Component {
     let insertPromises = [];
     let dataLength = hearthstoneData.length;
     for (let i = 0; i < n; i++) {
-      // const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
-      const doc = hearthstoneData[Math.floor(Math.random() * dataLength)];
+      const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
       insertPromises.push(turtleDB.create(doc));
     }
     Promise.all(insertPromises).then(() => this.syncStateWithTurtleDB());
@@ -57,10 +55,6 @@ class Dashboard extends React.Component {
   }
 
   handleSyncWithMongoDB = () => {
-    // axios.get("https://api.github.com/users/rockdinosaur")
-    //   .then(res => {
-    //     console.log(res);
-    //   })
     axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
       .then(res => console.log(res))
       .catch(err => console.log("Error:", err))
