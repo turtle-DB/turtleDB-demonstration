@@ -1,7 +1,5 @@
 import React from 'react';
 
-
-
 class PropertyFilter extends React.Component {
   handleFilterClick = (event) => {
 

@@ -1,21 +1,31 @@
 import React from 'react';
-import { getNumDocs } from './../data/newData';
+
+// Components
 import Table from './Table';
 import InsertDocs from './InsertDocs';
-import DropButton from './DropButton'
-import PropertyFilter from './PropertyFilter'
+import DropButton from './DropButton';
+import PropertyFilter from './PropertyFilter';
 import turtleDB from '../turtleDB/turtle';
+import SyncWithMongoDB from './SyncWithMongoDB';
+// import InsertSeedData from './InsertSeedData';
 
+// Data
+//import { getNumDocs } from './../data/newData';
+import hearthstoneData from './../data/HearthstoneData';
+
+// Dashboard
 class Dashboard extends React.Component {
   constructor() {
     super()
     this.state = {
-      data: []
+      data: [],
+      hearthstone: hearthstoneData,
     }
   }
 
   componentDidMount() {
     this.syncStateWithTurtleDB();
+    console.log(this.state.hearthstone);
   }
 
   syncStateWithTurtleDB = () => {
@@ -29,14 +39,12 @@ class Dashboard extends React.Component {
       this.syncStateWithTurtleDB();
     });
   }
-
-  handleInsertClick = (num) => {
-    const newDocs = getNumDocs(num);
-    newDocs.forEach(doc => {
-      turtleDB.create(doc);
-    })
-    this.syncStateWithTurtleDB();
-  }
+  //
+  // handleInsertClick = setName => {
+  //   const setName = setName;
+  //   console.log(this.state.hearthstone[setName]);
+  //   this.syncStateWithTurtleDB();
+  // }
 
   handleUpdateClick = (newObj) => {
     turtleDB.update(newObj.id, newObj).then(() => {
@@ -48,6 +56,16 @@ class Dashboard extends React.Component {
     turtleDB.dropDB().then(() => this.setState({ data: [] }));
   }
 
+  handleSyncWithMongoDB = () => {
+    // axios.get("https://api.github.com/users/rockdinosaur")
+    //   .then(res => {
+    //     console.log(res);
+    //   })
+    axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
+      .then(res => console.log(res))
+      .catch(err => console.log("Error:", err))
+  }
+
   render() {
     return (
       <div>
@@ -55,12 +73,16 @@ class Dashboard extends React.Component {
           <div className="row">
             <InsertDocs
               handleInsertClick={this.handleInsertClick}
+              data={this.state.hearthstone}
             />
             <PropertyFilter
               data={this.state.data}
             />
             <DropButton
               handleDropDatabase={this.handleDropDatabase}
+            />
+            <SyncWithMongoDB
+              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
             />
           </div>
         </div>

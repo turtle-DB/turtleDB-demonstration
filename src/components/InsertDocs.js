@@ -7,6 +7,16 @@ class InsertDocs extends React.Component {
     this.props.handleInsertClick(num);
   }
 
+  generateCardSets = () => {
+    return Object.keys(this.props.data).map((property, idx) =>
+      <li className="checkbox" key={idx}>
+        <label className="form-check-label">
+          <input className="form-check-input" type="checkbox" value={property} />
+        </label>
+      </li>
+    )
+  }
+
   render() {
     return (
       <div className="col">
@@ -15,6 +25,12 @@ class InsertDocs extends React.Component {
           <div className="form-group">
             <input className="form-control" type="text" name="number" placeholder="Number of docs" pattern="[0-9]*" />
             <input className="btn btn-primary" type="submit" value="Insert" />
+          </div>
+          <div className="form-group">
+            <h4>Card Sets</h4>
+            <ul>
+              {this.generateCardSets()}
+            </ul>
           </div>
         </form>
       </div>
