@@ -12,7 +12,6 @@ class InsertDocsPanel extends React.Component {
     return (
       <div className="col">
         <form className="form-inline" onSubmit={this.handleInsertClick}>
-          <h4>Insert Cards</h4>
           <div className="form-group">
             <ul>
               <input type="radio" name="number" value="1"/>1

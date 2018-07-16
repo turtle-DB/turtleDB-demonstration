@@ -6,7 +6,8 @@ import ControlPanel from './ControlPanel/ControlPanel';
 import turtleDB from '../turtleDB/turtle';
 
 // Data
-import hearthstoneData from './../data/HearthstoneData';
+// import hearthstoneData from './../data/HearthstoneData';
+import hearthstoneData from './../data/HearthstoneBasicData';
 
 // Dashboard
 class Dashboard extends React.Component {
@@ -14,13 +15,12 @@ class Dashboard extends React.Component {
     super()
     this.state = {
       data: [],
-      hearthstone: hearthstoneData,
     }
   }
 
   componentDidMount() {
     this.syncStateWithTurtleDB();
-    console.log(this.state.hearthstone);
+    console.log(hearthstoneData);
   }
 
   syncStateWithTurtleDB = () => {
@@ -35,10 +35,13 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleInsertClick = n => {
+  handleInsertClick = n => { // need to change so it inserts N random cards instead
     let insertPromises = [];
+    let dataLength = hearthstoneData.length;
     for (let i = 0; i < n; i++) {
-      insertPromises.push(turtleDB.create(this.state.hearthstone[i]));
+      // const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
+      const doc = hearthstoneData[Math.floor(Math.random() * dataLength)];
+      insertPromises.push(turtleDB.create(doc));
     }
     Promise.all(insertPromises).then(() => this.syncStateWithTurtleDB());
   }
@@ -72,7 +75,6 @@ class Dashboard extends React.Component {
               handleInsertClick={this.handleInsertClick}
               handleDropDatabase={this.handleDropDatabase}
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
-              data={this.state.hearthstone}
             />
           </div>
         </div>

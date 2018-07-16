@@ -10,9 +10,10 @@ class TurtleDB {
   create(data) {
     if (typeof data === 'object' && !Array.isArray(data)) {
       data.id = uuidv4();
+      console.log(data);
       //revision ids
       let newDoc = { key: data.id, data };
-      const rev = '1-' + md5(newDoc);
+      const rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc.data.rev = rev;
       return this.idb._crud('create', newDoc);
     } else {
@@ -47,6 +48,6 @@ class TurtleDB {
   }
 }
 
-const turtleDB = new TurtleDB('turtleDB');
+window.turtleDB = new TurtleDB('turtleDB');
 
 export default turtleDB;

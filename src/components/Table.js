@@ -2,11 +2,23 @@ import React from 'react';
 import Modal from 'react-responsive-modal';
 import UpdateDoc from './UpdateDoc';
 
+const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', 'rev', 'id'];
+
 class Table extends React.Component {
   state = {
     showUpdateModal: false,
     docObj: null
   }
+
+  // componentDidMount = () => {
+  //   let results = {};
+  //   this.props.data.forEach( doc => {
+  //     results[doc.id] ? results[doc.id] += 1 : results[doc.id] = 1;
+  //   })
+  //
+  //   console.log(Object.values(results).sort((a, b) => { a - b }));
+  // }
+
 
   handleOpenModal = (obj) => {
     this.setState({ showUpdateModal: true, docObj: obj });
@@ -17,10 +29,7 @@ class Table extends React.Component {
   }
 
   generateHeaders = () => {
-    // Only need one object to get property names for headers
-    const properties = Object.keys(this.props.data[0]).reverse();
-
-    const thElements = properties.map(property => {
+    const thElements = HEADERS.map(property => {
       return <th key={property}>{property}</th>;
     });
 
@@ -35,22 +44,20 @@ class Table extends React.Component {
 
   generateRows = () => {
     // map over every object
-    return this.props.data.map((obj) => {
-      // handle the column data within each row
-      let values = Object.values(obj).reverse();
-      var cells = values.map((value, idx) => <td key={obj.id + idx}>{String(value)}</td>);
+    return this.props.data.map((doc, i) => {
+      const cells = HEADERS.map((value, j) => <td key={doc.id + j}>{String(doc[value])}</td>)
       return (
-        <tr key={obj.id}>
+        <tr key={doc.id}>
           <td>
             <button
               className="btn btn-danger"
-              onClick={() => this.props.handleDeleteClick(obj.id)}
+              onClick={() => this.props.handleDeleteClick(doc.id)}
             >Del</button>
           </td>
           <td>
             <button
               className="btn btn-warning"
-              onClick={() => this.handleOpenModal(obj)}
+              onClick={() => this.handleOpenModal(doc)}
             >Update</button>
           </td>
           {cells}
@@ -96,4 +103,3 @@ class Table extends React.Component {
 }
 
 export default Table;
-

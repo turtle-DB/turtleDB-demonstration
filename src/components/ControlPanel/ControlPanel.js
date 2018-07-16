@@ -9,9 +9,9 @@ class ControlPanel extends React.Component {
   render() {
     return (
       <div>
+        <h4>Control Panel</h4>
         <InsertDocsPanel
           handleInsertClick={this.props.handleInsertClick}
-          data={this.props.data}
         />
         <DropButton
           handleDropDatabase={this.props.handleDropDatabase}
