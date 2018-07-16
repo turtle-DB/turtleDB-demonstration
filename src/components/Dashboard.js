@@ -2,15 +2,10 @@ import React from 'react';
 
 // Components
 import Table from './Table';
-import InsertDocs from './InsertDocs';
-import DropButton from './DropButton';
-import PropertyFilter from './PropertyFilter';
+import ControlPanel from './ControlPanel/ControlPanel';
 import turtleDB from '../turtleDB/turtle';
-import SyncWithMongoDB from './SyncWithMongoDB';
-// import InsertSeedData from './InsertSeedData';
 
 // Data
-//import { getNumDocs } from './../data/newData';
 import hearthstoneData from './../data/HearthstoneData';
 
 // Dashboard
@@ -39,12 +34,14 @@ class Dashboard extends React.Component {
       this.syncStateWithTurtleDB();
     });
   }
-  //
-  // handleInsertClick = setName => {
-  //   const setName = setName;
-  //   console.log(this.state.hearthstone[setName]);
-  //   this.syncStateWithTurtleDB();
-  // }
+
+  handleInsertClick = n => {
+    let insertPromises = [];
+    for (let i = 0; i < n; i++) {
+      insertPromises.push(turtleDB.create(this.state.hearthstone[i]));
+    }
+    Promise.all(insertPromises).then(() => this.syncStateWithTurtleDB());
+  }
 
   handleUpdateClick = (newObj) => {
     turtleDB.update(newObj.id, newObj).then(() => {
@@ -71,18 +68,11 @@ class Dashboard extends React.Component {
       <div>
         <div className="shadow p-3 mb-5 bg-light rounded container">
           <div className="row">
-            <InsertDocs
+            <ControlPanel
               handleInsertClick={this.handleInsertClick}
-              data={this.state.hearthstone}
-            />
-            <PropertyFilter
-              data={this.state.data}
-            />
-            <DropButton
               handleDropDatabase={this.handleDropDatabase}
-            />
-            <SyncWithMongoDB
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              data={this.state.hearthstone}
             />
           </div>
         </div>
@@ -95,6 +85,5 @@ class Dashboard extends React.Component {
     )
   }
 }
-
 
 export default Dashboard;

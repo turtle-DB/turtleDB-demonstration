@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DropButton = props => {
+const SyncWithMongoButton = props => {
   return (
     <div className="col-2">
       <button
@@ -14,4 +14,4 @@ const DropButton = props => {
   )
 }
 
-export default DropButton
+export default SyncWithMongoButton
