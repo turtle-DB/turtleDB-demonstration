@@ -40,6 +40,10 @@ class TurtleDB {
 
   // BULK OPERATIONS
 
+  filterBy(selector) {
+    return this.idb.filterBy(selector);
+  }
+
   readAllValues() {
     return this.idb.readAllValues();
   }

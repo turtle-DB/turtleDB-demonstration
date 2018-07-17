@@ -113,7 +113,7 @@ class IDBShell {
         request.onsuccess = () => {
           resolve(request.result);
         }
-      })         
+      })
     })
   }
 
@@ -202,7 +202,7 @@ class IDBShell {
       .then(vals => vals.filter((doc) => {
         return fields.every(field => doc[field] === selector[field])
       })
-      );
+    );
   }
 
   //

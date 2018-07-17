@@ -88,6 +88,9 @@ class Dashboard extends React.Component {
             />
           </div>
           <div className="row">
+            <TestPanel
+              handleTestClick={this.handleTestClick}
+            />
           </div>
         </div>
         <Table
