@@ -16,6 +16,7 @@ class Dashboard extends React.Component {
     super()
     this.state = {
       data: [],
+      benchmark: 0
     }
   }
 
@@ -48,7 +49,12 @@ class Dashboard extends React.Component {
       const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
       insertPromises.push(turtleDB.create(doc));
     }
-    Promise.all(insertPromises).then(() => this.syncStateWithTurtleDB());
+    let startTime = Date.now();
+    Promise.all(insertPromises).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({ benchmark: timeSpent });
+      this.syncStateWithTurtleDB();
+    });
   }
 
   handleUpdateClick = (newObj) => {
@@ -77,6 +83,7 @@ class Dashboard extends React.Component {
               handleDropDatabase={this.handleDropDatabase}
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
               handleDeleteClick={this.handleDeleteClick}
+              benchmark={this.state.benchmark}
             />
           </div>
         </div>

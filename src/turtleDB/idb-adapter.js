@@ -113,7 +113,7 @@ class IDBShell {
         request.onsuccess = () => {
           resolve(request.result);
         }
-      })
+      })         
     })
   }
 

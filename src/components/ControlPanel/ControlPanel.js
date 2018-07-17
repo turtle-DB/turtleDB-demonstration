@@ -2,6 +2,7 @@ import React from 'react';
 import DropButton from './DropButton';
 import InsertDocsPanel from './InsertDocsPanel';
 import DeleteDocsPanel from './DeleteDocsPanel';
+import BenchmarkingBox from './BenchmarkingBox';
 // import PropertyFilter from './PropertyFilter';
 import SyncWithMongoButton from './SyncWithMongoButton';
 
@@ -22,6 +23,9 @@ class ControlPanel extends React.Component {
         />
         <SyncWithMongoButton
           handleSyncWithMongoDB={this.props.handleSyncWithMongoDB}
+        />
+        <BenchmarkingBox
+          benchmark={this.props.benchmark}
         />
       </div>
     )
