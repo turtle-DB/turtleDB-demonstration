@@ -1,11 +1,12 @@
 import React from 'react';
+import axios from 'axios';
 
 // Components
 import Table from './Table';
 import ControlPanel from './ControlPanel/ControlPanel';
+import TestPanel from './TestPanel/TestPanel';
 import turtleDB from '../turtleDB/turtle';
 
-// Data
 // import hearthstoneData from './../data/HearthstoneData';
 import hearthstoneData from './../data/HearthstoneBasicData';
 
@@ -15,6 +16,7 @@ class Dashboard extends React.Component {
     super()
     this.state = {
       data: [],
+      benchmark: 0
     }
   }
 
@@ -28,10 +30,16 @@ class Dashboard extends React.Component {
     );
   }
 
-  handleDeleteClick = (key) => {
+  handleSingleDeleteClick = (key) => {
     turtleDB.delete(key).then(() => {
       this.syncStateWithTurtleDB();
     });
+  }
+
+  handleDeleteClick = n => {
+    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
+      this.syncStateWithTurtleDB();
+    })
   }
 
   handleInsertClick = n => { // need to change so it inserts N random cards instead
@@ -41,7 +49,12 @@ class Dashboard extends React.Component {
       const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
       insertPromises.push(turtleDB.create(doc));
     }
-    Promise.all(insertPromises).then(() => this.syncStateWithTurtleDB());
+    let startTime = Date.now();
+    Promise.all(insertPromises).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({ benchmark: timeSpent });
+      this.syncStateWithTurtleDB();
+    });
   }
 
   handleUpdateClick = (newObj) => {
@@ -69,12 +82,20 @@ class Dashboard extends React.Component {
               handleInsertClick={this.handleInsertClick}
               handleDropDatabase={this.handleDropDatabase}
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              handleDeleteClick={this.handleDeleteClick}
+              benchmark={this.state.benchmark}
+              handleTestClick={this.handleTestClick}
+            />
+          </div>
+          <div className="row">
+            <TestPanel
+              handleTestClick={this.handleTestClick}
             />
           </div>
         </div>
         <Table
           data={this.state.data}
-          handleDeleteClick={this.handleDeleteClick}
+          handleSingleDeleteClick={this.handleSingleDeleteClick}
           handleUpdateClick={this.handleUpdateClick}
         />
       </div>
