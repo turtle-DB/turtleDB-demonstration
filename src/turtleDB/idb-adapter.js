@@ -105,7 +105,7 @@ class IDBShell {
   }
 
   // Read Between Range
-  readValuesBetweenKeys(x, y) {
+  readValuesBetweenKeys(x, y) { // improve with default lower/upperbound
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
         const request = this.getStore(this._store)
@@ -142,10 +142,12 @@ class IDBShell {
   }
 
   getLengthOfStore(store) {
-    const request = this.getStore(store).count();
-    request.onsuccess = () => {
-      console.log(request.result);
-    }
+    return new Promise((resolve, reject) => {
+      const request = this.getStore(store).count();
+      request.onsuccess = () => {
+        resolve(request.result);
+      }
+    })
   }
 
   getAllStoreNames() {
@@ -156,22 +158,26 @@ class IDBShell {
     return this.getAllStoreNames().includes(store);
   }
 
-  deleteWithinRange() {
-
-  }
-
   //IDBCURSOR operations - advance(num), continue(), continuePrimaryKey(), delete(), update()
   //IDBCURSOR properties - source, direction, key, primaryKey
-  deleteAllData() {
-    this.getStore(this._store).openCursor().onsuccess = (e) => {
-      let cursor = e.target.result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      } else {
-        console.log('Cursor finished');
+  deleteBetweenNumbers(start, end) {
+    let counter = 0;
+      this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
+        let cursor = e.target.result;
+        if (cursor) {
+          counter += 1;
+          if (counter >= start && counter <= end) {
+            cursor.delete();
+          }
+          cursor.continue();
+        }
       }
-    }
+  }
+
+  clearStore() {
+    this.getStore(this._store, 'readwrite').clear().onsuccess = e => {
+      console.log("Store cleared:", e.target.readyState);
+    };
   }
   //
   // db.find({
