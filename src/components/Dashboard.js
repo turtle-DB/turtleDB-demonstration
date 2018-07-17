@@ -4,9 +4,9 @@ import axios from 'axios';
 // Components
 import Table from './Table';
 import ControlPanel from './ControlPanel/ControlPanel';
+import TestPanel from './TestPanel/TestPanel';
 import turtleDB from '../turtleDB/turtle';
 
-// Data
 // import hearthstoneData from './../data/HearthstoneData';
 import hearthstoneData from './../data/HearthstoneBasicData';
 
@@ -84,7 +84,10 @@ class Dashboard extends React.Component {
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
               handleDeleteClick={this.handleDeleteClick}
               benchmark={this.state.benchmark}
+              handleTestClick={this.handleTestClick}
             />
+          </div>
+          <div className="row">
           </div>
         </div>
         <Table
