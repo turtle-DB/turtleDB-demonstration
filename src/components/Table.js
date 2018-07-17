@@ -41,7 +41,7 @@ class Table extends React.Component {
           <td>
             <button
               className="btn btn-danger"
-              onClick={() => this.props.handleDeleteClick(doc.id)}
+              onClick={() => this.props.handleSingleDeleteClick(doc.id)}
             >Del</button>
           </td>
           <td>
