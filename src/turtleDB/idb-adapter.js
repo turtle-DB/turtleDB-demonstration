@@ -161,20 +161,23 @@ class IDBShell {
   //IDBCURSOR operations - advance(num), continue(), continuePrimaryKey(), delete(), update()
   //IDBCURSOR properties - source, direction, key, primaryKey
   deleteBetweenNumbers(start, end) {
-    let counter = 0;
-      this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-        let cursor = e.target.result;
-        if (cursor) {
-          counter += 1;
-          if (counter >= start && counter <= end) {
-            cursor.delete();
+    return new Promise((resolve, reject) => {
+      let counter = 0;
+        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
+          let cursor = e.target.result;
+          if (cursor) {
+            counter += 1;
+            if (counter >= start && counter <= end) {
+              cursor.delete();
+            }
+            cursor.continue();
           }
-          cursor.continue();
         }
-      }
+        resolve();
+    })
   }
 
-  clearStore() {
+  deleteAll() {
     this.getStore(this._store, 'readwrite').clear().onsuccess = e => {
       console.log("Store cleared:", e.target.readyState);
     };

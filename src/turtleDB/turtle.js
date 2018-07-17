@@ -38,6 +38,8 @@ class TurtleDB {
     return this.idb._crud('delete', { key });
   }
 
+  // BULK OPERATIONS
+
   readAllValues() {
     return this.idb.readAllValues();
   }
@@ -47,7 +49,7 @@ class TurtleDB {
   }
 }
 
-// for development purposes, putting turtleDB on window 
+// for development purposes, putting turtleDB on window
 window.turtleDB = new TurtleDB('turtleDB');
 
 export default turtleDB;

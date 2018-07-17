@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 // Components
 import Table from './Table';
@@ -28,10 +29,16 @@ class Dashboard extends React.Component {
     );
   }
 
-  handleDeleteClick = (key) => {
+  handleSingleDeleteClick = (key) => {
     turtleDB.delete(key).then(() => {
       this.syncStateWithTurtleDB();
     });
+  }
+
+  handleDeleteClick = n => {
+    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
+      this.syncStateWithTurtleDB();
+    })
   }
 
   handleInsertClick = n => { // need to change so it inserts N random cards instead
@@ -69,12 +76,13 @@ class Dashboard extends React.Component {
               handleInsertClick={this.handleInsertClick}
               handleDropDatabase={this.handleDropDatabase}
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              handleDeleteClick={this.handleDeleteClick}
             />
           </div>
         </div>
         <Table
           data={this.state.data}
-          handleDeleteClick={this.handleDeleteClick}
+          handleSingleDeleteClick={this.handleSingleDeleteClick}
           handleUpdateClick={this.handleUpdateClick}
         />
       </div>
