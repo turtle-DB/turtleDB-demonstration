@@ -177,6 +177,36 @@ class IDBShell {
     })
   }
 
+  //1 - you cannot change primary keys using cursor.update()
+  //2 - you can't directly put cursor.value into an update call,
+  //3 - hence the below example using an intermediary updateData variable
+  //4 - .update() onsuccess is not necessary
+  //5 - https://stackoverflow.com/questions/47934408/how-can-i-know-that-idbcursor-reached-its-last-value
+  editFirstNDocuments(amount) {
+    return new Promise((resolve, reject) => {
+      let counter = 0;
+        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
+          let cursor = e.target.result;
+          if (!cursor) {
+            console.log('Cursor finished!');
+            resolve();
+          }
+          if (cursor) {
+            counter += 1;
+            if (counter <= amount) {
+              let updateData = cursor.value;
+              updateData.eyeColor = 'green';
+              let request = cursor.update(updateData);
+              // request.onsuccess = function() {
+              //   console.log(counter);
+              // };
+            }
+            cursor.continue();
+          }
+        }
+    })
+  }
+
   deleteAll() {
     this.getStore(this._store, 'readwrite').clear().onsuccess = e => {
       console.log("Store cleared:", e.target.readyState);
