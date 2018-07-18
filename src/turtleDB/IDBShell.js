@@ -68,7 +68,7 @@ class IDBShell {
               request = request.get(key);
               break;
             case "update":
-              request = request.put(data, key);
+              request = request.put(data);
               break;
             case "delete":
               request = request.delete(key);
