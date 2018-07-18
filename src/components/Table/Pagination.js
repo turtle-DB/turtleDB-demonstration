@@ -1,13 +1,27 @@
 import React from 'react';
 
-const TABLE_MAX = 50;
-
 class Pagination extends React.Component {
+  handleLeftClick = () => {
+    this.props.handlePaginationClick('LEFT');
+  }
+
+  handleRightClick = () => {
+    this.props.handlePaginationClick("RIGHT");
+  }
+
   render() {
     return (
       <div className="pagination">
-        <button onClick={this.handleLeftClick}>Left</button>
-        <button onClick={this.handleRightClick}>Right</button>
+        <button
+          onClick={this.handleLeftClick}
+          disabled={this.props.page <= 1}
+          >Left
+        </button>
+        <button
+          onClick={this.handleRightClick}
+          disabled={this.props.page >= this.props.maxPages}
+          >Right
+        </button>
       </div>
   )}
 }
