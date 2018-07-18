@@ -6,18 +6,18 @@ import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
 
 const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', 'rev', 'id'];
-const TABLE_MAX = 25;
 
 class Table extends React.Component {
   state = {
     showUpdateModal: false,
     docObj: null,
     page: 1,
+    tableMax: 40,
   }
 
   componentWillReceiveProps = () => {
     console.log(this.props.dataLength);
-    this.setState({ maxPages: Math.ceil(this.props.data.length / TABLE_MAX)})
+    this.setState({ maxPages: Math.ceil(this.props.data.length / this.state.tableMax)})
   }
 
   handleOpenModal = (obj) => {
@@ -33,7 +33,7 @@ class Table extends React.Component {
       this.setState(prevState => {
         return { page: prevState.page - 1 }
       });
-    } else if (direction === 'RIGHT' && this.state.page < Math.ceil(this.props.data.length / TABLE_MAX)) {
+    } else if (direction === 'RIGHT' && this.state.page < Math.ceil(this.props.data.length / this.state.tableMax)) {
       this.setState(prevState => {
         return { page: prevState.page + 1 }
       });
@@ -56,7 +56,7 @@ class Table extends React.Component {
 
   generateRows = () => {
     // map over every object
-    return this.props.data.slice((this.state.page - 1) * TABLE_MAX, this.state.page * TABLE_MAX).map((doc, i) => {
+    return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
       const cells = HEADERS.map((value, j) => <td key={doc.id + j}>{String(doc[value])}</td>)
       return (
         <tr key={doc.id}>
@@ -91,11 +91,12 @@ class Table extends React.Component {
       <div>
         <Pagination
           handlePaginationClick={this.handlePaginationClick}
+          dataLength={this.props.data.length}
           page={this.state.page}
-          maxPages={Math.ceil(this.props.data.length / TABLE_MAX)}
+          maxPages={Math.ceil(this.props.data.length / this.state.tableMax)}
+          tableMax={this.state.tableMax}
         />
         <div className="shadow p-3 mb-5 bg-light rounded">
-          <span>{`${this.props.data.length} Documents`}</span>
           <table className='table table-striped table-bordered table-condensed'>
             <thead>{headerComponents}</thead>
             <tbody>{rowComponents}</tbody>

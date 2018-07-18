@@ -9,9 +9,22 @@ class Pagination extends React.Component {
     this.props.handlePaginationClick("RIGHT");
   }
 
+  getMaxRange = () => {
+    const maxMultiple = this.props.page * this.props.tableMax;
+    return maxMultiple <= this.props.dataLength ?
+           maxMultiple : this.props.dataLength;
+  }
+
+  getMinRange = () => {
+    return (this.props.page - 1) * this.props.tableMax + 1;
+  }
+
   render() {
     return (
       <div className="pagination">
+        <p>
+          {`${this.props.dataLength} Documents`}
+        </p>
         <button
           onClick={this.handleLeftClick}
           disabled={this.props.page <= 1}
@@ -22,6 +35,7 @@ class Pagination extends React.Component {
           disabled={this.props.page >= this.props.maxPages}
           >Right
         </button>
+        <span>Displaying {this.getMinRange()} of {this.getMaxRange()}</span>
       </div>
   )}
 }
