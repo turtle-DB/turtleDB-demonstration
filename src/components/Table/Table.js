@@ -15,11 +15,6 @@ class Table extends React.Component {
     tableMax: 40,
   }
 
-  componentWillReceiveProps = () => {
-    console.log(this.props.dataLength);
-    this.setState({ maxPages: Math.ceil(this.props.data.length / this.state.tableMax)})
-  }
-
   handleOpenModal = (obj) => {
     this.setState({ showUpdateModal: true, docObj: obj });
   }
@@ -93,7 +88,6 @@ class Table extends React.Component {
           handlePaginationClick={this.handlePaginationClick}
           dataLength={this.props.data.length}
           page={this.state.page}
-          maxPages={Math.ceil(this.props.data.length / this.state.tableMax)}
           tableMax={this.state.tableMax}
         />
         <div className="shadow p-3 mb-5 bg-light rounded">
