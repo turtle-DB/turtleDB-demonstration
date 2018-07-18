@@ -1,13 +1,17 @@
 import React from 'react';
 import Modal from 'react-responsive-modal';
+
+//components
 import UpdateDoc from './UpdateDoc';
+import Pagination from './Pagination';
 
 const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', 'rev', 'id'];
+const TABLE_MAX = 50;
 
 class Table extends React.Component {
   state = {
     showUpdateModal: false,
-    docObj: null
+    docObj: null,
   }
 
   handleOpenModal = (obj) => {
@@ -86,6 +90,7 @@ class Table extends React.Component {
             closeModal={this.handleCloseModal}
           />
         </Modal>}
+        <Pagination/>
       </div>
     );
   }

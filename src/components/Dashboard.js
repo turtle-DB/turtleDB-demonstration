@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 
 // Components
-import Table from './Table';
+import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
 import TestPanel from './TestPanel/TestPanel';
 import BenchmarkingBox from './BenchmarkingBox/BenchmarkingDisplay';
