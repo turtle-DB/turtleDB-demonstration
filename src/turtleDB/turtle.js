@@ -26,27 +26,30 @@ class TurtleDB {
       //insert into meta
       let metaDoc = { _id, revisions: [_rev] };
       return this.idb._crud(this.idb._meta, 'create', { data: metaDoc })
-        .then(() => {
-          return this.idb._crud(this.idb._store, 'create', { data: newDoc });
-        })
-        .catch(err => {
-          console.log("Create error:", err);
-        })
+        .then(() => this.idb._crud(this.idb._store, 'create', { data: newDoc }))
+        .catch(err => console.log("Create error:", err));
     } else {
-      console.log('Please pass in a valid object.')
+      console.log('Please pass in a valid object.');
     }
   }
 
-  read(key) {
-    return this.idb._crud('read', { key });
+  read(_id) {
+    return this.idb._crud(this.idb._meta, 'read', { key: _id })
+      .then(meta => {
+        return meta.revisions[0];
+      })
+      .then(winningRev => {
+        const _id_rev = _id + "::" + winningRev;
+        return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
+      })
+      .then(res => {
+        const data = Object.assign({}, res);
+        [ data._id, data._rev ] = data._id_rev.split('::');
+        delete data._id_rev;
+        return data;
+      })
+      .catch(err => console.log("Read error:", err));
   }
-
-  // get document
-    //getDoc(ID)
-      //first go to meta store, get winningRevID
-      //concat ID - winningRevID
-      //go to _store index
-      //takes us to store data
 
   update(key, data) {
     return this.read(key).then((doc) => {
