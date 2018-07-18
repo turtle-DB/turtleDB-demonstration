@@ -1,6 +1,8 @@
 class IDBShell {
   constructor(name) {
     this._store = 'store';
+    this._meta = 'metaStore';
+
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
 
@@ -8,8 +10,11 @@ class IDBShell {
         console.log('on upgrade needed fired!')
         console.log(e.target)
         this.db = e.target.result;
-        this.db.createObjectStore(this._store);
+        this.db.createObjectStore(this._store, { autoIncrement: true })
+               .createIndex('_id_rev', '_id_rev', { unique: true });
+        this.db.createObjectStore(this._meta, { keyPath: '_id' });
       };
+
       request.onsuccess = e => {
         console.log('on success fired!')
         console.log(e.target.result)
@@ -50,14 +55,14 @@ class IDBShell {
   // ****************************************************
   // ****************************************************
   // BASIC CRUD OPERATIONS
-  _crud(op, { key, data }) {
+  _crud(storeName, op, { key, data }) {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
-        let request = this.getStore(this._store, op === 'read' ? 'readonly' : 'readwrite');
+        let request = this.getStore(storeName, op === 'read' ? 'readonly' : 'readwrite');
         if (request) {
           switch (op) {
             case "create":
-              request = request.add(data, key);
+              request = request.add(data);
               break;
             case "read":
               request = request.get(key);
