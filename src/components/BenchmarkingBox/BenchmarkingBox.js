@@ -1,11 +1,14 @@
 import React from 'react';
+import BenchmarkingDisplay from './BenchmarkingDisplay';
 
 const BenchmarkingBox = props => {
   return (
+    <h4>Benchmark</h4>
     <div className="benchmark">
-      <p>{props.benchmark}ms</p>
+      <BenchmarkingDisplay benchmark={props.benchmark}/>
     </div>
   )
 }
+
 
 export default BenchmarkingBox;
