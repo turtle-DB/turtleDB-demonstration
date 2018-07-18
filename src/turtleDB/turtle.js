@@ -1,5 +1,5 @@
 import uuidv4 from 'uuid/v4';
-import IDBShell from './idb-adapter';
+import IDBShell from './IDBShell';
 import md5 from 'md5';
 
 class TurtleDB {
