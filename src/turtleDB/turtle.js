@@ -34,7 +34,7 @@ class TurtleDB {
   }
 
   _readMetaDoc(_id) {
-    return this.idb._crud(this.idb._meta, 'read', { key: _id })
+    return this.idb._crud(this.idb._meta, 'read', { _id })
       .then(meta => meta);
   }
 
@@ -56,18 +56,26 @@ class TurtleDB {
       .catch(err => console.log("Read error:", err));
   }
 
-  _generateNewVersion(_id, oldVersion, updates) {
+  _generateNewVersion(_id, oldVersion, newDoc) {
     const oldRev = oldVersion._id_rev.split('::')[1];
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
 
     delete oldVersion._id_rev;
-    const updatedVersion = Object.assign({}, oldVersion, updates);
-    const newRev = `${oldRevNumber + 1}-` + md5(updatedVersion);
+    const updatedVersion = Object.assign({}, newDoc);
+    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(updatedVersion));
     updatedVersion._id_rev = _id + "::" + newRev;
     return updatedVersion;
   }
 
-  update(_id, updates) {
+  _checkForDelete(doc) {
+    // if true, throw error
+  }
+  // read(id)
+    //default behavior - get latest rev.
+    //if rev deleted: true, return error
+
+  //requires a full document. will not append updates.
+  update(_id, newDoc) {
     let metaDoc;
     return this._readMetaDoc(_id)
       .then(meta => {
@@ -76,7 +84,10 @@ class TurtleDB {
       })
       .then(winningRev => this._readWinningRev(_id, winningRev))
       .then(oldVersion => {
-        const newVersion = this._generateNewVersion(_id, oldVersion, updates);
+        console.log('old version:', oldVersion);
+        if (oldVersion.hasOwnProperty("_deleted")) throw new Error("This document has already been deleted.");
+
+        const newVersion = this._generateNewVersion(_id, oldVersion, newDoc);
         this.idb._crud(this.idb._store, 'create', { data: newVersion });
         return newVersion._id_rev.split('::')[1];
       })
@@ -86,9 +97,13 @@ class TurtleDB {
     }).catch(err => console.log("Update error:", err));
   }
 
-  delete(key) {
-    return this.idb._crud('delete', { key });
+  delete(_id) {
+    return this.update(_id, { _deleted: true });
   }
+
+
+
+
 
   // BULK OPERATIONS
 
