@@ -45,7 +45,11 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: timeSpent });
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "DELETE",
+        count: n
+      }});
       this.syncStateWithTurtleDB();
     });
   }
@@ -88,7 +92,11 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: timeSpent });
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "EDIT",
+        count: n
+      }});
       this.syncStateWithTurtleDB();
     });
   }
