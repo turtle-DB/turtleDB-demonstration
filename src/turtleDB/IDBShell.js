@@ -55,7 +55,7 @@ class IDBShell {
   // ****************************************************
   // ****************************************************
   // BASIC CRUD OPERATIONS
-  _crud(storeName, op, { key, data }) {
+  _crud(storeName, op, { _id, data }) {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
         let request = this.getStore(storeName, op === 'read' ? 'readonly' : 'readwrite');
@@ -65,20 +65,19 @@ class IDBShell {
               request = request.add(data);
               break;
             case "read":
-              request = request.get(key);
+              request = request.get(_id);
               break;
             case "update":
               request = request.put(data);
               break;
             case "delete":
-              request = request.delete(key);
+              request = request.delete(_id);
               break;
             default:
               break;
           }
         }
         request.onsuccess = e => {
-          console.log(`${op} success:`, e);
           resolve(e.target.result);
         }
         request.onerror = e => {
