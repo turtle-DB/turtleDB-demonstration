@@ -2,9 +2,10 @@ import React from 'react';
 import axios from 'axios';
 
 // Components
-import Table from './Table';
+import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
 import TestPanel from './TestPanel/TestPanel';
+import BenchmarkingBox from './BenchmarkingBox/BenchmarkingDisplay';
 import turtleDB from '../turtleDB/turtle';
 
 // import hearthstoneData from './../data/HearthstoneData';
@@ -16,7 +17,11 @@ class Dashboard extends React.Component {
     super()
     this.state = {
       data: [],
-      benchmark: 0
+      benchmark: {
+        time: null,
+        type: null,
+        count: null,
+      }
     }
   }
 
@@ -55,7 +60,11 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     Promise.all(insertPromises).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: timeSpent });
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "INSERT",
+        count: n
+      }});
       this.syncStateWithTurtleDB();
     });
   }
@@ -111,9 +120,11 @@ class Dashboard extends React.Component {
               handleDropDatabase={this.handleDropDatabase}
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
               handleDeleteClick={this.handleDeleteClick}
-              benchmark={this.state.benchmark}
               handleTestClick={this.handleTestClick}
             />
+          </div>
+          <div className="row">
+            <BenchmarkingBox benchmark={this.state.benchmark}/>
           </div>
           <div className="row">
             <TestPanel
