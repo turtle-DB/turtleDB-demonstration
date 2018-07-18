@@ -89,6 +89,15 @@ class IDBShell {
     })
   }
 
+  readFromIndex(storeName, indexName, key) {
+    return new Promise((resolve, reject) => {
+      const request = this.getStore(storeName).index(indexName).get(key);
+      request.onsuccess = e => {
+        resolve(e.target.result);
+      };
+    });
+  }
+
   // ****************************************************
   // ****************************************************
   // Bulk OPERATIONS
