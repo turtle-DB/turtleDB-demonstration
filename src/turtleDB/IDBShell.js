@@ -102,17 +102,12 @@ class IDBShell {
   // Bulk OPERATIONS
 
   // Read All
-  readAllValues() {
+  readAllMetaDocs() {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
-        const request = this.getStore(this._store).getAll();
-        request.onsuccess = () => {
-          resolve(request.result);
-        }
-        request.onerror = e => {
-          console.log("readAllValues error:", e);
-          reject(e);
-        }
+        const requestMeta = this.getStore(this._meta).getAll();
+        requestMeta.onsuccess = () => resolve(requestMeta.result);
+        requestMeta.onerror = e => reject(e);
       })
     })
   }
