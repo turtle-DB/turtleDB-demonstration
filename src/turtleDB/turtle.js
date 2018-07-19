@@ -47,7 +47,9 @@ class TurtleDB {
     return this._readMetaDoc(_id)
       .then(meta => meta.revisions[0])
       .then(winningRev => this._readWinningRev(_id, winningRev))
-      .then(res => {
+      .then(doc => {
+        if (doc._deleted) throw new Error("This document has been deleted.");
+
         const data = Object.assign({}, res);
         [ data._id, data._rev ] = data._id_rev.split('::');
         delete data._id_rev;
@@ -67,13 +69,6 @@ class TurtleDB {
     return updatedVersion;
   }
 
-  _checkForDelete(doc) {
-    // if true, throw error
-  }
-  // read(id)
-    //default behavior - get latest rev.
-    //if rev deleted: true, return error
-
   //requires a full document. will not append updates.
   update(_id, newDoc) {
     let metaDoc;
@@ -84,8 +79,7 @@ class TurtleDB {
       })
       .then(winningRev => this._readWinningRev(_id, winningRev))
       .then(oldVersion => {
-        console.log('old version:', oldVersion);
-        if (oldVersion.hasOwnProperty("_deleted")) throw new Error("This document has already been deleted.");
+        if (oldVersion._deleted) throw new Error("This document has already been deleted.");
 
         const newVersion = this._generateNewVersion(_id, oldVersion, newDoc);
         this.idb._crud(this.idb._store, 'create', { data: newVersion });
@@ -100,8 +94,6 @@ class TurtleDB {
   delete(_id) {
     return this.update(_id, { _deleted: true });
   }
-
-
 
 
 
