@@ -5,7 +5,7 @@ import Modal from 'react-responsive-modal';
 import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
 
-const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', 'rev', 'id'];
+const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', '_rev', '_id'];
 
 class Table extends React.Component {
   state = {
@@ -52,13 +52,13 @@ class Table extends React.Component {
   generateRows = () => {
     // map over every object
     return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
-      const cells = HEADERS.map((value, j) => <td key={doc.id + j}>{String(doc[value])}</td>)
+      const cells = HEADERS.map((value, j) => <td key={doc._id + j}>{String(doc[value])}</td>)
       return (
-        <tr key={doc.id}>
+        <tr key={doc._id}>
           <td>
             <button
               className="btn btn-danger"
-              onClick={() => this.props.handleSingleDeleteClick(doc.id)}
+              onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
           </td>
           <td>

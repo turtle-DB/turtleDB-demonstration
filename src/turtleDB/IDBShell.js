@@ -1,6 +1,8 @@
 class IDBShell {
   constructor(name) {
     this._store = 'store';
+    this._meta = 'metaStore';
+
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
 
@@ -8,8 +10,11 @@ class IDBShell {
         console.log('on upgrade needed fired!')
         console.log(e.target)
         this.db = e.target.result;
-        this.db.createObjectStore(this._store);
+        this.db.createObjectStore(this._store, { autoIncrement: true })
+               .createIndex('_id_rev', '_id_rev', { unique: true });
+        this.db.createObjectStore(this._meta, { keyPath: '_id' });
       };
+
       request.onsuccess = e => {
         console.log('on success fired!')
         console.log(e.target.result)
@@ -50,30 +55,29 @@ class IDBShell {
   // ****************************************************
   // ****************************************************
   // BASIC CRUD OPERATIONS
-  _crud(op, { key, data }) {
+  _crud(storeName, op, { _id, data }) {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
-        let request = this.getStore(this._store, op === 'read' ? 'readonly' : 'readwrite');
+        let request = this.getStore(storeName, op === 'read' ? 'readonly' : 'readwrite');
         if (request) {
           switch (op) {
             case "create":
-              request = request.add(data, key);
+              request = request.add(data);
               break;
             case "read":
-              request = request.get(key);
+              request = request.get(_id);
               break;
             case "update":
-              request = request.put(data, key);
+              request = request.put(data);
               break;
             case "delete":
-              request = request.delete(key);
+              request = request.delete(_id);
               break;
             default:
               break;
           }
         }
         request.onsuccess = e => {
-          console.log(`${op} success:`, e);
           resolve(e.target.result);
         }
         request.onerror = e => {
@@ -84,22 +88,26 @@ class IDBShell {
     })
   }
 
+  readFromIndex(storeName, indexName, key) {
+    return new Promise((resolve, reject) => {
+      const request = this.getStore(storeName).index(indexName).get(key);
+      request.onsuccess = e => {
+        resolve(e.target.result);
+      };
+    });
+  }
+
   // ****************************************************
   // ****************************************************
   // Bulk OPERATIONS
 
   // Read All
-  readAllValues() {
+  readAllMetaDocs() {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
-        const request = this.getStore(this._store).getAll();
-        request.onsuccess = () => {
-          resolve(request.result);
-        }
-        request.onerror = e => {
-          console.log("readAllValues error:", e);
-          reject(e);
-        }
+        const requestMeta = this.getStore(this._meta).getAll();
+        requestMeta.onsuccess = () => resolve(requestMeta.result);
+        requestMeta.onerror = e => reject(e);
       })
     })
   }
