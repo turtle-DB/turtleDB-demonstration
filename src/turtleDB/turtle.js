@@ -6,7 +6,6 @@ import axios from 'axios';
 class TurtleDB {
   constructor() {
     this.idb = new IDBShell('turtleDB');
-
   }
 
   _readMetaDoc(_id) {
@@ -26,6 +25,30 @@ class TurtleDB {
       .then(doc => {
         if (doc._deleted) { return false; }
 
+        const data = Object.assign({}, doc);
+        [ data._id, data._rev ] = data._id_rev.split('::');
+        delete data._id_rev;
+        return data;
+      })
+      .catch(err => console.log("Read error:", err));
+  }
+
+  // figuring out replication work - will have to be cleaned up:
+
+  _readAllLeafDocs() {
+    return this.idb.readAllMetaDocs()
+     .then(metaDocs => {
+       let promises = metaDocs.map(doc => this._read(doc._id));
+       return Promise.all(promises);
+     })
+     .catch(err => console.log("readAllLeafDocs error:", err));
+  }
+
+  _read(_id) {
+    return this._readMetaDoc(_id)
+      .then(meta => meta.revisions[0])
+      .then(winningRev => this._readRevFromIndex(_id, winningRev))
+      .then(doc => {
         const data = Object.assign({}, doc);
         [ data._id, data._rev ] = data._id_rev.split('::');
         delete data._id_rev;
@@ -97,7 +120,7 @@ class TurtleDB {
         metaDoc = meta;
         return metaDoc.revisions[0];
       })
-      .then(winningRev => this._readWinningRev(_id, winningRev))
+      .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(oldVersion => {
         if (oldVersion._deleted) throw new Error("This document has already been deleted.");
 
@@ -141,56 +164,40 @@ class TurtleDB {
     return this.idb.dropDB();
   }
 
-  // figuring out replication work - will have to be cleaned up:
-
-  _readAllLeafDocs() {
-    return this.idb.readAllMetaDocs()
-     .then(metaDocs => {
-       let promises = metaDocs.map(doc => this._read(doc._id));
-       return Promise.all(promises);
-     })
-     .catch(err => console.log("readAllLeafDocs error:", err));
-  }
-
-  _read(_id) {
-    return this._readMetaDoc(_id)
-      .then(meta => meta.revisions[0])
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
-      .then(doc => {
-        const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
-      })
-      .catch(err => console.log("Read error:", err));
-  }
 
   // SYNCING
+  //replicate documentation:
+    //turtle post '/_rev_diffs'
+      //turtle sends batch of metaDocs from change feed to tortoise
+      //tortoise checks what revisions it doesn't have: tortoiseDB.revDiffs()
+        //tortoise.revDiffs() gets local metadocs for the same IDs: mongoShell.readAllMetaDocs()
+        //tortoise.revDiffs() gets back metadocs and then compares the revision IDs: tortoiseDB.findMissingRevs()
+          //tDB.findMissingRevs() returns a filtered set of turtle's metadocs to tortoiseDB.revDiffs()
+        //tortoise.revDiffs() passes these metadoc to tortoise.updateMetaDocs()
+      //tortoise updates the metadocs that are not up to date
+      //tortoise sends back a list of revIDs it needs data for from turtle
+      //
 
   replicate(target) {
     // temporary fix
     target = 'http://localhost:3000';
+
     this.idb.readAllMetaDocs()
-    .then((metaDocs) => {
-      axios.post(target + '/_rev_diffs', { metaDocs })
-      .then(res => console.log("Response:", res.data))
-      .catch(err => console.log("Error:", err));
-    })
-    .catch(err => {
-      console.log(err);
-    });
-    //send over all meta docs
-    //get response with list of id + rev
-    //fetch those using index
-    //send
+      .then(metaDocs => axios.post(target + '/_rev_diffs', { metaDocs }))
 
-    // axios.post(target + '/_bulk_docs', { docs })
-    // .then(res => console.log("Replicate success:", res.data))
-    // .catch(err => console.log("Replicate error:", err))
+      .then(_id_revs => {
+        // console.log(_id_revs);
+        const promises = _id_revs.data.map(_id_rev => {
+          return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
+        });
+        return Promise.all(promises);
+      })
 
-    //send all latest revisions to target
+      .then(docs => axios.post(target + '/_bulk_docs', { docs }))
+      .then(res => console.log("Replication success:", res))
+      .catch(err => console.log("Replication error:", err))
+    }
   }
-}
 
 // for development purposes, putting turtleDB on window
 window.turtleDB = new TurtleDB('turtleDB');
