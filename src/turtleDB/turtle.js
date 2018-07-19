@@ -38,25 +38,55 @@ class TurtleDB {
       .then(meta => meta);
   }
 
-  _readWinningRev(_id, winningRev) {
-    const _id_rev = _id + "::" + winningRev;
+  _readRevFromIndex(_id, rev) {
+    const _id_rev = _id + "::" + rev;
     return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
   }
 
   read(_id) {
     return this._readMetaDoc(_id)
       .then(meta => meta.revisions[0])
-      .then(winningRev => this._readWinningRev(_id, winningRev))
+      .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
         if (doc._deleted) throw new Error("This document has been deleted.");
 
-        const data = Object.assign({}, res);
+        const data = Object.assign({}, doc);
         [ data._id, data._rev ] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })
       .catch(err => console.log("Read error:", err));
   }
+
+  _readWithoutDeletedError(_id) {
+    return this._readMetaDoc(_id)
+      .then(meta => meta.revisions[0])
+      .then(winningRev => this._readRevFromIndex(_id, winningRev))
+      .then(doc => {
+        if (doc._deleted) { return false; }
+
+        const data = Object.assign({}, doc);
+        [ data._id, data._rev ] = data._id_rev.split('::');
+        delete data._id_rev;
+        return data;
+      })
+      .catch(err => console.log("Read error:", err));
+  }
+
+  readAllValues() {
+    return this.idb.readAllMetaDocs()
+       .then(metaDocs => {
+         let promises = metaDocs.map(doc => this._readWithoutDeletedError(doc._id));
+         return Promise.all(promises);
+       })
+       .then(docs => {
+         return docs.filter(doc => doc);
+       })
+       .catch(err => console.log("getAll error:", err));
+  }
+
+
+
 
   _generateNewVersion(_id, oldVersion, newDoc) {
     const oldRev = oldVersion._id_rev.split('::')[1];
@@ -95,16 +125,10 @@ class TurtleDB {
     return this.update(_id, { _deleted: true });
   }
 
-
-
   // BULK OPERATIONS
 
   filterBy(selector) {
     return this.idb.filterBy(selector);
-  }
-
-  readAllValues() {
-    return this.idb.readAllValues();
   }
 
   dropDB() {
