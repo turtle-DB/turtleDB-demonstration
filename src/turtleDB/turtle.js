@@ -24,6 +24,7 @@ class TurtleDB {
       .then(meta => meta.revisions[0])
       .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
+
         if (doc._deleted) { return false; }
 
         const data = Object.assign({}, doc);
@@ -194,8 +195,8 @@ class TurtleDB {
     //insert into history -> { last_seq: max key, session_id }
 
 
-  generateSyncHistory() {
-    const newSessionId = new Date().toISOString();
+  generateSessionID() {
+    return new Date().toISOString();
   }
 
   getHighestStoreKey() {
@@ -204,15 +205,38 @@ class TurtleDB {
 
   }
 
+  _getUniqueIDs(docs) {
+    let ids = {};
+    for (let i = 0; i < docs.length; i++) {
+      const id = docs[i]._id_rev.split("::")[0];
+      if (ids[id]) continue;
+      ids[id] = true;
+    }
+    const uniqueIDs = Object.keys(ids);
+    console.log(uniqueIDs);
+    return uniqueIDs
+  }
+
+  readMetaDocsByIDs(ids) {
+    let promises = [];
+    ids.forEach(_id => {
+      promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
+    });
+    return Promise.all(promises);
+  }
+
   replicate(target) {
     // temporary fix
     target = 'http://localhost:3000';
 
     let lastKey;
     let highestKey;
+    let sessionID = this.generateSessionID();
+    let turtleHistoryDoc;
     const syncHistory = this.idb.command(this.idb._sync, "READ_ALL", {})
     .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
-    .then(turtleHistoryDoc => {
+    .then(res => {
+      turtleHistoryDoc = res;
       if (turtleHistoryDoc.history.length === 0) {
         lastKey = 0;
       } else {
@@ -224,37 +248,33 @@ class TurtleDB {
       if (lastKey === highestKey) {
         return Promise.reject("No sync needed.")
       }
-      //doc => ids[doc._id] = true
-      this.idb.readValuesBetweenKeys(lastKey + 1, highestKey)
-      .then(docs => {
-        let ids = {};
-        console.log(docs);
-        // for (let i = 0; i < docs.length; i++) {
-        //   if (ids[docs[i]._id]) continue;
-        //   ids[docs[i]._id] = true;
-        // }
-        // console.log(Object.keys(ids));
-      });
+      return this.idb.readValuesBetweenKeys(lastKey + 1, highestKey);
     })
-    .catch(err => console.log(err));
+    .then(docs => this._getUniqueIDs(docs))
+    .then(ids => this.readMetaDocsByIDs(ids))
+    .then(metaDocs => axios.post(target + '/_rev_diffs', { sessionID, metaDocs }))
 
-    // this.idb.command(this._meta, 'READ_ALL', {})
-    //   .then(metaDocs => axios.post(target + '/_rev_diffs', { metaDocs }))
-    //
-    //   .then(_id_revs => {
-    //     // console.log(_id_revs);
-    //     const promises = _id_revs.data.map(_id_rev => {
-    //       return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
-    //       //return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
-    //     });
-    //     return Promise.all(promises);
-    //   })
-    //
-    //   .then(docs => axios.post(target + '/_bulk_docs', { docs }))
-    //   .then(res => console.log("Replication success:", res))
-    //   .catch(err => console.log("Replication error:", err))
-    }
+    // Handle response from Tortoise
+    .then(_id_revs => {
+      const promises = _id_revs.data.map(_id_rev => {
+        return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+        //return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
+      });
+      return Promise.all(promises);
+    })
+
+    .then(docs => axios.post(target + '/_bulk_docs', { docs }))
+    .then(res => {
+      let newHistory = { lastKey: highestKey, sessionID };
+      let updatedHistoryDoc = Object.assign(
+        turtleHistoryDoc, {history: [newHistory].concat(turtleHistoryDoc.history)}
+      );
+      return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
+    })
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
   }
+}
 
 // for development purposes, putting turtleDB on window
 window.turtleDB = new TurtleDB('turtleDB');
