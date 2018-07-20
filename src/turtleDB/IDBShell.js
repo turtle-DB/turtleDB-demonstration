@@ -50,7 +50,7 @@ class IDBShell {
     .catch(err => console.log(err));
   }
 
-  command(storeName, action, { _id, data }) {
+  command(storeName, action, { _id, data, x, y }) {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
         let request = this.getStore(storeName, ["READ", "READ_ALL"].includes(action) ? 'readonly' : 'readwrite');
@@ -61,6 +61,8 @@ class IDBShell {
             request = request.get(_id);
           } else if (action === "READ_ALL") {
             request = request.getAll();
+          } else if (action === "READ_BETWEEN") {
+            request = request.getAll(IDBKeyRange.bound(x, y));
           } else if (action === "UPDATE") {
             request = request.put(data);
           } else if (action === "INDEX_READ") {
@@ -103,18 +105,6 @@ class IDBShell {
       };
     });
     return this.ready;
-  }
-
-  readValuesBetweenKeys(x, y) { // improve with default lower/upperbound
-    return this.ready.then(() => {
-      return new Promise((resolve, reject) => {
-        const request = this.getStore(this._store)
-          .getAll(IDBKeyRange.bound(x, y));
-        request.onsuccess = () => {
-          resolve(request.result);
-        }
-      })
-    })
   }
 
   filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}

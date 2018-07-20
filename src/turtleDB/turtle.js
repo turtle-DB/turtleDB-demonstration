@@ -248,7 +248,7 @@ class TurtleDB {
       if (lastKey === highestKey) {
         return Promise.reject("No sync needed.")
       }
-      return this.idb.readValuesBetweenKeys(lastKey + 1, highestKey);
+      return this.idb.readValuesBetweenKeys({ x: lastKey + 1, y: highestKey });
     })
     .then(docs => this._getUniqueIDs(docs))
     .then(ids => this.readMetaDocsByIDs(ids))
@@ -267,7 +267,7 @@ class TurtleDB {
     .then(res => {
       let newHistory = { lastKey: highestKey, sessionID };
       let updatedHistoryDoc = Object.assign(
-        turtleHistoryDoc, {history: [newHistory].concat(turtleHistoryDoc.history)}
+        turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
       );
       return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
     })
