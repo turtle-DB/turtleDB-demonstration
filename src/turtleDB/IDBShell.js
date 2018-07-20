@@ -55,33 +55,22 @@ class IDBShell {
       return new Promise((resolve, reject) => {
         let request = this.getStore(storeName, ["READ", "READ_ALL"].includes(action) ? 'readonly' : 'readwrite');
         if (request) {
-          switch (action) {
-            case "CREATE":
-              request = request.add(data);
-              break;
-            case "READ":
-              request = request.get(_id);
-              break;
-            case "READ_ALL":
-              request = request.getAll();
-              break;
-            case "INDEX_READ":
-              request = request.index(data.indexName).get(data.key);
-            case "UPDATE":
-              console.log(data);
-              request = request.put(data);
-              break;
-            case "DELETE":
-              request = request.delete(_id);
-              break;
-            case "GET_ALL_KEYS":
-              request = request.getAllKeys();
-              break;
-            case "COUNT":
-              request = request.count();
-              break;
-            default:
-              break;
+          if (action === "CREATE") {
+            request = request.add(data);
+          } else if (action === "READ") {
+            request = request.get(_id);
+          } else if (action === "READ_ALL") {
+            request = request.getAll();
+          } else if (action === "UPDATE") {
+            request = request.put(data);
+          } else if (action === "INDEX_READ") {
+            request = request.index(data.indexName).get(data.key);
+          } else if (action === "DELETE") {
+            request = request.delete(_id);
+          } else if (action === "GET_ALL_KEYS") {
+            request = request.getAllKeys();
+          } else if (action === "COUNT") {
+            request = request.count();
           }
         }
         request.onsuccess = e => {
