@@ -1,7 +1,10 @@
+import uuidv4 from 'uuid/v4';
+
 class IDBShell {
   constructor(name) {
     this._store = 'store';
     this._meta = 'metaStore';
+    this._sync = 'syncHistoryStore';
 
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
@@ -13,12 +16,14 @@ class IDBShell {
         this.db.createObjectStore(this._store, { autoIncrement: true })
                .createIndex('_id_rev', '_id_rev', { unique: true });
         this.db.createObjectStore(this._meta, { keyPath: '_id' });
+        this.db.createObjectStore(this._sync, { keyPath: '_id' });
       };
 
       request.onsuccess = e => {
         console.log('on success fired!')
         console.log(e.target.result)
         this.db = e.target.result; // IDBDatabase object
+        this.hasSyncHistory()
         resolve();
       };
 
@@ -27,6 +32,26 @@ class IDBShell {
         reject(e);
       };
     });
+  }
+
+  hasSyncHistory() {
+    //go to sync store
+    //see if there is a record
+    //if not, make one //
+    return this.getAllKeysFromStore(this._sync)
+      .then(keys => {
+        if (keys.length === 0) this.createLocalSyncHistory()
+      })
+      .catch(err => console.log(err));
+  }
+
+  createLocalSyncHistory() {
+    const turtleID = uuidv4();
+    const syncHistory = { history: [], _id: turtleID };
+    //insert into sync store
+    this._crud(this._sync, 'create', { data: syncHistory })
+    .then((res) => console.log(res))
+    .catch(err => console.log(err));
   }
   // ****************************************************
   // ****************************************************
