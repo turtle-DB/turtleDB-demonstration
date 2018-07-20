@@ -67,6 +67,8 @@ class IDBShell {
             request = request.index(data.indexName).get(data.key);
           } else if (action === "DELETE") {
             request = request.delete(_id);
+          } else if (action === "DELETE_ALL") {
+            request = request.clear();
           } else if (action === "GET_ALL_KEYS") {
             request = request.getAllKeys();
           } else if (action === "COUNT") {
@@ -139,12 +141,6 @@ class IDBShell {
         }
         resolve();
     })
-  }
-
-  deleteAll() {
-    this.getStore(this._store, 'readwrite').clear().onsuccess = e => {
-      console.log("Store cleared:", e.target.readyState);
-    };
   }
 
 // STORE OPERATIONS

@@ -198,27 +198,61 @@ class TurtleDB {
     const newSessionId = new Date().toISOString();
   }
 
+  getHighestStoreKey() {
+    return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
+      .then(keys => keys[keys.length - 1])
+
+  }
+
   replicate(target) {
     // temporary fix
     target = 'http://localhost:3000';
 
-    const syncHistory = this.idb.command(this.idb._sync, "READ_ALL", )
+    let lastKey;
+    let highestKey;
+    const syncHistory = this.idb.command(this.idb._sync, "READ_ALL", {})
+    .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
+    .then(turtleHistoryDoc => {
+      if (turtleHistoryDoc.history.length === 0) {
+        lastKey = 0;
+      } else {
+        lastKey = turtleHistoryDoc.history[0].lastKey;
+      }
+    })
+    .then(() => this.getHighestStoreKey().then(key => highestKey = key))
+    .then(() => {
+      if (lastKey === highestKey) {
+        return Promise.reject("No sync needed.")
+      }
+      //doc => ids[doc._id] = true
+      this.idb.readValuesBetweenKeys(lastKey + 1, highestKey)
+      .then(docs => {
+        let ids = {};
+        console.log(docs);
+        // for (let i = 0; i < docs.length; i++) {
+        //   if (ids[docs[i]._id]) continue;
+        //   ids[docs[i]._id] = true;
+        // }
+        // console.log(Object.keys(ids));
+      });
+    })
+    .catch(err => console.log(err));
 
-    this.idb.command(this._meta, 'READ_ALL')
-      .then(metaDocs => axios.post(target + '/_rev_diffs', { metaDocs }))
-
-      .then(_id_revs => {
-        // console.log(_id_revs);
-        const promises = _id_revs.data.map(_id_rev => {
-          return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
-          //return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
-        });
-        return Promise.all(promises);
-      })
-
-      .then(docs => axios.post(target + '/_bulk_docs', { docs }))
-      .then(res => console.log("Replication success:", res))
-      .catch(err => console.log("Replication error:", err))
+    // this.idb.command(this._meta, 'READ_ALL', {})
+    //   .then(metaDocs => axios.post(target + '/_rev_diffs', { metaDocs }))
+    //
+    //   .then(_id_revs => {
+    //     // console.log(_id_revs);
+    //     const promises = _id_revs.data.map(_id_rev => {
+    //       return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    //       //return this.idb.readFromIndex(this.idb._store, '_id_rev', _id_rev);
+    //     });
+    //     return Promise.all(promises);
+    //   })
+    //
+    //   .then(docs => axios.post(target + '/_bulk_docs', { docs }))
+    //   .then(res => console.log("Replication success:", res))
+    //   .catch(err => console.log("Replication error:", err))
     }
   }
 
