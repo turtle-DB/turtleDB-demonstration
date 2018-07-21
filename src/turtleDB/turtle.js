@@ -35,8 +35,6 @@ class TurtleDB {
       .catch(err => console.log("Read error:", err));
   }
 
-  // figuring out replication work - will have to be cleaned up:
-
   _readAllLeafDocs() {
     return this.idb.command(this._meta, "READ_ALL")
      .then(metaDocs => {
@@ -70,24 +68,95 @@ class TurtleDB {
     return updatedVersion;
   }
 
+    _generateSessionID() {
+      return new Date().toISOString();
+    }
+
+    _getLastStoreKey(turtleHistoryDoc) {
+      if (turtleHistoryDoc.history.length === 0) {
+        return 0;
+      } else {
+        return turtleHistoryDoc.history[0].lastKey;
+      }
+    }
+
+    _getHighestStoreKey() {
+      return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
+        .then(keys => keys[keys.length - 1])
+    }
+
+    _getTurtleHistoryDoc() {
+      return this.idb.command(this.idb._sync, "READ_ALL", {})
+      .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
+    }
+
+    _getMetaDocsOfUpdatedDocs(lastKey, highestKey) {
+      return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastKey + 1, y: highestKey })
+      .then(docs => this._getUniqueIDs(docs))
+      .then(ids => this._getMetaDocsByIDs(ids))
+    }
+
+    _getUniqueIDs(docs) {
+      let ids = {};
+      for (let i = 0; i < docs.length; i++) {
+        const id = docs[i]._id_rev.split("::")[0];
+        if (ids[id]) continue;
+        ids[id] = true;
+      }
+      const uniqueIDs = Object.keys(ids);
+      return uniqueIDs;
+    }
+
+    _getMetaDocsByIDs(ids) {
+      let promises = [];
+      ids.forEach(_id => {
+        promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
+      });
+      return Promise.all(promises);
+    }
+
+    _getChangesForTortoise(highestKey, turtleHistoryDoc) {
+      let lastKey = this._getLastStoreKey(turtleHistoryDoc);
+      return new Promise((resolve, reject) => {
+        if (lastKey === highestKey) {
+          reject("No sync needed.")
+        }
+        resolve(this._getMetaDocsOfUpdatedDocs(lastKey, highestKey));
+      })
+      .catch(err => console.log(err));
+    }
+
+    _getDocsForTortoise(tortoiseResponse) {
+      const promises = tortoiseResponse.data.map(_id_rev => {
+        return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+      });
+      return Promise.all(promises);
+    }
+
+    _updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc) {
+      let newHistory = { lastKey: highestKey, sessionID };
+      let updatedHistoryDoc = Object.assign(
+        turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
+      );
+      return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
+    }
+
   // ----- Public API Methods ----- //
 
   create(data) {
     if (typeof data === 'object' && !Array.isArray(data)) {
       let newDoc = Object.assign({}, data);
-
       let _id;
+
       if (!newDoc._id && newDoc._id !== 0) {
         _id = uuidv4();
       } else {
         _id = newDoc._id;
         delete newDoc._id;
       }
-
       //revision + id
       const _rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc._id_rev = _id + '::' + _rev;
-
       //insert into meta
       let metaDoc = { _id, revisions: [_rev] };
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
@@ -97,7 +166,6 @@ class TurtleDB {
       console.log('Please pass in a valid object.');
     }
   }
-
 
   read(_id) {
     return this._readMetaDoc(_id)
@@ -159,84 +227,11 @@ class TurtleDB {
   }
 
   deleteAll() {
-    this.idb.deleteAll();
+    return this.idb.command(this.idb._store, "DELETE_ALL", {});
   }
 
   dropDB() {
     return this.idb.dropDB();
-  }
-
-  _generateSessionID() {
-    return new Date().toISOString();
-  }
-
-  _getLastStoreKey(turtleHistoryDoc) {
-    if (turtleHistoryDoc.history.length === 0) {
-      return 0;
-    } else {
-      return turtleHistoryDoc.history[0].lastKey;
-    }
-  }
-
-  _getHighestStoreKey() {
-    return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
-      .then(keys => keys[keys.length - 1])
-  }
-
-  _getTurtleHistoryDoc() {
-    return this.idb.command(this.idb._sync, "READ_ALL", {})
-    .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
-  }
-
-  _getMetaDocsOfUpdatedDocs(lastKey, highestKey) {
-    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastKey + 1, y: highestKey })
-    .then(docs => this._getUniqueIDs(docs))
-    .then(ids => this._getMetaDocsByIDs(ids))
-  }
-
-  _getUniqueIDs(docs) {
-    let ids = {};
-    for (let i = 0; i < docs.length; i++) {
-      const id = docs[i]._id_rev.split("::")[0];
-      if (ids[id]) continue;
-      ids[id] = true;
-    }
-    const uniqueIDs = Object.keys(ids);
-    return uniqueIDs;
-  }
-
-  _getMetaDocsByIDs(ids) {
-    let promises = [];
-    ids.forEach(_id => {
-      promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
-    });
-    return Promise.all(promises);
-  }
-
-  _getChangesForTortoise(highestKey, turtleHistoryDoc) {
-    let lastKey = this._getLastStoreKey(turtleHistoryDoc);
-    return new Promise((resolve, reject) => {
-      if (lastKey === highestKey) {
-        reject("No sync needed.")
-      }
-      resolve(this._getMetaDocsOfUpdatedDocs(lastKey, highestKey));
-    })
-    .catch(err => console.log(err));
-  }
-
-  _getDocsForTortoise(tortoiseResponse) {
-    const promises = tortoiseResponse.data.map(_id_rev => {
-      return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
-    });
-    return Promise.all(promises);
-  }
-
-  _updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc) {
-    let newHistory = { lastKey: highestKey, sessionID };
-    let updatedHistoryDoc = Object.assign(
-      turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
-    );
-    return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
   }
 
   //TASKS
@@ -263,7 +258,6 @@ class TurtleDB {
     .then(() => this._updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc))
     .then(res => console.log(res))
     .catch(err => console.log(err));
-
   }
 }
 

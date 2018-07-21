@@ -88,31 +88,14 @@ class IDBShell {
     })
   }
 
-  addIndex(field) {
-    this.ready = new Promise((resolve, reject) => {
-      this.db.close();
-      const request = window.indexedDB.open("turtleDB", this.db.version + 1);
-      request.onupgradeneeded = e => {
-        this.db = e.target.result;
-        // Version change transaction:
-        const transaction = e.target.transaction;
-        try {
-          transaction.objectStore('store').createIndex(field, field);
-          resolve(`Index: ${field} created successfully.`);
-        } catch (err) {
-          reject(err);
-        }
-      };
-    });
-    return this.ready;
-  }
-
+  // currently won't work for _id in store
+  // need to filter by winning & non-deleted docs
   filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
     let fields = Object.keys(selector);
-    return this.readAllValues()
-      .then(vals => vals.filter((doc) => {
-        return fields.every(field => doc[field] === selector[field])
-      })
+    return this.command(this._store, "READ_ALL", {})
+      .then(docs => docs.filter(doc => fields.every(field => {
+        return doc[field] === selector[field]
+      }))
     );
   }
 
@@ -178,6 +161,27 @@ class IDBShell {
           }
         }
     })
+  }
+
+  // DATABASE OPERATIONS
+
+  addIndex(field) {
+    this.ready = new Promise((resolve, reject) => {
+      this.db.close();
+      const request = window.indexedDB.open("turtleDB", this.db.version + 1);
+      request.onupgradeneeded = e => {
+        this.db = e.target.result;
+        // Version change transaction:
+        const transaction = e.target.transaction;
+        try {
+          transaction.objectStore('store').createIndex(field, field);
+          resolve(`Index: ${field} created successfully.`);
+        } catch (err) {
+          reject(err);
+        }
+      };
+    });
+    return this.ready;
   }
 
   dropDB() {
