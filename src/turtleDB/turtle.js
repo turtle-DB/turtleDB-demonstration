@@ -116,7 +116,7 @@ class TurtleDB {
   }
 
   _getChangesForTortoise(lastTortoiseKey, highestTurtleKey, turtleHistoryDoc) {
-    console.log(lastTortoiseKey, highestTurtleKey);
+    //console.log(lastTortoiseKey, highestTurtleKey);
     return new Promise((resolve, reject) => {
       if (lastTortoiseKey === highestTurtleKey) {
         reject("No sync needed.")
@@ -134,14 +134,20 @@ class TurtleDB {
   }
 
   _updateTurtleSyncHistory(turtleSyncRecord) {
+    //console.log(turtleSyncRecord);
     return this.idb.command(this.idb._sync, "UPDATE", { data: turtleSyncRecord });
   }
 
   _createNewSyncDocument(highestTurtleKey, sessionID, turtleHistoryDoc) {
+    // console.log('highestTurtleKey', highestTurtleKey);
+    // console.log('sessionID', sessionID);
+    // console.log('turtleHistoryDoc', turtleHistoryDoc);
+
     let newHistory = { lastKey: highestTurtleKey, sessionID };
     let turtleSyncRecord = Object.assign(
       turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
     );
+    // console.log('new sync doc is', turtleSyncRecord);
     return turtleSyncRecord;
   }
 
@@ -238,45 +244,19 @@ class TurtleDB {
     return this.idb.dropDB();
   }
 
-  //TASKS
-  //compare_sync_history with tortoiseDB
-  //remove underscores
-
-  //handle case where tortoise was deleted since last sync
-
   replicate(target) {
     target = 'http://localhost:3000'; // for testing purposes only
     let sessionID = this._generateSessionID();
     let turtleHistoryDoc;
     let highestTurtleKey;
-    let lastTurtleKey;
     let lastTortoiseKey;
     let turtleSyncRecord;
     let docsForTortoise;
 
-    // turtle:
-    // {
-    //   _id: 'turtleDB:1231',
-    //   lastKey: 5,
-    //   // highestTurtleKey: 5,
-    //   history: [ {lastKey: 5 ,sessionID: 123} ]
-    // }
-    //
-    // tortoise:
-    // {
-    //   _id: 'turtleDB::1231'
-    //   lastKey: 5,
-    //   history: [ {lastKey: 5, sessionID: 123} ]
-    // }
-
-
     this._getTurtleHistoryDoc()
     .then(history => turtleHistoryDoc = history)
     this._getHighestStoreKey()
-    .then(key => {
-      highestTurtleKey = key;
-      //lastTurtleKey = this._getLastStoreKey(turtleHistoryDoc)
-    })
+    .then(key => highestTurtleKey = key)
     .then(() => axios.post(target + '/_compare_sync_history', turtleHistoryDoc))
     .then(res => lastTortoiseKey = res.data)
     .then(() => this._getChangesForTortoise(lastTortoiseKey, highestTurtleKey, turtleHistoryDoc))
@@ -285,15 +265,8 @@ class TurtleDB {
     .then(docs => docsForTortoise = docs)
     .then(() => turtleSyncRecord = this._createNewSyncDocument(highestTurtleKey, sessionID, turtleHistoryDoc))
     .then(() => axios.post(target + '/_bulk_docs', { docs: docsForTortoise, turtleSyncRecord }))
-    //create updated turtleSyncHistory
-    //send it with bulk docs
-    //wait for OK response
-    //update turtle sync history
-
-
-
-    //.then(() => this._updateTurtleSyncHistory(highestTurtleKey, sessionID, turtleHistoryDoc))
-    // .then(res => console.log(res))
+    .then(() => this._updateTurtleSyncHistory(turtleSyncRecord))
+    .then(res => console.log(res))
     .catch(err => console.log(err));
   }
 }
