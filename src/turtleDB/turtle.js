@@ -130,10 +130,10 @@ class TurtleDB {
         return newVersion._id_rev.split('::')[1];
       })
       .then(newRev => {
-        //metaDoc = Object.assign({}, {revisions: [newRev].concat(metaDoc.revisions))
-        metaDoc.revisions.unshift(newRev); // mutating
+        const updatedMetaDoc = Object.assign(metaDoc, {revisions: [newRev].concat(metaDoc.revisions)})
         return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
-    }).catch(err => console.log("Update error:", err));
+      })
+      .catch(err => console.log("Update error:", err));
   }
 
   delete(_id) {
@@ -165,35 +165,6 @@ class TurtleDB {
   dropDB() {
     return this.idb.dropDB();
   }
-
-
-  // SYNCING
-  //replicate documentation:
-    //turtle post '/_rev_diffs'
-      //turtle sends batch of metaDocs from change feed to tortoise
-      //tortoise checks what revisions it doesn't have: tortoiseDB.revDiffs()
-        //tortoise.revDiffs() gets local metadocs for the same IDs: mongoShell.READ_ALLMetaDocs()
-        //tortoise.revDiffs() gets back metadocs and then compares the revision IDs: tortoiseDB.findMissingRevs()
-          //tDB.findMissingRevs() returns a filtered set of turtle's metadocs to tortoiseDB.revDiffs()
-        //tortoise.revDiffs() passes these metadoc to tortoise.updateMetaDocs()
-      //tortoise updates the metadocs that are not up to date
-      //tortoise sends back a list of revIDs it needs data for from turtle
-      //
-
-
-  //generate a session ID for every replicate w/ DateISOString
-  //get the last sync from history
-    //get the last_seq
-    //get highest key from store
-    //if they are the same, stop
-    //otherwise, get all unique _ids for records in (last_seq + 1 - highest key)
-    //get all metadocs for those _ids
-    //generate new session id
-    //send those metadocs and session id with /_rev_diffs
-
-  //after _bulk_docs returns a successful response, update sync history
-    //insert into history -> { last_seq: max key, session_id }
-
 
   _generateSessionID() {
     return new Date().toISOString();
@@ -242,19 +213,13 @@ class TurtleDB {
     return Promise.all(promises);
   }
 
-  _getChangesForTortoise(turtleHistoryDoc) {
-    let lastKey;
-    let highestKey;
+  _getChangesForTortoise(highestKey, turtleHistoryDoc) {
+    let lastKey = this._getLastStoreKey(turtleHistoryDoc);
     return new Promise((resolve, reject) => {
-      lastKey = this._getLastStoreKey(turtleHistoryDoc);
-      resolve(this._getHighestStoreKey());
-    })
-    .then(key => {
-      highestKey = key
       if (lastKey === highestKey) {
-        return Promise.reject("No sync needed.")
+        reject("No sync needed.")
       }
-      return this._getMetaDocsOfUpdatedDocs(lastKey, highestKey)
+      resolve(this._getMetaDocsOfUpdatedDocs(lastKey, highestKey));
     })
     .catch(err => console.log(err));
   }
@@ -266,34 +231,38 @@ class TurtleDB {
     return Promise.all(promises);
   }
 
+  _updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc) {
+    let newHistory = { lastKey: highestKey, sessionID };
+    let updatedHistoryDoc = Object.assign(
+      turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
+    );
+    return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
+  }
+
+  //TASKS
+  //compare_sync_history with tortoiseDB
+  //remove underscores
+
   replicate(target) {
-    //_check_sync_history
-    //_rev_diffs
-    //bulk_docs
     target = 'http://localhost:3000'; // for testing purposes only
     let sessionID = this._generateSessionID();
+
     let turtleHistoryDoc;
+    let highestKey;
+
     this._getTurtleHistoryDoc()
-    .then(history => {
-      turtleHistoryDoc = history;
-      return this._getChangesForTortoise(turtleHistoryDoc);
+    .then(history => turtleHistoryDoc = history)
+    this._getHighestStoreKey()
+    .then(key => {
+      highestKey = key;
     })
+    .then(() => this._getChangesForTortoise(highestKey, turtleHistoryDoc))
     .then(metaDocs => axios.post(target + '/_rev_diffs', { sessionID, metaDocs }))
     .then(tortoiseResponse => this._getDocsForTortoise(tortoiseResponse))
     .then(docs => axios.post(target + '/_bulk_docs', { docs }))
-
-    //this.updateTurtleSyncHistory();
-
-    // .then(() => updateTurtleSyncHistory())
-    // .then(res => {
-    //   let newHistory = { lastKey: highestKey, sessionID };
-    //   let updatedHistoryDoc = Object.assign(
-    //     turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
-    //   );
-    //   return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
-    // })
-    // .then(res => console.log(res))
-    // .catch(err => console.log(err));
+    .then(() => this._updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc))
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
 
   }
 }
