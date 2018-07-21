@@ -16,7 +16,7 @@ class Pagination extends React.Component {
   }
 
   getMinRange = () => {
-    return (this.props.page - 1) * this.props.tableMax + 1;
+    return this.props.dataLength === 0 ? 0 : (this.props.page - 1) * this.props.tableMax + 1;
   }
 
   render() {
@@ -35,7 +35,7 @@ class Pagination extends React.Component {
           disabled={this.props.page >= this.props.maxPages}
           >Right
         </button>
-        <span>Displaying {this.getMinRange()} of {this.getMaxRange()}</span>
+        <span>{this.getMinRange()} of {this.getMaxRange()}</span>
       </div>
   )}
 }
