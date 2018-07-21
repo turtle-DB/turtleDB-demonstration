@@ -68,78 +68,78 @@ class TurtleDB {
     return updatedVersion;
   }
 
-    _generateSessionID() {
-      return new Date().toISOString();
-    }
+  _generateSessionID() {
+    return new Date().toISOString();
+  }
 
-    _getLastStoreKey(turtleHistoryDoc) {
-      if (turtleHistoryDoc.history.length === 0) {
-        return 0;
-      } else {
-        return turtleHistoryDoc.history[0].lastKey;
+  _getLastStoreKey(turtleHistoryDoc) {
+    if (turtleHistoryDoc.history.length === 0) {
+      return 0;
+    } else {
+      return turtleHistoryDoc.history[0].lastKey;
+    }
+  }
+
+  _getHighestStoreKey() {
+    return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
+      .then(keys => keys[keys.length - 1])
+  }
+
+  _getTurtleHistoryDoc() {
+    return this.idb.command(this.idb._sync, "READ_ALL", {})
+    .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
+  }
+
+  _getMetaDocsOfUpdatedDocs(lastKey, highestTurtleKey) {
+    console.log(lastKey, highestTurtleKey);
+    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastKey + 1, y: highestTurtleKey })
+    .then(docs => this._getUniqueIDs(docs))
+    .then(ids => this._getMetaDocsByIDs(ids))
+  }
+
+  _getUniqueIDs(docs) {
+    let ids = {};
+    for (let i = 0; i < docs.length; i++) {
+      const id = docs[i]._id_rev.split("::")[0];
+      if (ids[id]) continue;
+      ids[id] = true;
+    }
+    const uniqueIDs = Object.keys(ids);
+    return uniqueIDs;
+  }
+
+  _getMetaDocsByIDs(ids) {
+    let promises = [];
+    ids.forEach(_id => {
+      promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
+    });
+    return Promise.all(promises);
+  }
+
+  _getChangesForTortoise(lastTortoiseKey, highestTurtleKey, turtleHistoryDoc) {
+    return new Promise((resolve, reject) => {
+      if (lastTortoiseKey === highestTurtleKey) {
+        reject("No sync needed.")
       }
-    }
+      resolve(this._getMetaDocsOfUpdatedDocs(lastTortoiseKey, highestTurtleKey));
+    })
+    .catch(err => console.log(err));
+  }
 
-    _getHighestStoreKey() {
-      return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
-        .then(keys => keys[keys.length - 1])
-    }
+  _getDocsForTortoise(tortoiseResponse) {
+    const promises = tortoiseResponse.data.map(_id_rev => {
+      return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    });
+    return Promise.all(promises);
+  }
 
-    _getTurtleHistoryDoc() {
-      return this.idb.command(this.idb._sync, "READ_ALL", {})
-      .then(syncRecords => syncRecords.filter(record => record._id.split("::")[0] === 'turtleDB')[0])
-    }
-
-    _getMetaDocsOfUpdatedDocs(lastKey, highestKey) {
-      return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastKey + 1, y: highestKey })
-      .then(docs => this._getUniqueIDs(docs))
-      .then(ids => this._getMetaDocsByIDs(ids))
-    }
-
-    _getUniqueIDs(docs) {
-      let ids = {};
-      for (let i = 0; i < docs.length; i++) {
-        const id = docs[i]._id_rev.split("::")[0];
-        if (ids[id]) continue;
-        ids[id] = true;
-      }
-      const uniqueIDs = Object.keys(ids);
-      return uniqueIDs;
-    }
-
-    _getMetaDocsByIDs(ids) {
-      let promises = [];
-      ids.forEach(_id => {
-        promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
-      });
-      return Promise.all(promises);
-    }
-
-    _getChangesForTortoise(highestKey, turtleHistoryDoc) {
-      let lastKey = this._getLastStoreKey(turtleHistoryDoc);
-      return new Promise((resolve, reject) => {
-        if (lastKey === highestKey) {
-          reject("No sync needed.")
-        }
-        resolve(this._getMetaDocsOfUpdatedDocs(lastKey, highestKey));
-      })
-      .catch(err => console.log(err));
-    }
-
-    _getDocsForTortoise(tortoiseResponse) {
-      const promises = tortoiseResponse.data.map(_id_rev => {
-        return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
-      });
-      return Promise.all(promises);
-    }
-
-    _updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc) {
-      let newHistory = { lastKey: highestKey, sessionID };
-      let updatedHistoryDoc = Object.assign(
-        turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
-      );
-      return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
-    }
+  _updateTurtleSyncHistory(highestTurtleKey, sessionID, turtleHistoryDoc) {
+    let newHistory = { lastKey: highestTurtleKey, sessionID };
+    let updatedHistoryDoc = Object.assign(
+      turtleHistoryDoc, { history: [newHistory].concat(turtleHistoryDoc.history) }
+    );
+    return this.idb.command(this.idb._sync, "UPDATE", { data: updatedHistoryDoc });
+  }
 
   // ----- Public API Methods ----- //
 
@@ -238,26 +238,57 @@ class TurtleDB {
   //compare_sync_history with tortoiseDB
   //remove underscores
 
+  //handle case where tortoise was deleted since last sync
+
   replicate(target) {
     target = 'http://localhost:3000'; // for testing purposes only
     let sessionID = this._generateSessionID();
-
     let turtleHistoryDoc;
-    let highestKey;
+    let highestTurtleKey;
+    let lastTurtleKey;
+    let lastTortoiseKey;
+
+    // turtle:
+    // {
+    //   _id: 'turtleDB:1231',
+    //   lastKey: 5,
+    //   // highestTurtleKey: 5,
+    //   history: [ {lastKey: 5 ,sessionID: 123} ]
+    // }
+    //
+    // tortoise:
+    // {
+    //   _id: 'turtleDB::1231'
+    //   lastKey: 5,
+    //   history: [ {lastKey: 5, sessionID: 123} ]
+    // }
+
 
     this._getTurtleHistoryDoc()
     .then(history => turtleHistoryDoc = history)
     this._getHighestStoreKey()
     .then(key => {
-      highestKey = key;
+      highestTurtleKey = key;
+      //lastTurtleKey = this._getLastStoreKey(turtleHistoryDoc)
     })
-    .then(() => this._getChangesForTortoise(highestKey, turtleHistoryDoc))
-    .then(metaDocs => axios.post(target + '/_rev_diffs', { sessionID, metaDocs }))
-    .then(tortoiseResponse => this._getDocsForTortoise(tortoiseResponse))
-    .then(docs => axios.post(target + '/_bulk_docs', { docs }))
-    .then(() => this._updateTurtleSyncHistory(highestKey, sessionID, turtleHistoryDoc))
+    .then(() => axios.post(target + '/_compare_sync_history', turtleHistoryDoc))
+    .then(key => lastTortoiseKey = key)
+
+      //if turtle/tortoise histories[0] are different, send over everything in
+      //turtle
+
+      //if turtle/tortoise lastKey are the same
+      // check turtleHighest === turtleLast && tortoiseLast,
+      // throw err;
+      // else send over turtleHighest - turtleLast
+    .then(() => this._getChangesForTortoise(lastTortoiseKey, highestTurtleKey, turtleHistoryDoc))
     .then(res => console.log(res))
-    .catch(err => console.log(err));
+    // .then(metaDocs => axios.post(target + '/_rev_diffs', { sessionID, metaDocs }))
+    // .then(tortoiseResponse => this._getDocsForTortoise(tortoiseResponse))
+    // .then(docs => axios.post(target + '/_bulk_docs', { docs }))
+    // .then(() => this._updateTurtleSyncHistory(highestTurtleKey, sessionID, turtleHistoryDoc))
+    // .then(res => console.log(res))
+    // .catch(err => console.log(err));
   }
 }
 
