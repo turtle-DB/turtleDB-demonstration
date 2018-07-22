@@ -157,7 +157,6 @@ class TurtleDB {
     if (typeof data === 'object' && !Array.isArray(data)) {
       let newDoc = Object.assign({}, data);
       let _id;
-
       if (!newDoc._id && newDoc._id !== 0) {
         _id = uuidv4();
       } else {
