@@ -12,15 +12,26 @@ class DeleteDocsPanel extends React.Component {
     return (
       <div className="col">
         <form className="form-inline" onSubmit={this.handleDeleteClick}>
-          <div className="form-group">
-            <ul>
-              <input type="radio" name="delete-number" value="1"/>1
-              <input type="radio" name="delete-number" value="100"/>100
-              <input type="radio" name="delete-number" value="1000"/>1000
-              <input type="radio" name="delete-number" value="10000"/>10000
+          <div className="form-check">
+            <ul className="list-unstyled">
+              <li>
+                <input id="defaultUnchecked" type="radio" name="delete-number" value="1"/>1
+              </li>
+              <li>
+                <input id="defaultUnchecked" type="radio" name="delete-number" value="100"/>100
+              </li>
+              <li>
+                <input id="defaultUnchecked" type="radio" name="delete-number" value="1000"/>1000
+              </li>
+              <li>
+                <input id="defaultUnchecked" type="radio" name="delete-number" value="10000"/>10000
+              </li>
+
+              <li>
+                <input className="btn btn-warning" type="submit" value="Delete" />
+              </li>
             </ul>
-            <input className="btn btn-primary" type="submit" value="Delete" />
-          </div>
+        </div>
         </form>
       </div>
     )
