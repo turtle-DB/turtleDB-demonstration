@@ -23,7 +23,7 @@ class Replicator {
     .then(() => this.getLastTortoiseKey('/_compare_sync_history')) //this.lastTortoiseKey
     .then(() => this.getChangedMetaDocsForTortoise()) //this.metaDocs
     .then(() => this.sendChangedMetaDocsToTortoise('/_rev_diffs'))
-    .then(tortoiseResponse => this.getChangedStoreDocsForTortoise(tortoiseResponse)) //this.turtleStoreDocsForTortoise
+    .then(tortoiseResponse => this.getChangedStoreDocsForTortoise(tortoiseResponse))
     .then(() => this.createNewSyncDocument()) //this.turtleSyncRecord
     .then(() => this.sendTurtleDocsAndSyncRecordToTortoise('/_bulk_docs'))
     .then(() => this.updateTurtleSyncHistory(this.turtleSyncRecord))
@@ -32,17 +32,17 @@ class Replicator {
   }
 
   sendTurtleDocsAndSyncRecordToTortoise(path) {
-    return axios.post(host + path, { docs: this.turtleStoreDocsForTortoise, turtleSyncRecord: this.turtleSyncRecord })
+    return axios.post(this.host + path, { docs: this.turtleStoreDocsForTortoise, turtleSyncRecord: this.turtleSyncRecord })
   }
 
   sendChangedMetaDocsToTortoise(path) {
-    return axios.post(host + path, { sessionID: this.sessionID, metaDocs: this.metaDocs });
+    return axios.post(this.host + path, { sessionID: this.sessionID, metaDocs: this.metaDocs });
   }
 
   getLastTortoiseKey(path) {
     return axios.post(this.host + path, this.turtleHistoryDoc)
       .then(res => this.lastTortoiseKey = res.data)
-  }
+    }
 
   generateSessionID() {
     return new Date().toISOString();
@@ -61,14 +61,12 @@ class Replicator {
   }
 
   getChangedMetaDocsForTortoise() {
-    return new Promise((resolve, reject) => {
-      if (this.lastTortoiseKey === this.highestTurtleKey) {
-        reject("No sync needed.")
-      } else {
-        this.getMetaDocsOfUpdatedDocs(this.lastTortoiseKey, this.highestTurtleKey)
-        .then(metaDocs => this.metaDocs = metaDocs)
-      }
-    })
+    if (this.lastTortoiseKey === this.highestTurtleKey) {
+      return Promise.reject("No sync needed.")
+    } else {
+      return Promise.resolve(this.getMetaDocsOfUpdatedDocs(this.lastTortoiseKey, this.highestTurtleKey))
+      .then(metaDocs => this.metaDocs = metaDocs)
+    }
   }
 
   getMetaDocsOfUpdatedDocs(lastKey, highestTurtleKey) {
@@ -90,9 +88,7 @@ class Replicator {
 
   getMetaDocsByIDs(ids) {
     let promises = [];
-    ids.forEach(_id => {
-      promises.push(this.idb.command(this.idb._meta, "READ", { _id }))
-    });
+    ids.forEach(_id => promises.push(this.idb.command(this.idb._meta, "READ", { _id })))
     return Promise.all(promises);
   }
 
