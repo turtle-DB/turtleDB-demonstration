@@ -1,30 +1,23 @@
 
 //STEPS
 
-//update document
-// update(id, { prop1: new, prop2: new2 })
-  //getDoc(ID)
-  //get revID from returned doc
-  //increment revID (1-duf.. -> 2-adssa)
-  //Object assign to create new object
-  //revID on new object
-  //insert object into store
+//separate replicator file
+//have a source(turtle) and target(tortoise)
+
+//replicate method on turtleDB
+  //turtle
+  //send all latest revisions (all data) from turtle to tortoise
+
+//target needs to receive docs
+  //check for revisions it does not have locally
+  //insert data
+  //send confirmation response
 
 
-// store:
-// 1 - abc123::1-asdf, data
-// 2 - abc123::2-gfhd, data
-// 3 - abc123::3-asdf, data
-// 4 - abc123::4-sfdg, data
-//
-// storeIndex
-// abc123::1-asdf -> 1
-// abc123::4-sfdg -> 4
-//
-// metaStore:
-// 'abc123' - { latestRev: '4-sfdg...', storeKey: 4 }
-
-
+//next steps:
+  //source first sends over just revision IDs
+    //target responds with list of what data it needs
+    // source send over docs with data that were requested
 
 
 
@@ -52,3 +45,16 @@
   "winningRev":"2-13304d2274b32c3999ac7bf56b74225a",
   "seq":2
 }
+
+// SYNCING
+//replicate documentation:
+  //turtle post '/_rev_diffs'
+    //turtle sends batch of metaDocs from change feed to tortoise
+    //tortoise checks what revisions it doesn't have: tortoiseDB.revDiffs()
+      //tortoise.revDiffs() gets local metadocs for the same IDs: mongoShell.readAllMetaDocs()
+      //tortoise.revDiffs() gets back metadocs and then compares the revision IDs: tortoiseDB.findMissingRevs()
+        //tDB.findMissingRevs() returns a filtered set of turtle's metadocs to tortoiseDB.revDiffs()
+      //tortoise.revDiffs() passes these metadoc to tortoise.updateMetaDocs()
+    //tortoise updates the metadocs that are not up to date
+    //tortoise sends back a list of revIDs it needs data for from turtle
+    //turtle sends back the data for those revIDs
