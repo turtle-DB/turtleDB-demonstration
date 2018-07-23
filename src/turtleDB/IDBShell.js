@@ -1,7 +1,10 @@
+import uuidv4 from 'uuid/v4';
+
 class IDBShell {
   constructor(name) {
     this._store = 'store';
     this._meta = 'metaStore';
+    this._sync = 'syncHistoryStore';
 
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
@@ -13,12 +16,14 @@ class IDBShell {
         this.db.createObjectStore(this._store, { autoIncrement: true })
                .createIndex('_id_rev', '_id_rev', { unique: true });
         this.db.createObjectStore(this._meta, { keyPath: '_id' });
+        this.db.createObjectStore(this._sync, { keyPath: '_id' });
       };
 
       request.onsuccess = e => {
         console.log('on success fired!')
         console.log(e.target.result)
-        this.db = e.target.result; // IDBDatabase object
+        this.db = e.target.result;
+        this._hasSyncHistory();
         resolve();
       };
 
@@ -28,146 +33,72 @@ class IDBShell {
       };
     });
   }
-  // ****************************************************
-  // ****************************************************
-  // Schema Operations
-  // var myIDBIndex = objectStore.createIndex(indexName, keyPath);
-  // var myIDBIndex = objectStore.createIndex(indexName, keyPath, objectParameters);
-  addIndex(field) {
-    this.ready = new Promise((resolve, reject) => {
-      this.db.close();
-      const request = window.indexedDB.open("turtleDB", this.db.version + 1);
-      request.onupgradeneeded = e => {
-        this.db = e.target.result;
-        // Version change transaction:
-        const transaction = e.target.transaction;
-        try {
-          transaction.objectStore('store').createIndex(field, field);
-          resolve(`Index: ${field} created successfully.`);
-        } catch (err) {
-          reject(err);
-        }
-      };
-    });
-    return this.ready;
+
+  _hasSyncHistory() {
+    return this.command(this._sync, 'GET_ALL_KEYS', {})
+      .then(keys => {
+        if (keys.length === 0) this._createLocalSyncHistory()
+      })
+      .catch(err => console.log(err));
   }
 
-  // ****************************************************
-  // ****************************************************
-  // BASIC CRUD OPERATIONS
-  _crud(storeName, op, { _id, data }) {
+  _createLocalSyncHistory() {
+    const turtleID = "turtleDB::" + uuidv4();
+    const syncHistory = { history: [], _id: turtleID };
+    this.command(this._sync, "CREATE", { data: syncHistory })
+    .then((res) => console.log(res))
+    .catch(err => console.log(err));
+  }
+
+  command(storeName, action, { _id, data, x, y }) {
     return this.ready.then(() => {
       return new Promise((resolve, reject) => {
-        let request = this.getStore(storeName, op === 'read' ? 'readonly' : 'readwrite');
+        let request = this.getStore(storeName, ["READ", "READ_ALL"].includes(action) ? 'readonly' : 'readwrite');
         if (request) {
-          switch (op) {
-            case "create":
-              request = request.add(data);
-              break;
-            case "read":
-              request = request.get(_id);
-              break;
-            case "update":
-              request = request.put(data);
-              break;
-            case "delete":
-              request = request.delete(_id);
-              break;
-            default:
-              break;
+          if (action === "CREATE") {
+            request = request.add(data);
+          } else if (action === "READ") {
+            request = request.get(_id);
+          } else if (action === "READ_ALL") {
+            request = request.getAll();
+          } else if (action === "READ_BETWEEN") {
+            request = request.getAll(IDBKeyRange.bound(x, y));
+          } else if (action === "UPDATE") {
+            request = request.put(data);
+          } else if (action === "INDEX_READ") {
+            request = request.index(data.indexName).get(data.key);
+          } else if (action === "DELETE") {
+            request = request.delete(_id);
+          } else if (action === "DELETE_ALL") {
+            request = request.clear();
+          } else if (action === "GET_ALL_KEYS") {
+            request = request.getAllKeys();
+          } else if (action === "COUNT") {
+            request = request.count();
           }
         }
         request.onsuccess = e => {
           resolve(e.target.result);
         }
         request.onerror = e => {
-          console.log(`${op} error:`, e);
+          console.log(`${action} error:`, e);
           reject(e);
         }
       })
     })
   }
 
-  readFromIndex(storeName, indexName, key) {
-    return new Promise((resolve, reject) => {
-      const request = this.getStore(storeName).index(indexName).get(key);
-      request.onsuccess = e => {
-        resolve(e.target.result);
-      };
-    });
+  // currently won't work for _id in store
+  // need to filter by winning & non-deleted docs
+  filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
+    let fields = Object.keys(selector);
+    return this.command(this._store, "READ_ALL", {})
+      .then(docs => docs.filter(doc => fields.every(field => {
+        return doc[field] === selector[field]
+      }))
+    );
   }
 
-  // ****************************************************
-  // ****************************************************
-  // Bulk OPERATIONS
-
-  // Read All
-  readAllMetaDocs() {
-    return this.ready.then(() => {
-      return new Promise((resolve, reject) => {
-        const requestMeta = this.getStore(this._meta).getAll();
-        requestMeta.onsuccess = () => resolve(requestMeta.result);
-        requestMeta.onerror = e => reject(e);
-      })
-    })
-  }
-
-  // Read Between Range
-  readValuesBetweenKeys(x, y) { // improve with default lower/upperbound
-    return this.ready.then(() => {
-      return new Promise((resolve, reject) => {
-        const request = this.getStore(this._store)
-          .getAll(IDBKeyRange.bound(x, y));
-        request.onsuccess = () => {
-          resolve(request.result);
-        }
-      })
-    })
-  }
-
-  // ****************************************************
-  // ****************************************************
-  // Store Operations
-  getStore(store, op) {
-    if (this.hasStoreName(store)) {
-      return this.db
-        .transaction([store], op)
-        .objectStore(store)
-    } else {
-      console.log(`Store <${store}> does not exist!`);
-      return null;
-    }
-  }
-
-  // *** NEED THIS TO RETURN ARRAY ***
-  getAllKeysFromStore(store) {
-    return new Promise((resolve, reject) => {
-      const request = this.getStore(store).getAllKeys();
-      request.onsuccess = () => {
-        resolve(request.result);
-      };
-    });
-  }
-
-  getLengthOfStore(store) {
-    return new Promise((resolve, reject) => {
-      const request = this.getStore(store).count();
-      request.onsuccess = () => {
-        resolve(request.result);
-      }
-    })
-  }
-
-  getAllStoreNames() {
-    return Array.prototype.slice.call(this.db.objectStoreNames);
-  }
-
-  hasStoreName(store) {
-    return this.getAllStoreNames().includes(store);
-  }
-
-  //IDBCURSOR operations - advance(num), continue(), continuePrimaryKey(), delete(), update()
-  //IDBCURSOR properties - source, direction, key, primaryKey
   deleteBetweenNumbers(start, end) {
     return new Promise((resolve, reject) => {
       let counter = 0;
@@ -185,11 +116,28 @@ class IDBShell {
     })
   }
 
-  //1 - you cannot change primary keys using cursor.update()
-  //2 - you can't directly put cursor.value into an update call,
-  //3 - hence the below example using an intermediary updateData variable
-  //4 - .update() onsuccess is not necessary
-  //5 - https://stackoverflow.com/questions/47934408/how-can-i-know-that-idbcursor-reached-its-last-value
+// STORE OPERATIONS
+
+  getStore(store, op) {
+    if (this.hasStoreName(store)) {
+      return this.db
+        .transaction([store], op)
+        .objectStore(store)
+    } else {
+      console.log(`Store <${store}> does not exist!`);
+      return null;
+    }
+  }
+
+  getAllStoreNames() {
+    return Array.prototype.slice.call(this.db.objectStoreNames);
+  }
+
+  hasStoreName(store) {
+    return this.getAllStoreNames().includes(store);
+  }
+
+// need to clean up:
   editFirstNDocuments(amount) {
     return new Promise((resolve, reject) => {
       let counter = 0;
@@ -215,53 +163,26 @@ class IDBShell {
     })
   }
 
-  deleteAll() {
-    this.getStore(this._store, 'readwrite').clear().onsuccess = e => {
-      console.log("Store cleared:", e.target.readyState);
-    };
+  // DATABASE OPERATIONS
+
+  addIndex(field) {
+    this.ready = new Promise((resolve, reject) => {
+      this.db.close();
+      const request = window.indexedDB.open("turtleDB", this.db.version + 1);
+      request.onupgradeneeded = e => {
+        this.db = e.target.result;
+        // Version change transaction:
+        const transaction = e.target.transaction;
+        try {
+          transaction.objectStore('store').createIndex(field, field);
+          resolve(`Index: ${field} created successfully.`);
+        } catch (err) {
+          reject(err);
+        }
+      };
+    });
+    return this.ready;
   }
-  //
-  // db.find({
-  //   selector: {name: 'Mario'},
-  //   // fields: ['_id', 'name'],
-  //   // sort: ['name']
-  // }).then(function (result) {
-  //   // handle result
-  // }).catch(function (err) {
-  //   console.log(err);
-  // });
-
-  // ****************************************************
-  // ****************************************************
-  // Filtering
-  filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
-    let fields = Object.keys(selector);
-    return this.readAllValues()
-      .then(vals => vals.filter((doc) => {
-        return fields.every(field => doc[field] === selector[field])
-      })
-    );
-  }
-
-  //
-  // filterByKey(lower, upper) {
-  //   var keyRangeValue = IDBKeyRange.bound(lower, upper);
-  //
-  //   this.getStore(this._store).openCursor(keyRangeValue).onsuccess = (e) => {
-  //     let cursor = e.target.result;
-  //     if (cursor) {
-  //       let value = cursor.value;
-  //       console.log(value);
-  //       cursor.continue();
-  //     } else {
-  //       console.log('Cursor finished');
-  //     }
-  //   }
-  // };
-
-  // ****************************************************
-  // ****************************************************
-  // Database Operations
 
   dropDB() {
     return new Promise((resolve, reject) => {
@@ -280,13 +201,7 @@ class IDBShell {
       }
     })
   }
-
-
 }
 
-// const turtleDB = new TurtleDB('turtleDB');
-// const turtleDBTest = new TurtleDB('turtleDBTest');
-
-// export { turtleDB  };
 
 export default IDBShell;

@@ -5,7 +5,7 @@ import axios from 'axios';
 import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
 import TestPanel from './TestPanel/TestPanel';
-import BenchmarkingBox from './BenchmarkingBox/BenchmarkingDisplay';
+import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import turtleDB from '../turtleDB/turtle';
 
 // import hearthstoneData from './../data/HearthstoneData';
@@ -120,19 +120,21 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <div className="shadow p-3 mb-5 bg-light rounded container">
+        <div className="">
           <div className="row">
-            <ControlPanel
-              handleInsertClick={this.handleInsertClick}
-              handleEditClick={this.handleEditClick}
-              handleDropDatabase={this.handleDropDatabase}
-              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
-              handleDeleteClick={this.handleDeleteClick}
-              handleTestClick={this.handleTestClick}
-            />
-          </div>
-          <div className="row">
-            <BenchmarkingBox benchmark={this.state.benchmark}/>
+            <div className="col">
+              <ControlPanel
+                handleInsertClick={this.handleInsertClick}
+                handleEditClick={this.handleEditClick}
+                handleDropDatabase={this.handleDropDatabase}
+                handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+                handleDeleteClick={this.handleDeleteClick}
+                handleTestClick={this.handleTestClick}
+              />
+            </div>
+            <div className="col">
+              <BenchmarkBox benchmark={this.state.benchmark}/>
+            </div>
           </div>
           <div className="row">
             <TestPanel
