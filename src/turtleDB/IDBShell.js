@@ -4,7 +4,8 @@ class IDBShell {
   constructor(name) {
     this._store = 'store';
     this._meta = 'metaStore';
-    this._sync = 'syncHistoryStore';
+    this._syncHistoryTo = 'syncHistoryTo';
+    this._syncHistoryFrom = 'syncHistoryFrom';
 
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
@@ -16,7 +17,7 @@ class IDBShell {
         this.db.createObjectStore(this._store, { autoIncrement: true })
                .createIndex('_id_rev', '_id_rev', { unique: true });
         this.db.createObjectStore(this._meta, { keyPath: '_id' });
-        this.db.createObjectStore(this._sync, { keyPath: '_id' });
+        this.db.createObjectStore(this._syncHistoryTo, { keyPath: '_id' });
       };
 
       request.onsuccess = e => {
@@ -35,17 +36,17 @@ class IDBShell {
   }
 
   _hasSyncHistory() {
-    return this.command(this._sync, 'GET_ALL_KEYS', {})
+    return this.command(this._syncHistoryTo, 'GET_ALL_KEYS', {})
       .then(keys => {
-        if (keys.length === 0) this._createLocalSyncHistory()
+        if (keys.length === 0) this._createSyncHistoryTo()
       })
       .catch(err => console.log(err));
   }
 
-  _createLocalSyncHistory() {
+  _createSyncHistoryTo() {
     const turtleID = "turtleDB::" + uuidv4();
-    const syncHistory = { history: [], _id: turtleID };
-    this.command(this._sync, "CREATE", { data: syncHistory })
+    const syncHistoryTo = { history: [], _id: turtleID };
+    this.command(this._syncHistoryTo, "CREATE", { data: syncHistoryTo })
     .then((res) => console.log(res))
     .catch(err => console.log(err));
   }

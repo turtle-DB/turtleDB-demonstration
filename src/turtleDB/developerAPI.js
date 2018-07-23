@@ -1,4 +1,5 @@
 import md5 from 'md5';
+import uuidv4 from 'uuid/v4';
 
 const developerAPI = {
   create(data) {

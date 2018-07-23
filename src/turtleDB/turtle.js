@@ -18,7 +18,7 @@ class TurtleDB {
     }
   }
 
-  replicate(target) {
+  replicateTo(target) {
     const replicator = new Replicator('http://localhost:3000');
     replicator.idb = this.idb;
     return replicator.replicate();
