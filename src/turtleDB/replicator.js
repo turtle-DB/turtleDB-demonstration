@@ -27,7 +27,6 @@ class Replicator {
     .then(() => this.createNewSyncDocument()) //this.turtleSyncRecord
     .then(() => this.sendTurtleDocsAndSyncRecordToTortoise('/_bulk_docs'))
     .then(() => this.updateTurtleSyncHistory(this.turtleSyncRecord))
-    .then(res => console.log(res))
     .catch(err => console.log(err));
   }
 
