@@ -120,10 +120,10 @@ class TurtleDB {
     return new Promise((resolve, reject) => {
       if (lastTortoiseKey === highestTurtleKey) {
         reject("No sync needed.")
+      } else {
+        resolve(this._getMetaDocsOfUpdatedDocs(lastTortoiseKey, highestTurtleKey));
       }
-      resolve(this._getMetaDocsOfUpdatedDocs(lastTortoiseKey, highestTurtleKey));
     })
-    .catch(err => console.log(err));
   }
 
   _getDocsForTortoise(tortoiseResponse) {
