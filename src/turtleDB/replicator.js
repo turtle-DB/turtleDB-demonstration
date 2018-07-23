@@ -34,8 +34,6 @@ class Replicator {
   }
 
   sendSourceDocsAndSyncRecordToTarget(path) {
-    console.log("2 " + this.sourceSyncRecord);
-    console.log("sourceStoreDocs:", this.sourceStoreDocsForTarget);
     return axios.post(this.targetUrl + path, { docs: this.sourceStoreDocsForTarget, sourceSyncRecord: this.sourceSyncRecord })
   }
 
@@ -107,11 +105,9 @@ class Replicator {
     this.sourceSyncRecord = Object.assign(
       this.sourceHistoryDoc, { history: [newHistory].concat(this.sourceHistoryDoc.history) }
     );
-    console.log("1 " + this.sourceSyncRecord);
   }
 
   updateSourceSyncHistory() {
-    console.log("3 " + this.sourceSyncRecord);
     return this.idb.command(this.idb._syncHistoryTo, "UPDATE", { data: this.sourceSyncRecord });
   }
 }
