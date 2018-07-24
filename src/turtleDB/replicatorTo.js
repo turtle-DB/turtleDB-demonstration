@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4';
 import axios from 'axios';
 
-class Replicator {
+class ReplicatorTo {
   constructor(targetUrl) {
     this.targetUrl = targetUrl; // for testing purposes only
     this.sessionID = this.generateSessionID();
@@ -112,4 +112,4 @@ class Replicator {
   }
 }
 
-export default Replicator;
+export default ReplicatorTo;
