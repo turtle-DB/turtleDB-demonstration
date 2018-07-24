@@ -38,13 +38,13 @@ class Replicator {
   }
 
   sendChangedMetaDocsToTarget(path) {
-    return axios.post(this.targetUrl + path, { sessionID: this.sessionID, metaDocs: this.metaDocs });
+    return axios.post(this.targetUrl + path, { metaDocs: this.metaDocs });
   }
 
   getLastTargetKey(path) {
     return axios.post(this.targetUrl + path, this.sourceHistoryDoc)
       .then(res => this.lastTargetKey = res.data)
-    }
+  }
 
   generateSessionID() {
     return new Date().toISOString();

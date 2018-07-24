@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "^4.1.1",
+    "express": "^4.16.3",
     "md5": "^2.2.1",
     "react-responsive-modal": "^3.0.3",
     "uuid": "^3.3.2"

@@ -18,10 +18,14 @@ class TurtleDB {
     }
   }
 
-  replicateTo(target) {
+  replicateTo(remoteURL) {
     const replicator = new Replicator('http://localhost:3000');
     replicator.idb = this.idb;
     return replicator.replicate();
+  }
+
+  replicateFrom(remoteURL) {
+    // if no records, recreate new syncHistoryFrom store
   }
 
   _readMetaDoc(_id) {
