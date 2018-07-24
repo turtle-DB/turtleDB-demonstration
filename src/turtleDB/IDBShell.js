@@ -4,27 +4,31 @@ class IDBShell {
   constructor(name) {
     this._store = 'store';
     this._meta = 'metaStore';
-    this._syncHistoryTo = 'syncHistoryTo';
-    this._syncHistoryFrom = 'syncHistoryFrom';
+    this._replicationHistoryTo = 'replicationHistoryTo';
+    this._replicationHistoryFrom = 'replicationHistoryFrom';
+    this._turtleDBMeta = 'turtleDBMeta';
 
     this.ready = new Promise((resolve, reject) => {
       const request = window.indexedDB.open(name);
 
       request.onupgradeneeded = e => {
-        console.log('on upgrade needed fired!')
-        console.log(e.target)
         this.db = e.target.result;
-        this.db.createObjectStore(this._store, { autoIncrement: true })
-               .createIndex('_id_rev', '_id_rev', { unique: true });
-        this.db.createObjectStore(this._meta, { keyPath: '_id' });
-        this.db.createObjectStore(this._syncHistoryTo, { keyPath: '_id' });
+        if (e.target.result.version === 1) {
+          const turtleID = "turtleDB::" + uuidv4();
+          this.db.createObjectStore(this._store, { autoIncrement: true })
+            .createIndex('_id_rev', '_id_rev', { unique: true });
+          this.db.createObjectStore(this._meta, { keyPath: '_id' });
+          this.db.createObjectStore(this._replicationHistoryTo, { keyPath: '_id' })
+            .add({ _id: turtleID, history: [] });
+          this.db.createObjectStore(this._replicationHistoryFrom, { keyPath: '_id' })
+            .add({ _id: turtleID, history: [] });
+          this.db.createObjectStore(this._turtleDBMeta, { keyPath: '_id' })
+            .add({ _id: turtleID });
+        }
       };
 
       request.onsuccess = e => {
-        console.log('on success fired!')
-        console.log(e.target.result)
         this.db = e.target.result;
-        this._hasSyncHistory();
         resolve();
       };
 
@@ -33,22 +37,6 @@ class IDBShell {
         reject(e);
       };
     });
-  }
-
-  _hasSyncHistory() {
-    return this.command(this._syncHistoryTo, 'GET_ALL_KEYS', {})
-      .then(keys => {
-        if (keys.length === 0) this._createSyncHistoryTo()
-      })
-      .catch(err => console.log(err));
-  }
-
-  _createSyncHistoryTo() {
-    const turtleID = "turtleDB::" + uuidv4();
-    const syncHistoryTo = { history: [], _id: turtleID };
-    this.command(this._syncHistoryTo, "CREATE", { data: syncHistoryTo })
-    .then((res) => console.log(res))
-    .catch(err => console.log(err));
   }
 
   command(storeName, action, { _id, data, x, y }) {
