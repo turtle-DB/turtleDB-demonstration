@@ -17,7 +17,9 @@ class SyncFrom {
     .then(() => this.sendRequestForTortoiseMetaDocs('/_source_meta_docs'))
     .then(changedTortoiseMetaDocs => this.findMissingRevIds(changedTortoiseMetaDocs.data)) // this.missingRevIds
     .then(() => this.sendRequestForTortoiseDocs('/_source_store_docs'))
-    .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data));
+    .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
+    .then(() => this.sendSuccessConfirmation('/_confirm_replication'))
+    .catch((err) => console.log('Sync From Error:', err));
   }
 
   getLastTurtleKey() {
@@ -31,6 +33,10 @@ class SyncFrom {
 
   sendRequestForTortoiseMetaDocs(path) {
     return axios.post(this.targetUrl + path, { turtleID: this.turtleID, lastTurtleKey: this.lastTurtleKey });
+  }
+
+  sendSuccessConfirmation(path) {
+    return axios.get(this.targetUrl + path);
   }
 
   findMissingRevIds(tortoiseMetaDocs) {
