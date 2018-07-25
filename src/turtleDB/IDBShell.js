@@ -4,8 +4,8 @@ class IDBShell {
   constructor(name) {
     this._store = 'store';
     this._meta = 'metaStore';
-    this._replicationHistoryTo = 'replicationHistoryTo';
-    this._replicationHistoryFrom = 'replicationHistoryFrom';
+    this._syncToStore = 'syncToStore';
+    this._syncFromStore = 'syncFromStore';
     this._turtleDBMeta = 'turtleDBMeta';
 
     this.ready = new Promise((resolve, reject) => {
@@ -18,9 +18,9 @@ class IDBShell {
           this.db.createObjectStore(this._store, { autoIncrement: true })
             .createIndex('_id_rev', '_id_rev', { unique: true });
           this.db.createObjectStore(this._meta, { keyPath: '_id' });
-          this.db.createObjectStore(this._replicationHistoryTo, { keyPath: '_id' })
+          this.db.createObjectStore(this._syncToStore, { keyPath: '_id' })
             .add({ _id: turtleID, history: [] });
-          this.db.createObjectStore(this._replicationHistoryFrom, { keyPath: '_id' })
+          this.db.createObjectStore(this._syncFromStore, { keyPath: '_id' })
             .add({ _id: turtleID, history: [] });
           this.db.createObjectStore(this._turtleDBMeta, { keyPath: '_id' })
             .add({ _id: turtleID });

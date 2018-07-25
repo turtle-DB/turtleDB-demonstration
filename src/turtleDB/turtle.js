@@ -4,8 +4,6 @@ import axios from 'axios';
 import md5 from 'md5';
 
 // turtleDB specific
-import ReplicatorTo from './replicatorTo';
-import ReplicatorFrom from './replicatorFrom';
 import developerAPI from './developerAPI';
 
 class TurtleDB {
@@ -17,19 +15,6 @@ class TurtleDB {
         this[prop] = developerAPI[prop];
       }
     }
-  }
-
-  replicateTo(remoteURL) {
-    const replicatorTo = new ReplicatorTo('http://localhost:3000');
-    replicatorTo.idb = this.idb;
-    return replicatorTo.replicate();
-  }
-
-  replicateFrom(remoteURL) {
-    const replicatorFrom = new ReplicatorFrom('http://localhost:3000');
-    replicatorFrom.idb = this.idb;
-    replicatorFrom.getTurtleID()
-    .then(() => replicatorFrom.replicate());
   }
 
   _readMetaDoc(_id) {
