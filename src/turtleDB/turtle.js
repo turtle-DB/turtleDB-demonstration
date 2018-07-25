@@ -26,10 +26,10 @@ class TurtleDB {
   }
 
   replicateFrom(remoteURL) {
-    // if no records, recreate new replicationHistoryFrom store
     const replicatorFrom = new ReplicatorFrom('http://localhost:3000');
     replicatorFrom.idb = this.idb;
-    return replicatorFrom.replicate();
+    replicatorFrom.getTurtleID()
+    .then(() => replicatorFrom.replicate());
   }
 
   _readMetaDoc(_id) {

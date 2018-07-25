@@ -51,7 +51,7 @@ class ReplicatorTo {
   }
 
   getSourceHistoryDoc() {
-    return this.idb.command(this.idb._syncHistoryTo, "READ_ALL", {})
+    return this.idb.command(this.idb.replicationHistoryTo, "READ_ALL", {})
     .then(syncRecords => this.sourceHistoryDoc = syncRecords[0])
   }
 
@@ -108,7 +108,7 @@ class ReplicatorTo {
   }
 
   updateSourceSyncHistory() {
-    return this.idb.command(this.idb._syncHistoryTo, "UPDATE", { data: this.sourceSyncRecord });
+    return this.idb.command(this.idb._replicationHistoryTo, "UPDATE", { data: this.sourceSyncRecord });
   }
 }
 
