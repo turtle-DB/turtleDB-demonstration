@@ -33,7 +33,9 @@ class SyncTo {
 
   sendRequestForLastTortoiseKey(path) {
     return axios.post(this.targetUrl + path, this.syncToTortoiseDoc)
-      .then(res => this.lastTortoiseKey = res.data)
+      .then(res => {
+        this.lastTortoiseKey = res.data;
+      })
   }
 
   getChangedMetaDocsForTortoise() {
