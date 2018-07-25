@@ -10,7 +10,16 @@ class ReplicatorFrom {
 
   replicate() {
     this.getLastTargetKey()
-    .then(() => console.log('last key', this.lastKey));
+    .then(() => this.requestMetaDocs('/_source_meta_docs'))
+    .then((res) => {
+      const sourceMetaDocs = res.data;
+      this.revDiffs(sourceMetaDocs)
+    });
+  }
+
+  getTurtleID() {
+    return this.idb.command(this.idb._turtleDBMeta, "READ_ALL", {})
+    .then(docs => this.turtleID = docs[0]._id);
   }
 
   generateSessionID() {
@@ -21,11 +30,88 @@ class ReplicatorFrom {
     return this.idb.command(this.idb._replicationHistoryFrom, "READ_ALL", {})
     .then(docs => {
       const localReplicationFromRecord = docs[0];
-      this.lastKey = localReplicationFromRecord.history.length === 0 ?
-        0 : localReplicationFromRecord.history[0].lastKey;
+      this.lastTargetKey = localReplicationFromRecord.history.length === 0 ?
+        '0' : localReplicationFromRecord.history[0].lastKey;
     })
   }
+
+  requestMetaDocs(path) {
+    return axios.post(this.targetUrl + path, { turtleID: this.turtleID, lastTargetKey: this.lastTargetKey });
+  }
+
+  revDiffs(sourceMetaDocs) {
+    const ids = sourceMetaDocs.map(doc => doc._id);
+    console.log('ids:', ids);
+    return this.readMetaDocs(ids)
+    .then(targetMetaDocs => {
+      const missingRevs = this.findMissingRevs(sourceMetaDocs, targetMetaDocs);
+      console.log(missingRevs);
+    });
+  }
+
+  readMetaDocs(ids) {
+    let promises = [];
+    ids.forEach(_id => promises.push(this.idb.command(this.idb._meta, "READ", { _id })))
+    return Promise.all(promises);
+  }
+
+  missingRevs(sourceMetaDocs, targetMetaDocs) {
+    //   const latestTargetDocRev = {};
+    //   targetMetaDocs.forEach(doc => {
+    //     latestTargetDocRev[doc._id] = doc.revisions[0];
+    //   })
+    //
+    //   return sourceMetaDocs.filter(doc => {
+    //     let targetRevId = latestTargetDocRev[doc._id];
+    //     if (targetRevId) {
+    //       if (targetRevId !== doc.revisions[0]) {
+    //         return true;
+    //       } else {
+    //         return false;
+    //       }
+    //     } else {
+    //       return true;
+    //     }
+    //   })
+  }
 }
+    // console.log(sourceMetaDocs);
+  //   const ids = sourceMetaDocs.map(doc => doc._id);
+  //
+  //   return mongoShell.readMetaDocs(ids)
+  //     .then(targetMetaDocs => {
+  //       const missingRevs = this.findMissingRevs(sourceMetaDocs, targetMetaDocs)
+  //       // should this be handled here?
+  //       mongoShell.updateMetaDocs(missingRevs);
+  //       return missingRevs;
+  //     })
+  //     .then(metaDocs => {
+  //       return metaDocs.map(doc => {
+  //         return doc._id + "::" + doc.revisions[0];
+  //       })
+  //     })
+  //     .catch(err => console.log(err));
+  // }
+
+  // findMissingRevs(sourceMetaDocs, targetMetaDocs) {
+  //   const latestTargetDocRev = {};
+  //   targetMetaDocs.forEach(doc => {
+  //     latestTargetDocRev[doc._id] = doc.revisions[0];
+  //   })
+  //
+  //   return sourceMetaDocs.filter(doc => {
+  //     let targetRevId = latestTargetDocRev[doc._id];
+  //     if (targetRevId) {
+  //       if (targetRevId !== doc.revisions[0]) {
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     } else {
+  //       return true;
+  //     }
+  //   })
+  // }
 
 export default ReplicatorFrom;
 
