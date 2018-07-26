@@ -65,15 +65,14 @@ class TurtleDB {
       .catch(err => console.log("Read error:", err));
   }
 
-  _generateNewVersion(_id, oldVersion, newDoc) {
-    const oldRev = oldVersion._id_rev.split('::')[1];
+  _generateNewDoc(oldDoc, newProperties) {
+    const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
 
-    delete oldVersion._id_rev;
-    const updatedVersion = Object.assign({}, newDoc);
-    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(updatedVersion));
-    updatedVersion._id_rev = _id + "::" + newRev;
-    return updatedVersion;
+    const newDoc = Object.assign({}, newProperties);
+    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(newDoc));
+    newDoc._id_rev = _id + "::" + newRev;
+    return newDoc;
   }
 
   _getLastStoreKey(turtleHistoryDoc) {
