@@ -2,9 +2,10 @@ import React from 'react';
 import axios from 'axios';
 
 // Components
-import Table from './Table';
+import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
 import TestPanel from './TestPanel/TestPanel';
+import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import turtleDB from '../turtleDB/turtle';
 
 // import hearthstoneData from './../data/HearthstoneData';
@@ -16,7 +17,11 @@ class Dashboard extends React.Component {
     super()
     this.state = {
       data: [],
-      benchmark: 0
+      benchmark: {
+        time: null,
+        type: null,
+        count: null,
+      }
     }
   }
 
@@ -37,9 +42,16 @@ class Dashboard extends React.Component {
   }
 
   handleDeleteClick = n => {
+    let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "DELETE",
+        count: n
+      }});
       this.syncStateWithTurtleDB();
-    })
+    });
   }
 
   handleInsertClick = n => { // need to change so it inserts N random cards instead
@@ -52,7 +64,39 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     Promise.all(insertPromises).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: timeSpent });
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "INSERT",
+        count: n
+      }});
+      this.syncStateWithTurtleDB();
+    });
+  }
+
+  ////////Example of generic wrapper for profiling
+  // profileAsyncFunction = (func, funcName) => {
+  //   let self = this;
+  //   return function () {
+  //     let startTime = Date.now();
+  //     let returnVal = func.apply(turtleDB.idb, arguments).then(() => {
+  //       let timeSpent = Date.now() - startTime;
+  //       console.log(`${funcName} took ${timeSpent} ms to execute`);
+  //       return returnVal;
+  //     });
+  //   };
+  // }
+
+  handleEditClick = n => {
+    // let profiledEditCall = this.profileAsyncFunction(turtleDB.idb.editFirstNDocuments, 'editFirstNDocuments');
+    // profiledEditCall.call(n);
+    let startTime = Date.now();
+    turtleDB.idb.editFirstNDocuments(n).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({ benchmark: {
+        time: timeSpent,
+        type: "EDIT",
+        count: n
+      }});
       this.syncStateWithTurtleDB();
     });
   }
@@ -76,16 +120,21 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <div className="shadow p-3 mb-5 bg-light rounded container">
+        <div className="">
           <div className="row">
-            <ControlPanel
-              handleInsertClick={this.handleInsertClick}
-              handleDropDatabase={this.handleDropDatabase}
-              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
-              handleDeleteClick={this.handleDeleteClick}
-              benchmark={this.state.benchmark}
-              handleTestClick={this.handleTestClick}
-            />
+            <div className="col">
+              <ControlPanel
+                handleInsertClick={this.handleInsertClick}
+                handleEditClick={this.handleEditClick}
+                handleDropDatabase={this.handleDropDatabase}
+                handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+                handleDeleteClick={this.handleDeleteClick}
+                handleTestClick={this.handleTestClick}
+              />
+            </div>
+            <div className="col">
+              <BenchmarkBox benchmark={this.state.benchmark}/>
+            </div>
           </div>
           <div className="row">
             <TestPanel
