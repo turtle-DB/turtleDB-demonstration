@@ -1,6 +1,32 @@
 import md5 from 'md5';
+import uuidv4 from 'uuid/v4';
+import SyncTo from './syncTo';
+import SyncFrom from './syncFrom';
 
 const developerAPI = {
+  syncTo(remoteURL) {
+    return new Promise((resolve, reject) => {
+      const syncTo = new SyncTo('http://localhost:3000');
+      syncTo.idb = this.idb;
+      return syncTo.start();
+    })
+  },
+
+  syncFrom(remoteURL) {
+    return new Promise((resolve, reject) => {
+      const syncFrom = new SyncFrom('http://localhost:3000');
+      syncFrom.idb = this.idb;
+      return syncFrom.getTurtleID()
+      .then(() => syncFrom.start());
+    })
+  },
+
+  sync() {
+    this.syncTo()
+      .then(() => this.syncFrom())
+      .catch((err) => console.log(err));
+  },
+
   create(data) {
     if (typeof data === 'object' && !Array.isArray(data)) {
       let newDoc = Object.assign({}, data);
@@ -11,10 +37,8 @@ const developerAPI = {
         _id = newDoc._id;
         delete newDoc._id;
       }
-      //revision + id
       const _rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc._id_rev = _id + '::' + _rev;
-      //insert into meta
       let metaDoc = { _id, revisions: [_rev] };
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
         .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
