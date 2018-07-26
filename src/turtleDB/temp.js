@@ -1,23 +1,54 @@
 
-//STEPS
+//replicate from tortoise
 
-//separate replicator file
-//have a source(turtle) and target(tortoise)
+Target - Turtle
+Source - Tortoise
 
-//replicate method on turtleDB
-  //turtle
-  //send all latest revisions (all data) from turtle to tortoise
+//this.sourceHistoryDoc  - tortoise
+//this.highestSourceKey  - tortoise
+//this.getLastTargetKey  - turtle last sync
+//this.metaDocs          - tortoise, requires highestSourceKey + lastTargetKey
+//this.sourceSyncRecord
 
-//target needs to receive docs
-  //check for revisions it does not have locally
-  //insert data
-  //send confirmation response
+//turtleDB.replicateFrom()
+
+    // turtle.getLastTargetKey
+  // request 1 ('/_source_meta_docs') - turtle sends turtleID, lastTargetKey
+
+    //tortoise.getSourceHistoryDoc
+    //tortoise.getHighestStoreKey
+    //tortoise.getChangedMetaDocsForTarget
+  // response 1 - tortoise sends back metaDocs
+
+    //turtle.revDiffs(metaDocs)
+  // request 2 ('/_source_store_docs') - turtle sends array of _id_revs
+
+    //tortoise.getChangedStoreDocsForTarget
+    //tortoise.createNewSyncDocument
+  // response 2 - tortoise sends back docs and new sync document
+
+      //turtle.updateDB
+      //turtle.updateSyncHistory
+  // request 3 ('/_confirm_replication') - turtle sends confirmation
+
+    //tortoise.updateSourceSyncHistory
+  // response 3 - tortoise sends confirmation
 
 
-//next steps:
-  //source first sends over just revision IDs
-    //target responds with list of what data it needs
-    // source send over docs with data that were requested
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -33,6 +64,35 @@
           "b4adf6a1fe69eec84304cb74353473a3",
           {"status":"available"},
           [
+
+
+
+
+
+{
+  "id":"idName",
+  "rev":"2-13304d2274b32c3999ac7bf56b74225a",
+  "deleted":true,
+  "rev_tree":[
+    {
+      "pos":1,
+      "ids":
+        [
+          "b4adf6a1fe69eec84304cb74353473a3",
+          {"status":"available"},
+          [
+            [
+              "13304d2274b32c3999ac7bf56b74225a",
+              {"status":"available","deleted":true},
+              []
+            ]
+          ]
+        ]
+    }
+  ],
+  "winningRev":"2-13304d2274b32c3999ac7bf56b74225a",
+  "seq":2
+}
             [
               "13304d2274b32c3999ac7bf56b74225a",
               {"status":"available","deleted":true},
