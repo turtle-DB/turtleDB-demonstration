@@ -10,12 +10,12 @@ class SyncTo {
   start() {
     this.getSyncToTortoiseDoc() //this.syncToTortoiseDoc
     .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
-    .then(() => this.sendRequestForLastTortoiseKey('/_compare_sync_history')) //this.lastTortoiseKey
+    .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
     .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-    .then(() => this.sendChangedMetaDocsToTortoise('/_rev_diffs'))
+    .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
     .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise))
     .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
-    .then(() => this.sendTurtleDocsToTortoise('/_bulk_docs'))
+    .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
     .then(() => this.updateSyncToTortoiseDoc())
     .catch(err => console.log(err));
   }
