@@ -1,13 +1,18 @@
 import React from 'react';
 import Modal from 'react-responsive-modal';
-import UpdateDoc from './UpdateDoc';
 
-const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', 'rev', 'id'];
+//components
+import UpdateDoc from './UpdateDoc';
+import Pagination from './Pagination';
+
+const HEADERS = ['name', 'cardSet', 'type', 'text', 'playerClass', 'attack', 'health', 'cost', '_rev', '_id'];
 
 class Table extends React.Component {
   state = {
     showUpdateModal: false,
-    docObj: null
+    docObj: null,
+    page: 1,
+    tableMax: 40,
   }
 
   handleOpenModal = (obj) => {
@@ -16,6 +21,18 @@ class Table extends React.Component {
 
   handleCloseModal = () => {
     this.setState({ showUpdateModal: false, docObj: null });
+  }
+
+  handlePaginationClick = direction => {
+    if (direction === 'LEFT' && this.state.page > 1) {
+      this.setState(prevState => {
+        return { page: prevState.page - 1 }
+      });
+    } else if (direction === 'RIGHT' && this.state.page < Math.ceil(this.props.data.length / this.state.tableMax)) {
+      this.setState(prevState => {
+        return { page: prevState.page + 1 }
+      });
+    }
   }
 
   generateHeaders = () => {
@@ -34,14 +51,14 @@ class Table extends React.Component {
 
   generateRows = () => {
     // map over every object
-    return this.props.data.map((doc, i) => {
-      const cells = HEADERS.map((value, j) => <td key={doc.id + j}>{String(doc[value])}</td>)
+    return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
+      const cells = HEADERS.map((value, j) => <td key={doc._id + j}>{String(doc[value])}</td>)
       return (
-        <tr key={doc.id}>
+        <tr key={doc._id}>
           <td>
             <button
               className="btn btn-danger"
-              onClick={() => this.props.handleSingleDeleteClick(doc.id)}
+              onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
           </td>
           <td>
@@ -67,8 +84,13 @@ class Table extends React.Component {
 
     return (
       <div>
+        <Pagination
+          handlePaginationClick={this.handlePaginationClick}
+          dataLength={this.props.data.length}
+          page={this.state.page}
+          tableMax={this.state.tableMax}
+        />
         <div className="shadow p-3 mb-5 bg-light rounded">
-          <span>{`${this.props.data.length} Documents`}</span>
           <table className='table table-striped table-bordered table-condensed'>
             <thead>{headerComponents}</thead>
             <tbody>{rowComponents}</tbody>
