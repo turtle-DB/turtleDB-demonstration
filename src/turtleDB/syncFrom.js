@@ -14,11 +14,11 @@ class SyncFrom {
 
   start() {
     this.getLastTurtleKey()
-    .then(() => this.sendRequestForTortoiseMetaDocs('/_source_meta_docs'))
+    .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
     .then(changedTortoiseMetaDocs => this.findMissingRevIds(changedTortoiseMetaDocs.data)) // this.missingRevIds
-    .then(() => this.sendRequestForTortoiseDocs('/_source_store_docs'))
+    .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
     .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
-    .then(() => this.sendSuccessConfirmation('/_confirm_replication'))
+    .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
     .catch((err) => console.log('Sync From Error:', err));
   }
 
@@ -44,7 +44,7 @@ class SyncFrom {
 
     return this.getMetaDocsByIds(ids)
     .then(turtleMetaDocs => {
-      const missingMetaDocs = this.findMissingRevs(tortoiseMetaDocs, turtleMetaDocs);
+      const missingMetaDocs = this.findMissingMetaDocs(tortoiseMetaDocs, turtleMetaDocs);
       this.updateTurtleMetaDocStore(missingMetaDocs);
       return missingMetaDocs;
     })
@@ -62,7 +62,7 @@ class SyncFrom {
     return Promise.all(promises).then(metadocs => metadocs.filter(doc => doc));
   }
 
-  findMissingRevs(tortoiseMetaDocs, turtleMetaDocs) {
+  findMissingMetaDocs(tortoiseMetaDocs, turtleMetaDocs) {
     const latestTurtleDocRevs = {};
     turtleMetaDocs.forEach(doc => {
       latestTurtleDocRevs[doc._id] = doc.revisions[0];
