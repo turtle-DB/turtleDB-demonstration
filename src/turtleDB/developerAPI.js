@@ -65,7 +65,6 @@ const developerAPI = {
 
   //requires a full document. will not append updates.
   update(_id, newProperties) {
-    // opts = { rev: '4-fjiojfoigjojg' }
     let metaDoc;
     return this._readMetaDoc(_id)
       .then(meta => {
