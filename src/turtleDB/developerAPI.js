@@ -40,7 +40,7 @@ const developerAPI = {
       const _rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc._id_rev = _id + '::' + _rev;
 
-      let metaDoc = { _id, _winningRev: _rev, revisions: [_rev, {}, []] };
+      let metaDoc = { _id, _winningRev: _rev, _revisions: [_rev, {}, []] };
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
         .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
         .catch(err => console.log("Create error:", err));
@@ -89,7 +89,7 @@ const developerAPI = {
   },
 
   _updateMetaDocRevisionTree(metaDoc, newRev, _deleted) {
-    let rootNode = metaDoc.revisions;
+    let rootNode = metaDoc._revisions;
     this._insertNewRev(rootNode, metaDoc._winningRev, newRev, _deleted);
   },
 
