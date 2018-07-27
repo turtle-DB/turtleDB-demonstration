@@ -50,7 +50,7 @@ class SyncFrom {
     })
     .then(missingMetaDocs => {
       this.missingRevIds = missingMetaDocs.map(doc => {
-        return doc._id + "::" + doc.revisions[0];
+        return doc._id + "::" + doc._winningRev;
       })
     })
     .catch(err => console.log(err));
@@ -65,14 +65,14 @@ class SyncFrom {
   findMissingMetaDocs(tortoiseMetaDocs, turtleMetaDocs) {
     const latestTurtleDocRevs = {};
     turtleMetaDocs.forEach(doc => {
-      latestTurtleDocRevs[doc._id] = doc.revisions[0];
+      latestTurtleDocRevs[doc._id] = doc._winningRev;
     })
 
     return tortoiseMetaDocs.filter(doc => {
       let turtleRevId = latestTurtleDocRevs[doc._id];
 
       if (turtleRevId) {
-        if (turtleRevId !== doc.revisions[0]) {
+        if (turtleRevId !== doc._winningRev) {
           return true;
         } else {
           return false;
