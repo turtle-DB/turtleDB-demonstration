@@ -105,6 +105,16 @@ class IDBShell {
     })
   }
 
+  getStoreDocsByIdRevs(idRevsArr) {
+    const promises = [];
+
+    idRevsArr.map(_id_rev => {
+      return this.command(this._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    });
+
+    return Promise.all(promises);
+  }
+
 // STORE OPERATIONS
 
   getStore(store, op) {
