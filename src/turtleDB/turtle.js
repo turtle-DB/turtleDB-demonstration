@@ -82,6 +82,45 @@ class TurtleDB {
       return turtleHistoryDoc.history[0].lastKey;
     }
   }
+
+  _getWinningRev(leafRevs) {
+    return leafRevs.sort((a, b) => {
+      let [revNumA, revHashA] = a.split('-');
+      let [revNumB, revHashB] = b.split('-');
+      revNumA = parseInt(revNumA, 10);
+      revNumB = parseInt(revNumB, 10);
+
+      if (revNumA > revNumB) {
+        return -1;
+      } else if (revNumA < revNumB) {
+        return 1;
+      } else {
+        if (revHashA > revHashB) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }
+    })[0];
+  }
+
+  _updateMetaDocRevisionTree(tree, newRev, oldRev, _deleted) {
+    this._insertNewRev(tree, newRev, oldRev, _deleted);
+  }
+
+  _insertNewRev(node, newRev, oldRev, _deleted) {
+    if (node[0] === oldRev) {
+      if (_deleted) {
+        return node[2].push([newRev, { _deleted: true }, []]);
+      } else {
+        return node[2].push([newRev, {}, []]);
+      }
+    }
+
+    for (let i = 0; i < node[2].length; i++) {
+      this._insertNewRev(node[2][i], newRev, oldRev, _deleted);
+    }
+  }
 }
 
 // for development purposes, putting turtleDB on window

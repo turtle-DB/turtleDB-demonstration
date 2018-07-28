@@ -40,7 +40,13 @@ const developerAPI = {
       const _rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc._id_rev = _id + '::' + _rev;
 
-      let metaDoc = { _id, _winningRev: _rev, _revisions: [_rev, {}, []] };
+      let metaDoc = {
+        _id,
+        _winningRev: _rev,
+        _revisions: [_rev, {}, []],
+        _leafRevs: [_rev]
+      };
+
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
         .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
         .catch(err => console.log("Create error:", err));
@@ -64,52 +70,45 @@ const developerAPI = {
   },
 
   //requires a full document. will not append updates.
-  update(_id, newProperties) {
+  update(_id, newProperties, revId = null) {
     let metaDoc;
+
     return this._readMetaDoc(_id)
-      .then(meta => {
-        metaDoc = meta;
-        return metaDoc._winningRev;
+      .then(doc => {
+        metaDoc = doc;
+        if (!revId) {
+          return metaDoc._winningRev;
+        } else {
+          if (metaDoc._leafRevs.includes(revId)) {
+            return revId;
+          } else {
+            throw new Error("Invalid revId");
+          }
+        }
       })
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
+      .then(revId => this._readRevFromIndex(_id, revId))
       .then(oldDoc => {
         if (oldDoc._deleted) throw new Error("This document has already been deleted.");
-
         const newDoc = this._generateNewDoc(oldDoc, newProperties);
         this.idb.command(this.idb._store, "CREATE", { data: newDoc });
-        return newDoc._id_rev.split('::')[1];
+        return {
+          newRev: newDoc._id_rev.split('::')[1],
+          oldRev: oldDoc._id_rev.split("::")[1],
+        };
       })
-      .then(newRev => {
-        // mutates metaDoc:
-        this._updateMetaDocRevisionTree(metaDoc, newRev, newProperties._deleted);
-        metaDoc._winningRev = newRev;
+      .then(({ newRev, oldRev }) => {
+        // updating the meta doc:
+        this._updateMetaDocRevisionTree(metaDoc._revisions, newRev, oldRev, newProperties._deleted);
+        metaDoc._leafRevs[metaDoc._leafRevs.indexOf(oldRev)] = newRev;
+        metaDoc._winningRev = this._getWinningRev(metaDoc._leafRevs);
+
         return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
       })
       .catch(err => console.log("Update error:", err));
   },
 
-  _updateMetaDocRevisionTree(metaDoc, newRev, _deleted) {
-    let rootNode = metaDoc._revisions;
-    this._insertNewRev(rootNode, metaDoc._winningRev, newRev, _deleted);
-  },
-
-// for reference  [1-a, {}, [children]]
-  _insertNewRev(node, winningRev, newRev, _deleted) {
-    if (node[0] === winningRev) {
-      if (_deleted) {
-        return node[2].push([newRev, { _deleted: true }, []]);
-      } else {
-        return node[2].push([newRev, {}, []]);
-      }
-    }
-
-    for (let i = 0; i < node[2].length; i++) {
-      this._insertNewRev(node[2][i], winningRev, newRev, _deleted);
-    }
-  },
-
-  delete(_id) {
-    return this.update(_id, { _deleted: true });
+  delete(_id, revId = null) {
+    return this.update(_id, { _deleted: true }, revId);
   },
 
   // BULK OPERATIONS
