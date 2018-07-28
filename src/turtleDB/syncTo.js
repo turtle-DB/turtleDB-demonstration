@@ -74,8 +74,8 @@ class SyncTo {
     return axios.post(this.targetUrl + path, { metaDocs: this.changedTurtleMetaDocs });
   }
 
-  getStoreDocsForTortoise(targetResponse) {
-    const promises = targetResponse.data.map(_id_rev => {
+  getStoreDocsForTortoise(revIdsFromTortoise) {
+    const promises = revIdsFromTortoise.data.map(_id_rev => {
       return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
     });
     return Promise.all(promises).then(docs => this.storeDocsForTortoise = docs)

@@ -88,6 +88,7 @@ const developerAPI = {
       })
       .then(revId => this._readRevFromIndex(_id, revId))
       .then(oldDoc => {
+        if (!oldDoc) throw new Error("This revision does not exist.");
         if (oldDoc._deleted) throw new Error("This document has already been deleted.");
         const newDoc = this._generateNewDoc(oldDoc, newProperties);
         this.idb.command(this.idb._store, "CREATE", { data: newDoc });
@@ -99,8 +100,14 @@ const developerAPI = {
       .then(({ newRev, oldRev }) => {
         // updating the meta doc:
         this._updateMetaDocRevisionTree(metaDoc._revisions, newRev, oldRev, newProperties._deleted);
-        metaDoc._leafRevs[metaDoc._leafRevs.indexOf(oldRev)] = newRev;
-        metaDoc._winningRev = this._getWinningRev(metaDoc._leafRevs);
+
+        if (newProperties._deleted) {
+          metaDoc._leafRevs.splice(metaDoc._leafRevs.indexOf(oldRev), 1);
+        } else {
+          metaDoc._leafRevs[metaDoc._leafRevs.indexOf(oldRev)] = newRev;
+        }
+
+        metaDoc._winningRev = this._getWinningRev(metaDoc._leafRevs) || null;
 
         return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
       })
