@@ -65,12 +65,12 @@ class TurtleDB {
       .catch(err => console.log("Read error:", err));
   }
 
-  _generateNewDoc(oldDoc, newProperties) {
+  _generateNewDoc(oldDoc, newProperties, metaDoc) {
     const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
 
     const newDoc = Object.assign({}, newProperties);
-    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(newDoc));
+    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(metaDoc._revisions) + JSON.stringify(newDoc));
     newDoc._id_rev = _id + "::" + newRev;
     return newDoc;
   }
