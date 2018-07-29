@@ -40,26 +40,29 @@ class SyncFrom {
   }
 
   findMissingRevIds(tortoiseMetaDocs) {
+    // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
+
     // returns a list of all tortoise leaf nodes that turtle doesn't have
     const missingLeafNodes = [];
 
     const promises = tortoiseMetaDocs.map(tortoiseMetaDoc => {
       return this.idb.command(this.idb._meta, "READ", { _id: tortoiseMetaDoc._id })
         .then(turtleMetaDoc => {
+          // console.log('turtle version of metadoc', turtleMetaDoc);
+
           if (turtleMetaDoc) {
             if (JSON.stringify(turtleMetaDoc._revisions) === JSON.stringify(tortoiseMetaDoc._revisions)) {
-              return Promise.resolve();
+              // console.log('revision trees are the same, no metadoc updates needed');
+              return;
             } else {
               return this.findMissingLeafRevs(tortoiseMetaDoc)
-                .then(idRevs => {
+                .then((idRevs) => {
                   missingLeafNodes.push(...idRevs);
                   return this.idb.command(this.idb._meta, "UPDATE", { data: tortoiseMetaDoc });
                 });
             }
           } else {
-              console.log("tortoise meta docs:", tortoiseMetaDoc._revisions);
               let revs = this.collectAllLeafRevs(tortoiseMetaDoc._revisions);
-              console.log(revs);
               let idRevs = revs.map(rev => tortoiseMetaDoc._id + '::' + rev);
               missingLeafNodes.push(...idRevs);
               return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
@@ -87,10 +90,13 @@ class SyncFrom {
     const docId = tortoiseMetaDoc._id;
     const leafIdRevs = leafRevs.map(rev => docId + '::' + rev);
 
+    // console.log('tortoise metadoc leaf id revs:', leafIdRevs);
+
     return this.idb.getStoreDocsByIdRevs(leafIdRevs)
       .then((turtleDocs) => {
-        const existingTurtleIdRevs = turtleDocs.map(doc => doc._id_rev);
-        console.log('existing turtle docs', existingTurtleIdRevs);
+        // note: here returns an array w/ some undefined, some docs
+        const existingTurtleIdRevs = turtleDocs.filter(d => d).map(doc => doc._id_rev);
+        // console.log('existing turtle leaf id revs', existingTurtleIdRevs);
         return leafIdRevs.filter(idRev => !existingTurtleIdRevs.includes(idRev));
       });
   }
