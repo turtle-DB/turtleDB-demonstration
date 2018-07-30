@@ -129,9 +129,9 @@ class Dashboard extends React.Component {
                 handleDropDatabase={this.handleDropDatabase}
                 handleSyncWithMongoDB={this.handleSyncWithMongoDB}
               />
-              <BenchmarkBox benchmark={this.state.benchmark}/>
             </div>
             <div className="col-9">
+              <BenchmarkBox benchmark={this.state.benchmark}/>
               <Table
                 data={this.state.data}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
