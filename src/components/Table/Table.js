@@ -90,12 +90,10 @@ class Table extends React.Component {
           page={this.state.page}
           tableMax={this.state.tableMax}
         />
-        <div className="shadow p-3 mb-5 bg-light rounded">
-          <table className='table table-striped table-bordered table-condensed'>
-            <thead>{headerComponents}</thead>
-            <tbody>{rowComponents}</tbody>
-          </table>
-        </div>
+        <table className='table table-striped table-bordered table-condensed'>
+          <thead>{headerComponents}</thead>
+          <tbody>{rowComponents}</tbody>
+        </table>
         {this.state.showUpdateModal && <Modal
           open={this.state.showUpdateModal}
           onClose={this.handleCloseModal}

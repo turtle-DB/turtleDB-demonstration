@@ -120,34 +120,27 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div>
-        <div className="">
           <div className="row">
-            <div className="col">
+            <div className="col-3">
               <ControlPanel
                 handleInsertClick={this.handleInsertClick}
                 handleEditClick={this.handleEditClick}
+                handleDeleteClick={this.handleDeleteClick}
                 handleDropDatabase={this.handleDropDatabase}
                 handleSyncWithMongoDB={this.handleSyncWithMongoDB}
-                handleDeleteClick={this.handleDeleteClick}
-                handleTestClick={this.handleTestClick}
               />
-            </div>
-            <div className="col">
               <BenchmarkBox benchmark={this.state.benchmark}/>
             </div>
-          </div>
-          <div className="row">
-            <TestPanel
-              handleTestClick={this.handleTestClick}
-            />
+            <div className="col-9">
+              <Table
+                data={this.state.data}
+                handleSingleDeleteClick={this.handleSingleDeleteClick}
+                handleUpdateClick={this.handleUpdateClick}
+              />
+            </div>
           </div>
         </div>
-        <Table
-          data={this.state.data}
-          handleSingleDeleteClick={this.handleSingleDeleteClick}
-          handleUpdateClick={this.handleUpdateClick}
-        />
-      </div>
+
     )
   }
 }
