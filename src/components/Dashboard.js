@@ -8,8 +8,9 @@ import TestPanel from './TestPanel/TestPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import turtleDB from '../turtleDB/turtle';
 
-// import hearthstoneData from './../data/HearthstoneData';
-import hearthstoneData from './../data/HearthstoneBasicData';
+// import peopleData from './../data/peopleData';
+// import peopleData from './../data/HearthstoneBasicData';
+import peopleData from './../data/PeopleData';
 
 // Dashboard
 class Dashboard extends React.Component {
@@ -45,30 +46,34 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: {
-        time: timeSpent,
-        type: "DELETE",
-        count: n
-      }});
+      this.setState({
+        benchmark: {
+          time: timeSpent,
+          type: "DELETE",
+          count: n
+        }
+      });
       this.syncStateWithTurtleDB();
     });
   }
 
   handleInsertClick = n => { // need to change so it inserts N random cards instead
     let insertPromises = [];
-    let dataLength = hearthstoneData.length;
+    let dataLength = peopleData.length;
     for (let i = 0; i < n; i++) {
-      const doc = Object.assign({}, hearthstoneData[Math.floor(Math.random() * dataLength)]);
+      const doc = Object.assign({}, peopleData[Math.floor(Math.random() * dataLength)]);
       insertPromises.push(turtleDB.create(doc));
     }
     let startTime = Date.now();
     Promise.all(insertPromises).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: {
-        time: timeSpent,
-        type: "INSERT",
-        count: n
-      }});
+      this.setState({
+        benchmark: {
+          time: timeSpent,
+          type: "INSERT",
+          count: n
+        }
+      });
       this.syncStateWithTurtleDB();
     });
   }
@@ -92,11 +97,13 @@ class Dashboard extends React.Component {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
-      this.setState({ benchmark: {
-        time: timeSpent,
-        type: "EDIT",
-        count: n
-      }});
+      this.setState({
+        benchmark: {
+          time: timeSpent,
+          type: "EDIT",
+          count: n
+        }
+      });
       this.syncStateWithTurtleDB();
     });
   }
@@ -133,7 +140,7 @@ class Dashboard extends React.Component {
               />
             </div>
             <div className="col">
-              <BenchmarkBox benchmark={this.state.benchmark}/>
+              <BenchmarkBox benchmark={this.state.benchmark} />
             </div>
           </div>
           <div className="row">
