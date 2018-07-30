@@ -29,7 +29,7 @@ class TurtleDB {
 
   _readWithoutDeletedError(_id) {
     return this._readMetaDoc(_id)
-      .then(meta => meta.revisions[0])
+      .then(meta => meta._revisions[0])
       .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
 
@@ -54,7 +54,7 @@ class TurtleDB {
 
   _read(_id) {
     return this._readMetaDoc(_id)
-      .then(meta => meta.revisions[0])
+      .then(meta => meta._revisions[0])
       .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
         const data = Object.assign({}, doc);
@@ -65,15 +65,14 @@ class TurtleDB {
       .catch(err => console.log("Read error:", err));
   }
 
-  _generateNewVersion(_id, oldVersion, newDoc) {
-    const oldRev = oldVersion._id_rev.split('::')[1];
+  _generateNewDoc(oldDoc, newProperties, metaDoc) {
+    const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
 
-    delete oldVersion._id_rev;
-    const updatedVersion = Object.assign({}, newDoc);
-    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(updatedVersion));
-    updatedVersion._id_rev = _id + "::" + newRev;
-    return updatedVersion;
+    const newDoc = Object.assign({}, newProperties);
+    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(metaDoc._revisions) + JSON.stringify(newDoc));
+    newDoc._id_rev = _id + "::" + newRev;
+    return newDoc;
   }
 
   _getLastStoreKey(turtleHistoryDoc) {
@@ -81,6 +80,45 @@ class TurtleDB {
       return 0;
     } else {
       return turtleHistoryDoc.history[0].lastKey;
+    }
+  }
+
+  _getWinningRev(leafRevs) {
+    return leafRevs.sort((a, b) => {
+      let [revNumA, revHashA] = a.split('-');
+      let [revNumB, revHashB] = b.split('-');
+      revNumA = parseInt(revNumA, 10);
+      revNumB = parseInt(revNumB, 10);
+
+      if (revNumA > revNumB) {
+        return -1;
+      } else if (revNumA < revNumB) {
+        return 1;
+      } else {
+        if (revHashA > revHashB) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }
+    })[0];
+  }
+
+  _updateMetaDocRevisionTree(tree, newRev, oldRev, _deleted) {
+    this._insertNewRev(tree, newRev, oldRev, _deleted);
+  }
+
+  _insertNewRev(node, newRev, oldRev, _deleted) {
+    if (node[0] === oldRev) {
+      if (_deleted) {
+        return node[2].push([newRev, { _deleted: true }, []]);
+      } else {
+        return node[2].push([newRev, {}, []]);
+      }
+    }
+
+    for (let i = 0; i < node[2].length; i++) {
+      this._insertNewRev(node[2][i], newRev, oldRev, _deleted);
     }
   }
 }

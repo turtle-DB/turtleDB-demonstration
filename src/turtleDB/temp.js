@@ -1,120 +1,62 @@
+//syncFromRoutes '/missing_rev_ids' endpoint
+  //mergeMetaDocs(turtleMetaDocs)
+  //.then(metaDocs => insertMetaDocs()
+  //.then(metadocs => findMissingLeafNodes(metadocs))
+  //.then(revIds => send(revIds))
 
-//replicate from tortoise
+// --> input: array of changed turtle metadocs
 
-Target - Turtle
-Source - Tortoise
-
-//this.sourceHistoryDoc  - tortoise
-//this.highestSourceKey  - tortoise
-//this.getLastTargetKey  - turtle last sync
-//this.metaDocs          - tortoise, requires highestSourceKey + lastTargetKey
-//this.sourceSyncRecord
-
-//turtleDB.replicateFrom()
-
-    // turtle.getLastTargetKey
-  // request 1 ('/_source_meta_docs') - turtle sends turtleID, lastTargetKey
-
-    //tortoise.getSourceHistoryDoc
-    //tortoise.getHighestStoreKey
-    //tortoise.getChangedMetaDocsForTarget
-  // response 1 - tortoise sends back metaDocs
-
-    //turtle.revDiffs(metaDocs)
-  // request 2 ('/_source_store_docs') - turtle sends array of _id_revs
-
-    //tortoise.getChangedStoreDocsForTarget
-    //tortoise.createNewSyncDocument
-  // response 2 - tortoise sends back docs and new sync document
-
-      //turtle.updateDB
-      //turtle.updateSyncHistory
-  // request 3 ('/_confirm_replication') - turtle sends confirmation
-
-    //tortoise.updateSourceSyncHistory
-  // response 3 - tortoise sends confirmation
+//mergeMetaDocs(turtleMetaDocs)
+  //matchExistingMetaDocs(turtleMetaDocs)
+    //get all turtle ids -> map(id => id)
+    //getTortoiseMetaDocsById(ids) --> [this.matchingTortoiseMetaDocs]
+    //const newTurtleMetaDocs = sortNewTurtleMetaDocs(this.matchingTortoiseMetaDocs, turtleMetaDocs)
+      // --> [this.matchingTurtleMetaDocs]
 
 
+      // this.missingLeafNodes = [];
+      // turtleMetaDocs.forEach(turtleMetaDoc => {
+          //turtleMetaDoc.id
+          // if (id exists in mongoShell) {
+            // newMetaDoc = mergeRevTrees(tortoiseMetaDoc1, turtleMetaDoc1)
+            // update newMetaDoc to tortoise
+          // } else {
+            // add turtle's turtleMetaDoc into tortoise
+          // }
+          // this.missingLeafNodes.push(leafNode)
+
+        // this.missingLeafNodes/missingRevIds = [id-3a, id2-1a, ]
+        // findMissingLeafNodes(newMergedMetaDoc)
+           // rev tree, recurse through it to find leaf nodes, check not deleted
+           // leafNodes = [id-2d, id-6e];
+           // go to tortoise store, check for already exisiting revids
+           // this.missingLeafNodes.push()
+          //  -> filter for non-existing leaf nodes
+
+           // 1a - 2b
+           //    - 2c
+          //     - 2d - 3d
 
 
+    // })
 
 
+    //const updatedTortoiseMetaDocs = mergeExistingMetaDocs()
+      //forEach...
+      //mergeRevTrees(tortoiseMetaDoc1, turtleMetaDoc1)
+        // altering tortoiseMetaDoc
+          // update rev tree
+          // update conflict status
+          // if conflict: true, findWinningRev(revisionTree)
+    //<-- {updated: updatedTortoiseMetaDocs + new: newTurtleMetaDocs}
+    // mongoShell.read(id) // if comes back
 
+//insertMetaDocs()
+  //updateMetaDocs(updatedTortoiseMetaDocs)
+  //insertNewMetaDocs(newTurtleMetaDocs)
 
-
-
-
-
-
-
-
-
-
-
-
-{
-  "id":"idName",
-  "rev":"2-13304d2274b32c3999ac7bf56b74225a",
-  "deleted":true,
-  "rev_tree":[
-    {
-      "pos":1,
-      "ids":
-        [
-          "b4adf6a1fe69eec84304cb74353473a3",
-          {"status":"available"},
-          [
-
-
-
-
-
-{
-  "id":"idName",
-  "rev":"2-13304d2274b32c3999ac7bf56b74225a",
-  "deleted":true,
-  "rev_tree":[
-    {
-      "pos":1,
-      "ids":
-        [
-          "b4adf6a1fe69eec84304cb74353473a3",
-          {"status":"available"},
-          [
-            [
-              "13304d2274b32c3999ac7bf56b74225a",
-              {"status":"available","deleted":true},
-              []
-            ]
-          ]
-        ]
-    }
-  ],
-  "winningRev":"2-13304d2274b32c3999ac7bf56b74225a",
-  "seq":2
-}
-            [
-              "13304d2274b32c3999ac7bf56b74225a",
-              {"status":"available","deleted":true},
-              []
-            ]
-          ]
-        ]
-    }
-  ],
-  "winningRev":"2-13304d2274b32c3999ac7bf56b74225a",
-  "seq":2
-}
-
-// SYNCING
-//replicate documentation:
-  //turtle post '/_rev_diffs'
-    //turtle sends batch of metaDocs from change feed to tortoise
-    //tortoise checks what revisions it doesn't have: tortoiseDB.revDiffs()
-      //tortoise.revDiffs() gets local metadocs for the same IDs: mongoShell.readAllMetaDocs()
-      //tortoise.revDiffs() gets back metadocs and then compares the revision IDs: tortoiseDB.findMissingRevs()
-        //tDB.findMissingRevs() returns a filtered set of turtle's metadocs to tortoiseDB.revDiffs()
-      //tortoise.revDiffs() passes these metadoc to tortoise.updateMetaDocs()
-    //tortoise updates the metadocs that are not up to date
-    //tortoise sends back a list of revIDs it needs data for from turtle
-    //turtle sends back the data for those revIDs
+//findMissingLeafNodes
+    //const allUpdatedLeafNodes = findLeafNodes(updatedMetaDocs)
+    //searchDBLeafNodes(allUpdatedLeafNodes) --> [missingLeafNodes]
+    //findLeafNodes(newTurtleMetaDocs) --> concat onto [missingLeafNodes]
+//<-- return: array of missing revIds
