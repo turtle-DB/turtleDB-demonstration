@@ -13,7 +13,7 @@ class SyncTo {
     .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
     .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
     .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
-    .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise))
+    .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
     .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
     .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
     .then(() => this.updateSyncToTortoiseDoc())
@@ -75,7 +75,8 @@ class SyncTo {
   }
 
   getStoreDocsForTortoise(revIdsFromTortoise) {
-    const promises = revIdsFromTortoise.data.map(_id_rev => {
+    // console.log('rev ids recieved from tortoise:', revIdsFromTortoise);
+    const promises = revIdsFromTortoise.map(_id_rev => {
       return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
     });
     return Promise.all(promises).then(docs => this.storeDocsForTortoise = docs)
