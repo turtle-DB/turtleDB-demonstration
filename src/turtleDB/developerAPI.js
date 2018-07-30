@@ -30,6 +30,7 @@ const developerAPI = {
   create(data) {
     if (typeof data === 'object' && !Array.isArray(data)) {
       let newDoc = Object.assign({}, data);
+
       let _id;
       if (!newDoc._id && newDoc._id !== 0) {
         _id = uuidv4();
@@ -37,9 +38,17 @@ const developerAPI = {
         _id = newDoc._id;
         delete newDoc._id;
       }
+
       const _rev = '1-' + md5(JSON.stringify(newDoc));
       newDoc._id_rev = _id + '::' + _rev;
-      let metaDoc = { _id, revisions: [_rev] };
+
+      let metaDoc = {
+        _id,
+        _winningRev: _rev,
+        _revisions: [_rev, {}, []],
+        _leafRevs: [_rev]
+      };
+
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
         .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
         .catch(err => console.log("Create error:", err));
@@ -48,13 +57,26 @@ const developerAPI = {
     }
   },
 
-  read(_id) {
+  read(_id, revId = null) {
     return this._readMetaDoc(_id)
-      .then(meta => meta.revisions[0])
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
-      .then(doc => {
-        if (doc._deleted) throw new Error("This document has been deleted.");
+      .then(metaDoc => {
+        let rev;
 
+        if (!metaDoc._winningRev) {
+          throw new Error("This document has been deleted.");
+        } else if (!revId) {
+          rev = metaDoc._winningRev;
+        } else {
+          if (metaDoc._leafRevs.includes(revId)) {
+            rev = revId;
+          } else {
+            throw new Error("Invalid Revision Id");
+          }
+        }
+
+        return this._readRevFromIndex(_id, rev);
+      })
+      .then(doc => {
         const data = Object.assign({}, doc);
         [ data._id, data._rev ] = data._id_rev.split('::');
         delete data._id_rev;
@@ -64,29 +86,64 @@ const developerAPI = {
   },
 
   //requires a full document. will not append updates.
-  update(_id, newDoc) {
+  update(_id, newProperties, revId = null) {
     let metaDoc;
+    let newDoc;
+
     return this._readMetaDoc(_id)
-      .then(meta => {
-        metaDoc = meta;
-        return metaDoc.revisions[0];
+      .then(doc => {
+        // save metaDoc to be used later
+        metaDoc = doc;
+        let rev;
+
+        if (!metaDoc._winningRev) {
+          throw new Error("This document has been deleted.");
+        } else if (!revId) {
+          rev = metaDoc._winningRev;
+        } else {
+          if (metaDoc._leafRevs.includes(revId)) {
+            rev = revId;
+          } else {
+            throw new Error("Invalid Revision Id");
+          }
+        }
+
+        return this._readRevFromIndex(_id, rev);
       })
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
-      .then(oldVersion => {
-        if (oldVersion._deleted) throw new Error("This document has already been deleted.");
-        const newVersion = this._generateNewVersion(_id, oldVersion, newDoc);
-        this.idb.command(this.idb._store, "CREATE", { data: newVersion });
-        return newVersion._id_rev.split('::')[1];
+      .then(oldDoc => {
+        newDoc = this._generateNewDoc(oldDoc, newProperties, metaDoc);
+        this.idb.command(this.idb._store, "CREATE", { data: newDoc });
+
+        return {
+          newRev: newDoc._id_rev.split('::')[1],
+          oldRev: oldDoc._id_rev.split("::")[1]
+        };
       })
-      .then(newRev => {
-        const updatedMetaDoc = Object.assign(metaDoc, {revisions: [newRev].concat(metaDoc.revisions)})
+      .then(({ newRev, oldRev }) => {
+        // updating the meta doc:
+        this._updateMetaDocRevisionTree(metaDoc._revisions, newRev, oldRev, newProperties._deleted);
+
+        if (newProperties._deleted) {
+          metaDoc._leafRevs.splice(metaDoc._leafRevs.indexOf(oldRev), 1);
+        } else {
+          metaDoc._leafRevs[metaDoc._leafRevs.indexOf(oldRev)] = newRev;
+        }
+
+        metaDoc._winningRev = this._getWinningRev(metaDoc._leafRevs) || null;
+
         return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
+      })
+      .then(() => {
+        const data = Object.assign({}, newDoc);
+        [ data._id, data._rev ] = data._id_rev.split('::');
+        delete data._id_rev;
+        return data;
       })
       .catch(err => console.log("Update error:", err));
   },
 
-  delete(_id) {
-    return this.update(_id, { _deleted: true });
+  delete(_id, revId = null) {
+    return this.update(_id, { _deleted: true }, revId);
   },
 
   // BULK OPERATIONS

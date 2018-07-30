@@ -40,47 +40,65 @@ class SyncFrom {
   }
 
   findMissingRevIds(tortoiseMetaDocs) {
-    const ids = tortoiseMetaDocs.map(doc => doc._id);
+    // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
 
-    return this.getMetaDocsByIds(ids)
-    .then(turtleMetaDocs => {
-      const missingMetaDocs = this.findMissingMetaDocs(tortoiseMetaDocs, turtleMetaDocs);
-      this.updateTurtleMetaDocStore(missingMetaDocs);
-      return missingMetaDocs;
-    })
-    .then(missingMetaDocs => {
-      this.missingRevIds = missingMetaDocs.map(doc => {
-        return doc._id + "::" + doc.revisions[0];
-      })
-    })
-    .catch(err => console.log(err));
+    // returns a list of all tortoise leaf nodes that turtle doesn't have
+    const missingLeafNodes = [];
+
+    const promises = tortoiseMetaDocs.map(tortoiseMetaDoc => {
+      return this.idb.command(this.idb._meta, "READ", { _id: tortoiseMetaDoc._id })
+        .then(turtleMetaDoc => {
+          // console.log('turtle version of metadoc', turtleMetaDoc);
+
+          if (turtleMetaDoc) {
+            if (JSON.stringify(turtleMetaDoc._revisions) === JSON.stringify(tortoiseMetaDoc._revisions)) {
+              // console.log('revision trees are the same, no metadoc updates needed');
+              return;
+            } else {
+              return this.findMissingLeafRevs(tortoiseMetaDoc)
+                .then((idRevs) => {
+                  missingLeafNodes.push(...idRevs);
+                  return this.idb.command(this.idb._meta, "UPDATE", { data: tortoiseMetaDoc });
+                });
+            }
+          } else {
+              let revs = this.collectAllLeafRevs(tortoiseMetaDoc._revisions);
+              let idRevs = revs.map(rev => tortoiseMetaDoc._id + '::' + rev);
+              missingLeafNodes.push(...idRevs);
+              return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
+          }
+        })
+    });
+
+    return Promise.all(promises).then(() => this.missingRevIds = missingLeafNodes);
   }
 
-  getMetaDocsByIds(ids) {
-    let promises = [];
-    ids.forEach(_id => promises.push(this.idb.command(this.idb._meta, "READ", { _id })))
-    return Promise.all(promises).then(metadocs => metadocs.filter(doc => doc));
+  collectAllLeafRevs(node, leafRevs = []) {
+    if (node[2].length === 0) {
+      leafRevs.push(node[0]);
+    }
+
+    for (let i = 0; i < node[2].length; i++) {
+      this.collectAllLeafRevs(node[2][i], leafRevs);
+    }
+
+    return leafRevs;
   }
 
-  findMissingMetaDocs(tortoiseMetaDocs, turtleMetaDocs) {
-    const latestTurtleDocRevs = {};
-    turtleMetaDocs.forEach(doc => {
-      latestTurtleDocRevs[doc._id] = doc.revisions[0];
-    })
+  findMissingLeafRevs(tortoiseMetaDoc) {
+    const leafRevs = this.collectAllLeafRevs(tortoiseMetaDoc._revisions);
+    const docId = tortoiseMetaDoc._id;
+    const leafIdRevs = leafRevs.map(rev => docId + '::' + rev);
 
-    return tortoiseMetaDocs.filter(doc => {
-      let turtleRevId = latestTurtleDocRevs[doc._id];
+    // console.log('tortoise metadoc leaf id revs:', leafIdRevs);
 
-      if (turtleRevId) {
-        if (turtleRevId !== doc.revisions[0]) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return true;
-      }
-    })
+    return this.idb.getStoreDocsByIdRevs(leafIdRevs)
+      .then((turtleDocs) => {
+        // note: here returns an array w/ some undefined, some docs
+        const existingTurtleIdRevs = turtleDocs.filter(d => d).map(doc => doc._id_rev);
+        // console.log('existing turtle leaf id revs', existingTurtleIdRevs);
+        return leafIdRevs.filter(idRev => !existingTurtleIdRevs.includes(idRev));
+      });
   }
 
   sendRequestForTortoiseDocs(path) {
@@ -106,7 +124,7 @@ class SyncFrom {
   }
 
   updateSyncFromDoc(newSyncToTurtleDoc) {
-    this.idb.command(this.idb._syncFromStore, "UPDATE", { data: newSyncToTurtleDoc });
+    return this.idb.command(this.idb._syncFromStore, "UPDATE", { data: newSyncToTurtleDoc });
   }
 }
 

@@ -70,8 +70,8 @@ class IDBShell {
           resolve(e.target.result);
         }
         request.onerror = e => {
-          console.log(`${action} error:`, e);
-          reject(e);
+          console.log(`${action} error:`, e.target.error);
+          reject(e.target.error);
         }
       })
     })
@@ -103,6 +103,14 @@ class IDBShell {
         }
         resolve();
     })
+  }
+
+  getStoreDocsByIdRevs(idRevsArr) {
+    const promises = idRevsArr.map(_id_rev => {
+      return this.command(this._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    });
+
+    return Promise.all(promises);
   }
 
 // STORE OPERATIONS
