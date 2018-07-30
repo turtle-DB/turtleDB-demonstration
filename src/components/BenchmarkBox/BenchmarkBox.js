@@ -7,7 +7,7 @@ class BenchmarkBox extends React.Component {
       <div>
         <h4>Benchmarks</h4>
         <BenchmarkDisplay benchmark={this.props.benchmark}/>
-      <img className="w-75" src={"./images/spinning-turtle.gif"} alt="Spinning Turtle"/>
+      <img className="w-25" src={"./images/spinning-turtle.gif"} alt="Spinning Turtle"/>
       </div>
     )
   }
