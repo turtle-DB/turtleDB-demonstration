@@ -36,21 +36,20 @@ class Table extends React.Component {
   }
 
   generateHeaders = () => {
-    const thElements = Object.keys(this.props.data[0])
-    .filter(property => HEADERS.includes(property))
-    .map(property =>  <th key={property}>{property}</th>)
+    const h = HEADERS.map((header, idx) => <th key={header+idx}>{header}</th>)
 
     return (
       <tr>
         <th></th>
         <th></th>
-        {thElements}
+        {h}
       </tr>
     );
   }
 
   generateRows = () => {
     return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
+      console.log(this.props.data);
       const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header]}</td>);
 
       return (

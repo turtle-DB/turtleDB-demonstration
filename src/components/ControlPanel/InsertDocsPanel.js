@@ -1,7 +1,7 @@
 import React from 'react';
 
 class InsertDocsPanel extends React.Component {
-  handleInsertClick = (event) => {
+  handleInsertClick = event => {
     event.preventDefault();
     this.props.handleInsertClick(
       document.querySelector('input[name="insert-number"]:checked').value
