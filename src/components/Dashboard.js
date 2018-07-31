@@ -16,13 +16,15 @@ class Dashboard extends React.Component {
   constructor() {
     super()
     this.state = {
-      data: [],
+      data: {
+        docs: [],
+        metaDocs: []
+      },
       benchmark: {
         time: null,
         type: null,
         count: null,
-      },
-      metaDoc: null
+      }
     }
   }
 
@@ -31,31 +33,14 @@ class Dashboard extends React.Component {
   }
 
   syncStateWithTurtleDB = () => {
+    let docs;
+
     turtleDB.readAllValues().then(docs =>
       this.setState({ data: docs })
     );
   }
 
-  handleSingleDeleteClick = (_id) => {
-    turtleDB.delete(_id).then(() => {
-      this.syncStateWithTurtleDB();
-    });
-  }
-
-  handleDeleteClick = (n) => {
-    let startTime = Date.now();
-    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "DELETE",
-          count: n
-        }
-      });
-      this.syncStateWithTurtleDB();
-    });
-  }
+  // DASHBOARD HANDLERS
 
   handleInsertClick = (n) => {
     let insertPromises = [];
@@ -78,6 +63,21 @@ class Dashboard extends React.Component {
     });
   }
 
+  handleDeleteClick = (n) => {
+    let startTime = Date.now();
+    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({
+        benchmark: {
+          time: timeSpent,
+          type: "DELETE",
+          count: n
+        }
+      });
+      this.syncStateWithTurtleDB();
+    });
+  }
+
   handleEditClick = (n) => {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
@@ -93,12 +93,6 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleSingleUpdateClick = (obj) => {
-    turtleDB.update(obj._id, obj).then(() => {
-      this.syncStateWithTurtleDB();
-    })
-  }
-
   handleDropDatabase = () => {
     turtleDB.dropDB().then(() => this.setState({ data: [] }));
   }
@@ -109,11 +103,27 @@ class Dashboard extends React.Component {
     //   .catch(err => console.log("Error:", err))
   }
 
+  // DOCUMENT HANDLERS
+
   handleViewTreeClick = (_id) => {
     turtleDB._readMetaDoc(_id).then(metaDoc => {
       this.setState({ metaDoc: metaDoc });
     });
   }
+
+  handleSingleUpdateClick = (obj) => {
+    turtleDB.update(obj._id, obj).then(() => {
+      this.syncStateWithTurtleDB();
+    })
+  }
+
+  handleSingleDeleteClick = (_id) => {
+    turtleDB.delete(_id).then(() => {
+      this.syncStateWithTurtleDB();
+    });
+  }
+
+
 
   render() {
     return (
