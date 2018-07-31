@@ -104,9 +104,7 @@ class Dashboard extends React.Component {
   }
 
   handleSyncWithMongoDB = () => {
-    // axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
-    //   .then(res => console.log(res))
-    //   .catch(err => console.log("Error:", err))
+    turtleDB.sync();
   }
 
   handleViewTreeClick = (_id) => {
