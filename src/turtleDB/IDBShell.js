@@ -1,4 +1,5 @@
 import uuidv4 from 'uuid/v4';
+import turtleDB from './turtle'
 
 class IDBShell {
   constructor(name) {
@@ -139,17 +140,20 @@ class IDBShell {
     return new Promise((resolve, reject) => {
       let counter = 0;
         this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          let cursor = e.target.result;
+          const cursor = e.target.result;
+          counter += 1;
           if (!cursor) {
             console.log('Cursor finished!');
             resolve();
           }
           if (cursor) {
-            counter += 1;
+            const _id = e.target.result.value._id_rev.split("::")[0];
             if (counter <= amount) {
-              let updateData = cursor.value;
-              updateData.eyeColor = 'green';
-              let request = cursor.update(updateData);
+              let data = Object.assign(cursor.value, {
+                age: Math.floor(Math.random() * 100 + 1)
+              })
+              turtleDB.update(_id, data)
+              let request = cursor.update(data);
               // request.onsuccess = function() {
               //   console.log(counter);
               // };
