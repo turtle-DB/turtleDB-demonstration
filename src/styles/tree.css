@@ -1,8 +1,10 @@
 .tree-container {
   background-color: rgba(245, 245, 245, 0.5);
-  padding-top: 30px;
+  padding-top: 10px;
   border-radius: 10px;
   border: solid rgb(138, 138, 138) 1px;
+  height: 300px;
+  width: 400px;
 }
 
 svg.custom .node circle {
@@ -19,7 +21,6 @@ svg.custom .node text {
   /* stroke-width: 0.5px; */
   /* text-shadow: 0px 0px 1px black; */
 }
-
 
 svg.custom .node {
 	cursor: pointer;
