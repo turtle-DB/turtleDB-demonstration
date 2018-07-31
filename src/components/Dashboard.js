@@ -33,11 +33,8 @@ class Dashboard extends React.Component {
   }
 
   syncStateWithTurtleDB = () => {
-    let docs;
-
-    turtleDB.readAllValues().then(docs =>
-      this.setState({ data: docs })
-    );
+    turtleDB.readAllMetaDocsAndDocs()
+      .then(data => this.setState({ data: data }));
   }
 
   // DASHBOARD HANDLERS
@@ -94,7 +91,7 @@ class Dashboard extends React.Component {
   }
 
   handleDropDatabase = () => {
-    turtleDB.dropDB().then(() => this.setState({ data: [] }));
+    turtleDB.dropDB().then(() => this.setState({ data: { docs: [], metaDocs: [] } }));
   }
 
   handleSync = () => {
