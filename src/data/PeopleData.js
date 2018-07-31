@@ -2,7 +2,7 @@ const peopleData = [
   {
     "name": "Heath Graves",
     "age": 28,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "EXTRO",
     "email": "heathgraves@extro.com",
@@ -12,7 +12,7 @@ const peopleData = [
   {
     "name": "Sweeney Dawson",
     "age": 33,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "QUILITY",
     "email": "sweeneydawson@quility.com",
@@ -22,7 +22,7 @@ const peopleData = [
   {
     "name": "Bolton Sweeney",
     "age": 32,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ISOSWITCH",
     "email": "boltonsweeney@isoswitch.com",
@@ -32,7 +32,7 @@ const peopleData = [
   {
     "name": "Jones Ruiz",
     "age": 27,
-    "eyeColor": "brown",
+    
     "gender": "male",
     "company": "TETAK",
     "email": "jonesruiz@tetak.com",
@@ -42,7 +42,7 @@ const peopleData = [
   {
     "name": "Wolf Weiss",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ECOSYS",
     "email": "wolfweiss@ecosys.com",
@@ -52,7 +52,7 @@ const peopleData = [
   {
     "name": "Reese Hall",
     "age": 38,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "GINKLE",
     "email": "reesehall@ginkle.com",
@@ -62,7 +62,7 @@ const peopleData = [
   {
     "name": "Howard Mcneil",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "FRENEX",
     "email": "howardmcneil@frenex.com",
@@ -72,7 +72,7 @@ const peopleData = [
   {
     "name": "Willa Sherman",
     "age": 23,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "PAPRIKUT",
     "email": "willasherman@paprikut.com",
@@ -82,7 +82,7 @@ const peopleData = [
   {
     "name": "Watts Phelps",
     "age": 26,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "GLEAMINK",
     "email": "wattsphelps@gleamink.com",
@@ -92,7 +92,7 @@ const peopleData = [
   {
     "name": "Parks Cole",
     "age": 40,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "SNOWPOKE",
     "email": "parkscole@snowpoke.com",
@@ -102,7 +102,7 @@ const peopleData = [
   {
     "name": "Maynard Hartman",
     "age": 22,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "EXOSWITCH",
     "email": "maynardhartman@exoswitch.com",
@@ -112,7 +112,7 @@ const peopleData = [
   {
     "name": "Perkins Brennan",
     "age": 29,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "POWERNET",
     "email": "perkinsbrennan@powernet.com",
@@ -122,7 +122,7 @@ const peopleData = [
   {
     "name": "Horton Morrow",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "MOREGANIC",
     "email": "hortonmorrow@moreganic.com",
@@ -132,7 +132,7 @@ const peopleData = [
   {
     "name": "Beck Landry",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "HOMELUX",
     "email": "becklandry@homelux.com",
@@ -142,7 +142,7 @@ const peopleData = [
   {
     "name": "Lolita Talley",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "AFFLUEX",
     "email": "lolitatalley@affluex.com",
@@ -152,7 +152,7 @@ const peopleData = [
   {
     "name": "Jennie Dunlap",
     "age": 20,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "SULTRAX",
     "email": "jenniedunlap@sultrax.com",
@@ -162,7 +162,7 @@ const peopleData = [
   {
     "name": "Elva Boone",
     "age": 34,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "GRAINSPOT",
     "email": "elvaboone@grainspot.com",
@@ -172,7 +172,7 @@ const peopleData = [
   {
     "name": "Rowe Sanford",
     "age": 23,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "RODEOMAD",
     "email": "rowesanford@rodeomad.com",
@@ -182,7 +182,7 @@ const peopleData = [
   {
     "name": "Rebecca Gibbs",
     "age": 34,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "SNACKTION",
     "email": "rebeccagibbs@snacktion.com",
@@ -192,7 +192,7 @@ const peopleData = [
   {
     "name": "Lily Bishop",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "BIOSPAN",
     "email": "lilybishop@biospan.com",
@@ -202,7 +202,7 @@ const peopleData = [
   {
     "name": "Evans Sims",
     "age": 24,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "GEEKOLA",
     "email": "evanssims@geekola.com",
@@ -212,7 +212,7 @@ const peopleData = [
   {
     "name": "Alyce Harris",
     "age": 27,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "RODEMCO",
     "email": "alyceharris@rodemco.com",
@@ -222,7 +222,7 @@ const peopleData = [
   {
     "name": "Daisy Salas",
     "age": 23,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "DEVILTOE",
     "email": "daisysalas@deviltoe.com",
@@ -232,7 +232,7 @@ const peopleData = [
   {
     "name": "Tessa Cervantes",
     "age": 37,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "ZORK",
     "email": "tessacervantes@zork.com",
@@ -242,7 +242,7 @@ const peopleData = [
   {
     "name": "Mcgowan Mason",
     "age": 39,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "MARVANE",
     "email": "mcgowanmason@marvane.com",
@@ -252,7 +252,7 @@ const peopleData = [
   {
     "name": "Jeannette Cooley",
     "age": 29,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "KOFFEE",
     "email": "jeannettecooley@koffee.com",
@@ -262,7 +262,7 @@ const peopleData = [
   {
     "name": "Deena Garrett",
     "age": 20,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "POLARAX",
     "email": "deenagarrett@polarax.com",
@@ -272,7 +272,7 @@ const peopleData = [
   {
     "name": "Hardin Blevins",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "YOGASM",
     "email": "hardinblevins@yogasm.com",
@@ -282,7 +282,7 @@ const peopleData = [
   {
     "name": "Bird Hutchinson",
     "age": 35,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "PERMADYNE",
     "email": "birdhutchinson@permadyne.com",
@@ -292,7 +292,7 @@ const peopleData = [
   {
     "name": "Janine Murphy",
     "age": 20,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "SEALOUD",
     "email": "janinemurphy@sealoud.com",
@@ -302,7 +302,7 @@ const peopleData = [
   {
     "name": "Pacheco Ramos",
     "age": 24,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ZENTIA",
     "email": "pachecoramos@zentia.com",
@@ -312,7 +312,7 @@ const peopleData = [
   {
     "name": "Bentley Woods",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "UNIWORLD",
     "email": "bentleywoods@uniworld.com",
@@ -322,7 +322,7 @@ const peopleData = [
   {
     "name": "Charity Tate",
     "age": 28,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "SYNKGEN",
     "email": "charitytate@synkgen.com",
@@ -332,7 +332,7 @@ const peopleData = [
   {
     "name": "Leann Espinoza",
     "age": 32,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "MAGNEATO",
     "email": "leannespinoza@magneato.com",
@@ -342,7 +342,7 @@ const peopleData = [
   {
     "name": "Felicia Wiggins",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "ENDIPINE",
     "email": "feliciawiggins@endipine.com",
@@ -352,7 +352,7 @@ const peopleData = [
   {
     "name": "Leta Townsend",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "MEMORA",
     "email": "letatownsend@memora.com",
@@ -362,7 +362,7 @@ const peopleData = [
   {
     "name": "Owen Roman",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "DIGIPRINT",
     "email": "owenroman@digiprint.com",
@@ -372,7 +372,7 @@ const peopleData = [
   {
     "name": "Sasha Vang",
     "age": 32,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "QUOTEZART",
     "email": "sashavang@quotezart.com",
@@ -382,7 +382,7 @@ const peopleData = [
   {
     "name": "Rhoda Morris",
     "age": 23,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "OHMNET",
     "email": "rhodamorris@ohmnet.com",
@@ -392,7 +392,7 @@ const peopleData = [
   {
     "name": "Gregory Obrien",
     "age": 36,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "NEOCENT",
     "email": "gregoryobrien@neocent.com",
@@ -402,7 +402,7 @@ const peopleData = [
   {
     "name": "Angie Reyes",
     "age": 30,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "PHOLIO",
     "email": "angiereyes@pholio.com",
@@ -412,7 +412,7 @@ const peopleData = [
   {
     "name": "Merrill Randolph",
     "age": 35,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "EXOTERIC",
     "email": "merrillrandolph@exoteric.com",
@@ -422,7 +422,7 @@ const peopleData = [
   {
     "name": "Marion Soto",
     "age": 22,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "MAKINGWAY",
     "email": "marionsoto@makingway.com",
@@ -432,7 +432,7 @@ const peopleData = [
   {
     "name": "Sue Collins",
     "age": 22,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "MIRACLIS",
     "email": "suecollins@miraclis.com",
@@ -442,7 +442,7 @@ const peopleData = [
   {
     "name": "Lacy Pace",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "PLASMOS",
     "email": "lacypace@plasmos.com",
@@ -452,7 +452,7 @@ const peopleData = [
   {
     "name": "Gay Campbell",
     "age": 21,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "SONGLINES",
     "email": "gaycampbell@songlines.com",
@@ -462,7 +462,7 @@ const peopleData = [
   {
     "name": "Hallie Conley",
     "age": 31,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "LUDAK",
     "email": "hallieconley@ludak.com",
@@ -472,7 +472,7 @@ const peopleData = [
   {
     "name": "Martinez Lancaster",
     "age": 39,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "FREAKIN",
     "email": "martinezlancaster@freakin.com",
@@ -482,7 +482,7 @@ const peopleData = [
   {
     "name": "Jill Daniels",
     "age": 31,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "EVEREST",
     "email": "jilldaniels@everest.com",
@@ -492,7 +492,7 @@ const peopleData = [
   {
     "name": "Gilbert Gilliam",
     "age": 34,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "COMTRACT",
     "email": "gilbertgilliam@comtract.com",
@@ -502,7 +502,7 @@ const peopleData = [
   {
     "name": "Johanna Guerrero",
     "age": 22,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "SENTIA",
     "email": "johannaguerrero@sentia.com",
@@ -512,7 +512,7 @@ const peopleData = [
   {
     "name": "Melinda Mcdonald",
     "age": 37,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "OZEAN",
     "email": "melindamcdonald@ozean.com",
@@ -522,7 +522,7 @@ const peopleData = [
   {
     "name": "Valarie Turner",
     "age": 36,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "UNIA",
     "email": "valarieturner@unia.com",
@@ -532,7 +532,7 @@ const peopleData = [
   {
     "name": "Brandy Shepherd",
     "age": 33,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "EVENTAGE",
     "email": "brandyshepherd@eventage.com",
@@ -542,7 +542,7 @@ const peopleData = [
   {
     "name": "Dorothea Franklin",
     "age": 39,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "FRANSCENE",
     "email": "dorotheafranklin@franscene.com",
@@ -552,7 +552,7 @@ const peopleData = [
   {
     "name": "Leonor Clay",
     "age": 24,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "EARBANG",
     "email": "leonorclay@earbang.com",
@@ -562,7 +562,7 @@ const peopleData = [
   {
     "name": "Garcia Stokes",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "QUIZKA",
     "email": "garciastokes@quizka.com",
@@ -572,7 +572,7 @@ const peopleData = [
   {
     "name": "Deanna Wallace",
     "age": 33,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "CORIANDER",
     "email": "deannawallace@coriander.com",
@@ -582,7 +582,7 @@ const peopleData = [
   {
     "name": "Weaver Wiley",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "PROGENEX",
     "email": "weaverwiley@progenex.com",
@@ -592,7 +592,7 @@ const peopleData = [
   {
     "name": "Abigail Hood",
     "age": 27,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "XURBAN",
     "email": "abigailhood@xurban.com",
@@ -602,7 +602,7 @@ const peopleData = [
   {
     "name": "Rena Kirkland",
     "age": 32,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "HOUSEDOWN",
     "email": "renakirkland@housedown.com",
@@ -612,7 +612,7 @@ const peopleData = [
   {
     "name": "Rose Garrison",
     "age": 26,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "ZILPHUR",
     "email": "rosegarrison@zilphur.com",
@@ -622,7 +622,7 @@ const peopleData = [
   {
     "name": "Agnes Pittman",
     "age": 39,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "VALPREAL",
     "email": "agnespittman@valpreal.com",
@@ -632,7 +632,7 @@ const peopleData = [
   {
     "name": "Small Jimenez",
     "age": 28,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "PETICULAR",
     "email": "smalljimenez@peticular.com",
@@ -642,7 +642,7 @@ const peopleData = [
   {
     "name": "Edna Berry",
     "age": 28,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "EXTREMO",
     "email": "ednaberry@extremo.com",
@@ -652,7 +652,7 @@ const peopleData = [
   {
     "name": "Ellen Hickman",
     "age": 33,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "TECHADE",
     "email": "ellenhickman@techade.com",
@@ -662,7 +662,7 @@ const peopleData = [
   {
     "name": "Gordon Merrill",
     "age": 33,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "SKINSERVE",
     "email": "gordonmerrill@skinserve.com",
@@ -672,7 +672,7 @@ const peopleData = [
   {
     "name": "Morse Aguirre",
     "age": 21,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "TALKALOT",
     "email": "morseaguirre@talkalot.com",
@@ -682,7 +682,7 @@ const peopleData = [
   {
     "name": "Wyatt Quinn",
     "age": 25,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "REMOTION",
     "email": "wyattquinn@remotion.com",
@@ -692,7 +692,7 @@ const peopleData = [
   {
     "name": "Benita Rodriquez",
     "age": 37,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "AUSTECH",
     "email": "benitarodriquez@austech.com",
@@ -702,7 +702,7 @@ const peopleData = [
   {
     "name": "Amber Cooke",
     "age": 37,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "EMERGENT",
     "email": "ambercooke@emergent.com",
@@ -712,7 +712,7 @@ const peopleData = [
   {
     "name": "Solis Noel",
     "age": 31,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "BIOTICA",
     "email": "solisnoel@biotica.com",
@@ -722,7 +722,7 @@ const peopleData = [
   {
     "name": "Barnes Dickson",
     "age": 26,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ORBEAN",
     "email": "barnesdickson@orbean.com",
@@ -732,7 +732,7 @@ const peopleData = [
   {
     "name": "Richard Stephenson",
     "age": 31,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ZILLADYNE",
     "email": "richardstephenson@zilladyne.com",
@@ -742,7 +742,7 @@ const peopleData = [
   {
     "name": "Ines Burton",
     "age": 28,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "EARTHPLEX",
     "email": "inesburton@earthplex.com",
@@ -752,7 +752,7 @@ const peopleData = [
   {
     "name": "Latisha Bond",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "CINESANCT",
     "email": "latishabond@cinesanct.com",
@@ -762,7 +762,7 @@ const peopleData = [
   {
     "name": "Lynn Diaz",
     "age": 32,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "TELEPARK",
     "email": "lynndiaz@telepark.com",
@@ -772,7 +772,7 @@ const peopleData = [
   {
     "name": "Paulette Emerson",
     "age": 29,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "TROPOLI",
     "email": "pauletteemerson@tropoli.com",
@@ -782,7 +782,7 @@ const peopleData = [
   {
     "name": "Hess Acevedo",
     "age": 36,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "PROFLEX",
     "email": "hessacevedo@proflex.com",
@@ -792,7 +792,7 @@ const peopleData = [
   {
     "name": "Young Dotson",
     "age": 23,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "VIDTO",
     "email": "youngdotson@vidto.com",
@@ -802,7 +802,7 @@ const peopleData = [
   {
     "name": "Elsa Greene",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "COMTREK",
     "email": "elsagreene@comtrek.com",
@@ -812,7 +812,7 @@ const peopleData = [
   {
     "name": "Minerva Hughes",
     "age": 39,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "SUPPORTAL",
     "email": "minervahughes@supportal.com",
@@ -822,7 +822,7 @@ const peopleData = [
   {
     "name": "Eileen Hines",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "SHOPABOUT",
     "email": "eileenhines@shopabout.com",
@@ -832,7 +832,7 @@ const peopleData = [
   {
     "name": "Sonja Chavez",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ZILLACON",
     "email": "sonjachavez@zillacon.com",
@@ -842,7 +842,7 @@ const peopleData = [
   {
     "name": "Rosales May",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "RODEOLOGY",
     "email": "rosalesmay@rodeology.com",
@@ -852,7 +852,7 @@ const peopleData = [
   {
     "name": "Kari Hyde",
     "age": 21,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "COMTRAK",
     "email": "karihyde@comtrak.com",
@@ -862,7 +862,7 @@ const peopleData = [
   {
     "name": "Rosario Hebert",
     "age": 29,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "EXOSPEED",
     "email": "rosariohebert@exospeed.com",
@@ -872,7 +872,7 @@ const peopleData = [
   {
     "name": "Mcclain Figueroa",
     "age": 23,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ACUMENTOR",
     "email": "mcclainfigueroa@acumentor.com",
@@ -882,7 +882,7 @@ const peopleData = [
   {
     "name": "Shaffer Flynn",
     "age": 25,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ZAPHIRE",
     "email": "shafferflynn@zaphire.com",
@@ -892,7 +892,7 @@ const peopleData = [
   {
     "name": "Aimee Stone",
     "age": 38,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "DUOFLEX",
     "email": "aimeestone@duoflex.com",
@@ -902,7 +902,7 @@ const peopleData = [
   {
     "name": "Tiffany Kinney",
     "age": 36,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "PAPRICUT",
     "email": "tiffanykinney@papricut.com",
@@ -912,7 +912,7 @@ const peopleData = [
   {
     "name": "Dorothy Christensen",
     "age": 30,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ZBOO",
     "email": "dorothychristensen@zboo.com",
@@ -922,7 +922,7 @@ const peopleData = [
   {
     "name": "Leila Day",
     "age": 21,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ESSENSIA",
     "email": "leiladay@essensia.com",
@@ -932,7 +932,7 @@ const peopleData = [
   {
     "name": "Maxwell Rowe",
     "age": 22,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ROCKYARD",
     "email": "maxwellrowe@rockyard.com",
@@ -942,7 +942,7 @@ const peopleData = [
   {
     "name": "Barrett Poole",
     "age": 40,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "TYPHONICA",
     "email": "barrettpoole@typhonica.com",
@@ -952,7 +952,7 @@ const peopleData = [
   {
     "name": "Greene Bradshaw",
     "age": 27,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "COMVEYOR",
     "email": "greenebradshaw@comveyor.com",
@@ -962,7 +962,7 @@ const peopleData = [
   {
     "name": "Eddie Tucker",
     "age": 24,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "FITCORE",
     "email": "eddietucker@fitcore.com",
@@ -972,7 +972,7 @@ const peopleData = [
   {
     "name": "Stanton Massey",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "SUPREMIA",
     "email": "stantonmassey@supremia.com",
@@ -982,7 +982,7 @@ const peopleData = [
   {
     "name": "Madden Burch",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "GALLAXIA",
     "email": "maddenburch@gallaxia.com",
@@ -992,7 +992,7 @@ const peopleData = [
   {
     "name": "Emily Lane",
     "age": 25,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "QIMONK",
     "email": "emilylane@qimonk.com",
@@ -1002,7 +1002,7 @@ const peopleData = [
   {
     "name": "Scott Whitney",
     "age": 27,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "OCEANICA",
     "email": "scottwhitney@oceanica.com",
@@ -1012,7 +1012,7 @@ const peopleData = [
   {
     "name": "Walsh Patterson",
     "age": 20,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "EXOBLUE",
     "email": "walshpatterson@exoblue.com",
@@ -1022,7 +1022,7 @@ const peopleData = [
   {
     "name": "Erna James",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "BOILICON",
     "email": "ernajames@boilicon.com",
@@ -1032,7 +1032,7 @@ const peopleData = [
   {
     "name": "Sofia Browning",
     "age": 40,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "INDEXIA",
     "email": "sofiabrowning@indexia.com",
@@ -1042,7 +1042,7 @@ const peopleData = [
   {
     "name": "Janelle Middleton",
     "age": 27,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "PORTICO",
     "email": "janellemiddleton@portico.com",
@@ -1052,7 +1052,7 @@ const peopleData = [
   {
     "name": "Johnnie Franco",
     "age": 26,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "GORGANIC",
     "email": "johnniefranco@gorganic.com",
@@ -1062,7 +1062,7 @@ const peopleData = [
   {
     "name": "Pauline Buchanan",
     "age": 21,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "HANDSHAKE",
     "email": "paulinebuchanan@handshake.com",
@@ -1072,7 +1072,7 @@ const peopleData = [
   {
     "name": "Sara Osborn",
     "age": 24,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "ORGANICA",
     "email": "saraosborn@organica.com",
@@ -1082,7 +1082,7 @@ const peopleData = [
   {
     "name": "Sweet Rose",
     "age": 24,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ORBAXTER",
     "email": "sweetrose@orbaxter.com",
@@ -1092,7 +1092,7 @@ const peopleData = [
   {
     "name": "Madge Holden",
     "age": 21,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "XSPORTS",
     "email": "madgeholden@xsports.com",
@@ -1102,7 +1102,7 @@ const peopleData = [
   {
     "name": "Twila Mathews",
     "age": 31,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "MAXIMIND",
     "email": "twilamathews@maximind.com",
@@ -1112,7 +1112,7 @@ const peopleData = [
   {
     "name": "Petty Irwin",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ENORMO",
     "email": "pettyirwin@enormo.com",
@@ -1122,7 +1122,7 @@ const peopleData = [
   {
     "name": "Lewis Sandoval",
     "age": 28,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ZYTREK",
     "email": "lewissandoval@zytrek.com",
@@ -1132,7 +1132,7 @@ const peopleData = [
   {
     "name": "Lucy Osborne",
     "age": 24,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ZOID",
     "email": "lucyosborne@zoid.com",
@@ -1142,7 +1142,7 @@ const peopleData = [
   {
     "name": "Christensen Holcomb",
     "age": 24,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "WARETEL",
     "email": "christensenholcomb@waretel.com",
@@ -1152,7 +1152,7 @@ const peopleData = [
   {
     "name": "Morin Fry",
     "age": 34,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "QUALITEX",
     "email": "morinfry@qualitex.com",
@@ -1162,7 +1162,7 @@ const peopleData = [
   {
     "name": "Jeannie Roth",
     "age": 28,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "BYTREX",
     "email": "jeannieroth@bytrex.com",
@@ -1172,7 +1172,7 @@ const peopleData = [
   {
     "name": "Justice Moon",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "LOCAZONE",
     "email": "justicemoon@locazone.com",
@@ -1182,7 +1182,7 @@ const peopleData = [
   {
     "name": "Iris Fowler",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "KIGGLE",
     "email": "irisfowler@kiggle.com",
@@ -1192,7 +1192,7 @@ const peopleData = [
   {
     "name": "Hester Barry",
     "age": 25,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "TROLLERY",
     "email": "hesterbarry@trollery.com",
@@ -1202,7 +1202,7 @@ const peopleData = [
   {
     "name": "Whitaker Gates",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ENVIRE",
     "email": "whitakergates@envire.com",
@@ -1212,7 +1212,7 @@ const peopleData = [
   {
     "name": "Summers Gentry",
     "age": 22,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "VERBUS",
     "email": "summersgentry@verbus.com",
@@ -1222,7 +1222,7 @@ const peopleData = [
   {
     "name": "Casey Durham",
     "age": 29,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "MATRIXITY",
     "email": "caseydurham@matrixity.com",
@@ -1232,7 +1232,7 @@ const peopleData = [
   {
     "name": "Allen Mayo",
     "age": 30,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "EXPOSA",
     "email": "allenmayo@exposa.com",
@@ -1242,7 +1242,7 @@ const peopleData = [
   {
     "name": "Bennett Michael",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ANACHO",
     "email": "bennettmichael@anacho.com",
@@ -1252,7 +1252,7 @@ const peopleData = [
   {
     "name": "Lynne Shields",
     "age": 38,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "RECOGNIA",
     "email": "lynneshields@recognia.com",
@@ -1262,7 +1262,7 @@ const peopleData = [
   {
     "name": "Katy Green",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "POLARIA",
     "email": "katygreen@polaria.com",
@@ -1272,7 +1272,7 @@ const peopleData = [
   {
     "name": "Marian Valenzuela",
     "age": 39,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "QOT",
     "email": "marianvalenzuela@qot.com",
@@ -1282,7 +1282,7 @@ const peopleData = [
   {
     "name": "Nash Larson",
     "age": 40,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "OVATION",
     "email": "nashlarson@ovation.com",
@@ -1292,7 +1292,7 @@ const peopleData = [
   {
     "name": "Browning Horn",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "OVIUM",
     "email": "browninghorn@ovium.com",
@@ -1302,7 +1302,7 @@ const peopleData = [
   {
     "name": "Marla Greer",
     "age": 36,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ZOGAK",
     "email": "marlagreer@zogak.com",
@@ -1312,7 +1312,7 @@ const peopleData = [
   {
     "name": "Mathews Crosby",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "GLASSTEP",
     "email": "mathewscrosby@glasstep.com",
@@ -1322,7 +1322,7 @@ const peopleData = [
   {
     "name": "Pearl Huffman",
     "age": 22,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "IZZBY",
     "email": "pearlhuffman@izzby.com",
@@ -1332,7 +1332,7 @@ const peopleData = [
   {
     "name": "Lester Delacruz",
     "age": 26,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "IMPERIUM",
     "email": "lesterdelacruz@imperium.com",
@@ -1342,7 +1342,7 @@ const peopleData = [
   {
     "name": "Esther Boyle",
     "age": 37,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "EWAVES",
     "email": "estherboyle@ewaves.com",
@@ -1352,7 +1352,7 @@ const peopleData = [
   {
     "name": "Mayer Wolfe",
     "age": 31,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "FARMAGE",
     "email": "mayerwolfe@farmage.com",
@@ -1362,7 +1362,7 @@ const peopleData = [
   {
     "name": "Gay Stark",
     "age": 31,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "LETPRO",
     "email": "gaystark@letpro.com",
@@ -1372,7 +1372,7 @@ const peopleData = [
   {
     "name": "Grimes Pugh",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ECRATER",
     "email": "grimespugh@ecrater.com",
@@ -1382,7 +1382,7 @@ const peopleData = [
   {
     "name": "Sullivan Hurst",
     "age": 20,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "LOTRON",
     "email": "sullivanhurst@lotron.com",
@@ -1392,7 +1392,7 @@ const peopleData = [
   {
     "name": "Kristie Snider",
     "age": 39,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "KLUGGER",
     "email": "kristiesnider@klugger.com",
@@ -1402,7 +1402,7 @@ const peopleData = [
   {
     "name": "Sharp Black",
     "age": 34,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ECOLIGHT",
     "email": "sharpblack@ecolight.com",
@@ -1412,7 +1412,7 @@ const peopleData = [
   {
     "name": "Kent Price",
     "age": 29,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "KOG",
     "email": "kentprice@kog.com",
@@ -1422,7 +1422,7 @@ const peopleData = [
   {
     "name": "Patty Becker",
     "age": 20,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "MEDIOT",
     "email": "pattybecker@mediot.com",
@@ -1432,7 +1432,7 @@ const peopleData = [
   {
     "name": "Meadows French",
     "age": 21,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "CEMENTION",
     "email": "meadowsfrench@cemention.com",
@@ -1442,7 +1442,7 @@ const peopleData = [
   {
     "name": "Pennington Welch",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "FIBEROX",
     "email": "penningtonwelch@fiberox.com",
@@ -1452,7 +1452,7 @@ const peopleData = [
   {
     "name": "Salinas Holt",
     "age": 24,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "ZENCO",
     "email": "salinasholt@zenco.com",
@@ -1462,7 +1462,7 @@ const peopleData = [
   {
     "name": "Nikki Wilder",
     "age": 40,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "MELBACOR",
     "email": "nikkiwilder@melbacor.com",
@@ -1472,7 +1472,7 @@ const peopleData = [
   {
     "name": "Lyons Tran",
     "age": 33,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "BEDLAM",
     "email": "lyonstran@bedlam.com",
@@ -1482,7 +1482,7 @@ const peopleData = [
   {
     "name": "Keith Bennett",
     "age": 27,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "REPETWIRE",
     "email": "keithbennett@repetwire.com",
@@ -1492,7 +1492,7 @@ const peopleData = [
   {
     "name": "Slater Alston",
     "age": 38,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "QUINTITY",
     "email": "slateralston@quintity.com",
@@ -1502,7 +1502,7 @@ const peopleData = [
   {
     "name": "Carly Erickson",
     "age": 23,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "RODEOCEAN",
     "email": "carlyerickson@rodeocean.com",
@@ -1512,7 +1512,7 @@ const peopleData = [
   {
     "name": "Best Drake",
     "age": 36,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ISOPLEX",
     "email": "bestdrake@isoplex.com",
@@ -1522,7 +1522,7 @@ const peopleData = [
   {
     "name": "Fowler Ford",
     "age": 32,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "PROSURE",
     "email": "fowlerford@prosure.com",
@@ -1532,7 +1532,7 @@ const peopleData = [
   {
     "name": "Blake Stein",
     "age": 30,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "LYRIA",
     "email": "blakestein@lyria.com",
@@ -1542,7 +1542,7 @@ const peopleData = [
   {
     "name": "Blackwell Hale",
     "age": 26,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "MAGMINA",
     "email": "blackwellhale@magmina.com",
@@ -1552,7 +1552,7 @@ const peopleData = [
   {
     "name": "Gomez Hernandez",
     "age": 37,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "SYNTAC",
     "email": "gomezhernandez@syntac.com",
@@ -1562,7 +1562,7 @@ const peopleData = [
   {
     "name": "Lynn Rosales",
     "age": 39,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "VANTAGE",
     "email": "lynnrosales@vantage.com",
@@ -1572,7 +1572,7 @@ const peopleData = [
   {
     "name": "Stephanie Santos",
     "age": 20,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "RECRISYS",
     "email": "stephaniesantos@recrisys.com",
@@ -1582,7 +1582,7 @@ const peopleData = [
   {
     "name": "Knapp Sharpe",
     "age": 32,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ELENTRIX",
     "email": "knappsharpe@elentrix.com",
@@ -1592,7 +1592,7 @@ const peopleData = [
   {
     "name": "Alice Mccullough",
     "age": 20,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "MEDALERT",
     "email": "alicemccullough@medalert.com",
@@ -1602,7 +1602,7 @@ const peopleData = [
   {
     "name": "Colon William",
     "age": 27,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "KINDALOO",
     "email": "colonwilliam@kindaloo.com",
@@ -1612,7 +1612,7 @@ const peopleData = [
   {
     "name": "Lindsey Stout",
     "age": 21,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ENJOLA",
     "email": "lindseystout@enjola.com",
@@ -1622,7 +1622,7 @@ const peopleData = [
   {
     "name": "Loraine Prince",
     "age": 29,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "SILODYNE",
     "email": "loraineprince@silodyne.com",
@@ -1632,7 +1632,7 @@ const peopleData = [
   {
     "name": "Ruthie Edwards",
     "age": 27,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "TETRATREX",
     "email": "ruthieedwards@tetratrex.com",
@@ -1642,7 +1642,7 @@ const peopleData = [
   {
     "name": "Velez Henson",
     "age": 38,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "GENMEX",
     "email": "velezhenson@genmex.com",
@@ -1652,7 +1652,7 @@ const peopleData = [
   {
     "name": "Durham English",
     "age": 23,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "HATOLOGY",
     "email": "durhamenglish@hatology.com",
@@ -1662,7 +1662,7 @@ const peopleData = [
   {
     "name": "Debbie Alvarado",
     "age": 22,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "ZENTIME",
     "email": "debbiealvarado@zentime.com",
@@ -1672,7 +1672,7 @@ const peopleData = [
   {
     "name": "Justine Schneider",
     "age": 25,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "MEDESIGN",
     "email": "justineschneider@medesign.com",
@@ -1682,7 +1682,7 @@ const peopleData = [
   {
     "name": "Patrice King",
     "age": 27,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "STRALUM",
     "email": "patriceking@stralum.com",
@@ -1692,7 +1692,7 @@ const peopleData = [
   {
     "name": "Alvarez Lopez",
     "age": 26,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "ROOFORIA",
     "email": "alvarezlopez@rooforia.com",
@@ -1702,7 +1702,7 @@ const peopleData = [
   {
     "name": "Elise Melton",
     "age": 38,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "TERSANKI",
     "email": "elisemelton@tersanki.com",
@@ -1712,7 +1712,7 @@ const peopleData = [
   {
     "name": "Hayden Hanson",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "NEXGENE",
     "email": "haydenhanson@nexgene.com",
@@ -1722,7 +1722,7 @@ const peopleData = [
   {
     "name": "Valentine Jacobson",
     "age": 33,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "STEELFAB",
     "email": "valentinejacobson@steelfab.com",
@@ -1732,7 +1732,7 @@ const peopleData = [
   {
     "name": "Cara Park",
     "age": 26,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "TROPOLIS",
     "email": "carapark@tropolis.com",
@@ -1742,7 +1742,7 @@ const peopleData = [
   {
     "name": "Haney Case",
     "age": 31,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "XIXAN",
     "email": "haneycase@xixan.com",
@@ -1752,7 +1752,7 @@ const peopleData = [
   {
     "name": "Tommie Donovan",
     "age": 29,
-    "eyeColor": "blue",
+
     "gender": "female",
     "company": "ELITA",
     "email": "tommiedonovan@elita.com",
@@ -1762,7 +1762,7 @@ const peopleData = [
   {
     "name": "Faye Mcgee",
     "age": 32,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "POLARIUM",
     "email": "fayemcgee@polarium.com",
@@ -1772,7 +1772,7 @@ const peopleData = [
   {
     "name": "Alyson Howard",
     "age": 37,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "ENERSOL",
     "email": "alysonhoward@enersol.com",
@@ -1782,7 +1782,7 @@ const peopleData = [
   {
     "name": "Sargent Clemons",
     "age": 29,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "FLUMBO",
     "email": "sargentclemons@flumbo.com",
@@ -1792,7 +1792,7 @@ const peopleData = [
   {
     "name": "Banks Bird",
     "age": 23,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "NETERIA",
     "email": "banksbird@neteria.com",
@@ -1802,7 +1802,7 @@ const peopleData = [
   {
     "name": "Stella Caldwell",
     "age": 27,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "PASTURIA",
     "email": "stellacaldwell@pasturia.com",
@@ -1812,7 +1812,7 @@ const peopleData = [
   {
     "name": "Audrey Hayes",
     "age": 21,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "IPLAX",
     "email": "audreyhayes@iplax.com",
@@ -1822,7 +1822,7 @@ const peopleData = [
   {
     "name": "Carpenter Lloyd",
     "age": 35,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "ZIGGLES",
     "email": "carpenterlloyd@ziggles.com",
@@ -1832,7 +1832,7 @@ const peopleData = [
   {
     "name": "Glenda Brooks",
     "age": 35,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "GROK",
     "email": "glendabrooks@grok.com",
@@ -1842,7 +1842,7 @@ const peopleData = [
   {
     "name": "Nita Solomon",
     "age": 26,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "VISUALIX",
     "email": "nitasolomon@visualix.com",
@@ -1852,7 +1852,7 @@ const peopleData = [
   {
     "name": "Emma Bowman",
     "age": 33,
-    "eyeColor": "green",
+
     "gender": "female",
     "company": "GENESYNK",
     "email": "emmabowman@genesynk.com",
@@ -1862,7 +1862,7 @@ const peopleData = [
   {
     "name": "Lorna Estrada",
     "age": 27,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "CORMORAN",
     "email": "lornaestrada@cormoran.com",
@@ -1872,7 +1872,7 @@ const peopleData = [
   {
     "name": "Laverne Crane",
     "age": 40,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "PREMIANT",
     "email": "lavernecrane@premiant.com",
@@ -1882,7 +1882,7 @@ const peopleData = [
   {
     "name": "Lakisha Dickerson",
     "age": 32,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "MUSANPOLY",
     "email": "lakishadickerson@musanpoly.com",
@@ -1892,7 +1892,7 @@ const peopleData = [
   {
     "name": "Jasmine Mcintyre",
     "age": 28,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "LYRICHORD",
     "email": "jasminemcintyre@lyrichord.com",
@@ -1902,7 +1902,7 @@ const peopleData = [
   {
     "name": "Magdalena Paul",
     "age": 40,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "VERTON",
     "email": "magdalenapaul@verton.com",
@@ -1912,7 +1912,7 @@ const peopleData = [
   {
     "name": "Lina Maldonado",
     "age": 27,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "VERTIDE",
     "email": "linamaldonado@vertide.com",
@@ -1922,7 +1922,7 @@ const peopleData = [
   {
     "name": "Gilmore Parks",
     "age": 22,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "GLUKGLUK",
     "email": "gilmoreparks@glukgluk.com",
@@ -1932,7 +1932,7 @@ const peopleData = [
   {
     "name": "Cole Lindsey",
     "age": 36,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "GENEKOM",
     "email": "colelindsey@genekom.com",
@@ -1942,7 +1942,7 @@ const peopleData = [
   {
     "name": "Anthony Doyle",
     "age": 34,
-    "eyeColor": "blue",
+
     "gender": "male",
     "company": "KAGE",
     "email": "anthonydoyle@kage.com",
@@ -1952,7 +1952,7 @@ const peopleData = [
   {
     "name": "Morris Grimes",
     "age": 30,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "GEOFORM",
     "email": "morrisgrimes@geoform.com",
@@ -1962,7 +1962,7 @@ const peopleData = [
   {
     "name": "Conrad Gray",
     "age": 39,
-    "eyeColor": "green",
+
     "gender": "male",
     "company": "TINGLES",
     "email": "conradgray@tingles.com",
@@ -1972,7 +1972,7 @@ const peopleData = [
   {
     "name": "Rosario Martinez",
     "age": 39,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "NAXDIS",
     "email": "rosariomartinez@naxdis.com",
@@ -1982,7 +1982,7 @@ const peopleData = [
   {
     "name": "Guy Byrd",
     "age": 37,
-    "eyeColor": "brown",
+
     "gender": "male",
     "company": "BULLJUICE",
     "email": "guybyrd@bulljuice.com",
@@ -1992,7 +1992,7 @@ const peopleData = [
   {
     "name": "Jocelyn Strong",
     "age": 31,
-    "eyeColor": "brown",
+
     "gender": "female",
     "company": "NURALI",
     "email": "jocelynstrong@nurali.com",

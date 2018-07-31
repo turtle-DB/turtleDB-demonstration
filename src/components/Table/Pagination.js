@@ -21,23 +21,31 @@ class Pagination extends React.Component {
 
   render() {
     return (
-      <div className="pagination">
+      <nav>
+        <ul className="pagination">
+          <li className={`page-item ${this.props.page <= 1 ? "disabled" : ""}`}>
+            <a
+              className="page-link"
+              onClick={this.handleLeftClick}
+              >Previous
+            </a>
+          </li>
+          <li className={`page-item ${(this.props.page * this.props.tableMax) > this.props.dataLength ? "disabled" : ""}`}>
+            <a
+              className="page-link"
+              onClick={this.handleRightClick}
+              >Next
+            </a>
+          </li>
+        </ul>
         <p>
-          {`${this.props.dataLength} Documents`}
+          Displaying {this.getMinRange()} - {this.getMaxRange()} of {this.props.dataLength}
         </p>
-        <button
-          onClick={this.handleLeftClick}
-          disabled={this.props.page <= 1}
-          >Left
-        </button>
-        <button
-          onClick={this.handleRightClick}
-          disabled={this.props.page >= this.props.maxPages}
-          >Right
-        </button>
-        <span>{this.getMinRange()} of {this.getMaxRange()}</span>
-      </div>
+      </nav>
+
   )}
 }
 
 export default Pagination;
+// {}
+//
