@@ -4,8 +4,9 @@ import axios from 'axios';
 // Components
 import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
-import TestPanel from './TestPanel/TestPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
+import TreeDisplay from './TreeDisplay';
+
 import turtleDB from '../turtleDB/turtle';
 
 // import peopleData from './../data/peopleData';
@@ -22,7 +23,8 @@ class Dashboard extends React.Component {
         time: null,
         type: null,
         count: null,
-      }
+      },
+      metaDoc: null
     }
   }
 
@@ -146,6 +148,9 @@ class Dashboard extends React.Component {
             />
           </div>
         </div>
+        <TreeDisplay
+          metaDoc={this.state.metaDoc}
+        />
       </div>
 
     )
