@@ -2,29 +2,38 @@ import md5 from 'md5';
 import uuidv4 from 'uuid/v4';
 import SyncTo from './syncTo';
 import SyncFrom from './syncFrom';
+const debug = require('debug');
+
+var logTo = debug('turtleDB:syncToSummary');
+var logFrom = debug('turtleDB:syncFromSummary');
 
 const developerAPI = {
   syncTo(remoteURL) {
+    logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
     return new Promise((resolve, reject) => {
       const syncTo = new SyncTo('http://localhost:3000');
       syncTo.idb = this.idb;
-      return syncTo.start();
+      resolve(syncTo.start().then(() => {
+        logTo('\n ------- Turtle ==> Tortoise sync complete ------');
+      }));
     })
   },
 
   syncFrom(remoteURL) {
+    logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
     return new Promise((resolve, reject) => {
       const syncFrom = new SyncFrom('http://localhost:3000');
       syncFrom.idb = this.idb;
-      return syncFrom.getTurtleID()
-      .then(() => syncFrom.start());
+      resolve(syncFrom.start().then(() => {
+        logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
+      }));
     })
   },
 
   sync() {
     this.syncTo()
-      .then(() => this.syncFrom())
-      .catch((err) => console.log(err));
+    .then(() => this.syncFrom())
+    .catch((err) => console.log(err));
   },
 
   create(data) {
