@@ -17,6 +17,14 @@ class TurtleDB {
     }
   }
 
+  _printRevTree(_id) {
+    this._readMetaDoc(_id).then(metaDoc => {
+      console.log('-----');
+      console.log(`Revision Tree for ${_id}:`, JSON.stringify(metaDoc._revisions, undefined, 2));
+      console.log('-----');
+    });
+  }
+
   _readMetaDoc(_id) {
     return this.idb.command(this.idb._meta, 'READ', { _id })
       .then(meta => meta);
@@ -24,7 +32,7 @@ class TurtleDB {
 
   _readRevFromIndex(_id, rev) {
     const _id_rev = _id + "::" + rev;
-    return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
   }
 
   _readWithoutDeletedError(_id) {
@@ -35,7 +43,7 @@ class TurtleDB {
         if (doc._deleted) { return false; }
 
         const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
+        [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })
@@ -44,11 +52,11 @@ class TurtleDB {
 
   _readAllLeafDocs() {
     return this.idb.command(this._meta, "READ_ALL")
-     .then(metaDocs => {
-       let promises = metaDocs.map(doc => this._read(doc._id));
-       return Promise.all(promises);
-     })
-     .catch(err => console.log("readAllLeafDocs error:", err));
+      .then(metaDocs => {
+        let promises = metaDocs.map(doc => this._read(doc._id));
+        return Promise.all(promises);
+      })
+      .catch(err => console.log("readAllLeafDocs error:", err));
   }
 
   _read(_id) {
@@ -57,7 +65,7 @@ class TurtleDB {
       .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
         const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
+        [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })

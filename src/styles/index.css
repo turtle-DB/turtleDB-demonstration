@@ -17,3 +17,12 @@ body {
 .margin-bottom {
   margin-bottom: 1.25rem;
 }
+
+.row-butttons-header {
+  width: 300px;
+}
+
+.row-buttons-container {
+  width: 300px;
+  display: flex;
+}

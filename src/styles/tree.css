@@ -1,0 +1,45 @@
+.tree-container {
+  background-color: rgba(245, 245, 245, 0.5);
+  padding-top: 10px;
+  border-radius: 10px;
+  border: solid rgb(138, 138, 138) 1px;
+  height: 300px;
+  width: 400px;
+}
+
+svg.custom .node circle {
+	fill: rgb(212, 212, 212);
+	stroke: rgb(0, 0, 0);
+	stroke-width: 1.5px;
+}
+
+svg.custom .node text {
+  font-size: 12px;
+	/* background-color: #444; */
+  fill: rgb(0, 0, 0);
+  /* stroke: #F4F4F4; */
+  /* stroke-width: 0.5px; */
+  /* text-shadow: 0px 0px 1px black; */
+}
+
+svg.custom .node {
+	cursor: pointer;
+}
+
+svg.custom path.link {
+	fill: none;
+	stroke: rgb(85, 85, 85);
+	stroke-width: 1.5px;
+}
+
+svg.custom .node circle.leaf-rev {
+  fill: rgb(77, 77, 77);
+}
+
+svg.custom .node circle.deleted-rev {
+  fill: #FF0032;
+}
+
+svg.custom .node circle.winning-rev {
+  fill: rgb(0, 255, 98);
+}

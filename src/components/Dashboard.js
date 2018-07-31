@@ -5,6 +5,8 @@ import axios from 'axios';
 import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
+import TreeDisplay from './TreeDisplay';
+
 import turtleDB from '../turtleDB/turtle';
 
 // import data
@@ -19,7 +21,8 @@ class Dashboard extends React.Component {
         time: null,
         type: null,
         count: null,
-      }
+      },
+      metaDoc: null
     }
   }
 
@@ -106,6 +109,12 @@ class Dashboard extends React.Component {
     //   .catch(err => console.log("Error:", err))
   }
 
+  handleViewTreeClick = (_id) => {
+    turtleDB._readMetaDoc(_id).then(metaDoc => {
+      this.setState({ metaDoc: metaDoc });
+    });
+  }
+
   render() {
     return (
       <div>
@@ -120,16 +129,19 @@ class Dashboard extends React.Component {
             />
           </div>
           <div className="col-10">
-            <BenchmarkBox benchmark={this.state.benchmark} />
+            <div className="d-flex">
+              <BenchmarkBox benchmark={this.state.benchmark} />
+              <TreeDisplay metaDoc={this.state.metaDoc} />
+            </div>
             <TableComponent
               data={this.state.data}
               handleSingleDeleteClick={this.handleSingleDeleteClick}
               handleUpdateClick={this.handleUpdateClick}
+              handleViewTreeClick={this.handleViewTreeClick}
             />
           </div>
         </div>
       </div>
-
     )
   }
 }
