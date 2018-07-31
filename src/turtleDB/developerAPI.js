@@ -32,8 +32,8 @@ const developerAPI = {
 
   sync() {
     this.syncTo()
-    .then(() => this.syncFrom())
-    .catch((err) => console.log(err));
+      .then(() => this.syncFrom())
+      .catch((err) => console.log(err));
   },
 
   create(data) {
@@ -87,7 +87,7 @@ const developerAPI = {
       })
       .then(doc => {
         const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
+        [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })
@@ -144,7 +144,7 @@ const developerAPI = {
       })
       .then(() => {
         const data = Object.assign({}, newDoc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
+        [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })
@@ -157,14 +157,20 @@ const developerAPI = {
 
   // BULK OPERATIONS
 
-  readAllValues() {
+  readAllMetaDocsAndDocs() {
+    const result = {};
+
     return this.idb.command(this.idb._meta, "READ_ALL", {})
-     .then(metaDocs => {
-       let promises = metaDocs.map(doc => this._readWithoutDeletedError(doc._id));
-       return Promise.all(promises);
-     })
-     .then(docs => docs.filter(doc => !!doc))
-     .catch(err => console.log("readAllValues error:", err));
+      .then(metaDocs => {
+        result.metaDocs = metaDocs.filter(doc => doc._winningRev);
+        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
+        return Promise.all(promises);
+      })
+      .then(docs => {
+        result.docs = docs.filter(doc => !!doc);
+        return result;
+      })
+      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   },
 
   filterBy(selector) {

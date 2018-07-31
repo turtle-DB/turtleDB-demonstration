@@ -16,16 +16,16 @@ class InsertDocsPanel extends React.Component {
             <div className="form-group">
               <ul className="list-unstyled">
                 <li>
-                  <input type="radio" name="insert-number" value="1"/>1
+                  <input type="radio" name="insert-number" value="1" />1
                 </li>
                 <li>
-                  <input type="radio" name="insert-number" value="100"/>100
+                  <input type="radio" name="insert-number" value="100" />100
                 </li>
                 <li>
-                  <input type="radio" name="insert-number" value="1000"/>1000
+                  <input type="radio" name="insert-number" value="1000" />1000
                 </li>
                 <li>
-                  <input type="radio" name="insert-number" value="10000"/>10000
+                  <input type="radio" name="insert-number" value="10000" />10000
                 </li>
 
                 <li>
