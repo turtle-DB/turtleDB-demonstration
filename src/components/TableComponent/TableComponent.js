@@ -1,28 +1,27 @@
 import React from 'react';
-// import Modal from 'react-responsive-modal';
+import Modal from 'react-responsive-modal';
 
 //components
 import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
 import Table from './Table';
-import UpdateModal from './UpdateModal';
 
 const HEADERS = ['name', 'age', 'gender', 'company', 'email', 'phone'];
 
 class TableComponent extends React.Component {
   state = {
     showUpdateModal: false,
-    docObj: null,
+    selectedDoc: null,
     page: 1,
     tableMax: 8,
   }
 
   handleOpenModal = (obj) => {
-    this.setState({ showUpdateModal: true, docObj: obj });
+    this.setState({ showUpdateModal: true, selectedDoc: obj });
   }
 
   handleCloseModal = () => {
-    this.setState({ showUpdateModal: false, docObj: null });
+    this.setState({ showUpdateModal: false, selectedDoc: null });
   }
 
   handlePaginationClick = direction => {
@@ -39,7 +38,6 @@ class TableComponent extends React.Component {
 
   generateHeaders = () => {
     const h = HEADERS.map((header, idx) => <th key={header+idx}>{header}</th>)
-
     return (
       <tr>
         <th></th>
@@ -57,15 +55,15 @@ class TableComponent extends React.Component {
         <tr key={doc._id}>
           <td>
             <button
-              className="btn btn-danger"
+              className="btn btn-warning btn-sm"
               onClick={() => this.props.handleSingleDeleteClick(doc._id)}
-            >Del</button>
+            >Delete</button>
           </td>
           <td>
             <button
-              className="btn btn-warning"
+              className="btn btn-info btn-sm"
               onClick={() => this.handleOpenModal(doc)}
-            >Update</button>
+            >Edit</button>
           </td>
           {cells}
         </tr>
@@ -94,23 +92,21 @@ class TableComponent extends React.Component {
           headers={headerComponents}
           rows={rowComponents}
         />
-        <UpdateModal />
+        {this.state.showUpdateModal && <Modal
+          open={this.state.showUpdateModal}
+          onClose={this.handleCloseModal}
+          showCloseIcon={false}
+          center={true}
+        >
+          <UpdateDoc
+            handleUpdateClick={this.props.handleUpdateClick}
+            selectedDoc={this.state.selectedDoc}
+            closeModal={this.handleCloseModal}
+          />
+        </Modal>}
       </div>
     );
   }
 }
 
 export default TableComponent;
-
-// {this.state.showUpdateModal && <Modal
-//   open={this.state.showUpdateModal}
-//   onClose={this.handleCloseModal}
-//   showCloseIcon={false}
-//   center={true}
-// >
-//   <UpdateDoc
-//     handleUpdateClick={this.props.handleUpdateClick}
-//     docObj={this.state.docObj}
-//     closeModal={this.handleCloseModal}
-//   />
-// </Modal>}
