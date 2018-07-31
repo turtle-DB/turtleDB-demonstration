@@ -17,7 +17,6 @@ class SyncFrom {
   }
 
   start() {
-    log('------- NEW Tortoise ==> Turtle SESSION ------');
     return this.getTurtleID()
     .then(() => this.getLastTurtleKey())
     .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
@@ -38,14 +37,18 @@ class SyncFrom {
   }
 
   sendRequestForTortoiseMetaDocs(path) {
+    log(`\n Get TurtleDBs ID and local checkpoint (${this.lastTurtleKey}) from previous sync session`);
+    log('\n #1 HTTP ==> to Tortoise requesting any changed metadocs');
     return axios.post(this.targetUrl + path, { turtleID: this.turtleID, lastTurtleKey: this.lastTurtleKey });
   }
 
   sendSuccessConfirmation(path) {
+    log('\n #5 HTTP ==> to Tortoise with confirmation of sync');
     return axios.get(this.targetUrl + path);
   }
 
   findMissingRevIds(tortoiseMetaDocs) {
+    log(`\n #2 HTTP <== from Tortoise with ${tortoiseMetaDocs.length} changed metadocs`);
     // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
 
     // returns a list of all tortoise leaf nodes that turtle doesn't have
@@ -76,7 +79,9 @@ class SyncFrom {
         })
     });
 
-    return Promise.all(promises).then(() => this.missingRevIds = missingLeafNodes);
+    return Promise.all(promises)
+    .then(() => this.missingRevIds = missingLeafNodes)
+    .then(() => log(`\n compare Turtle/Tortoise metadocs to make a list of ${this.missingRevIds.length} missing records`));
   }
 
   collectAllLeafRevs(node, leafRevs = []) {
@@ -108,6 +113,7 @@ class SyncFrom {
   }
 
   sendRequestForTortoiseDocs(path) {
+    log('\n #3 HTTP ==> to Tortoise requesting missing records');
     return axios.post(this.targetUrl + path, { revIds: this.missingRevIds });
   }
 
@@ -118,9 +124,11 @@ class SyncFrom {
   }
 
   updateStoreAndSyncFromStore(docsFromTortoise) {
+    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.length} missing records`);
     const { docs, newSyncToTurtleDoc } = docsFromTortoise;
     this.insertNewDocsIntoStore(docs)
-    .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc));
+    .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
+    .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
   }
 
   insertNewDocsIntoStore(docs) {
