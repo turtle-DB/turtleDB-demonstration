@@ -5,7 +5,7 @@ import axios from 'axios';
 import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
-import TreeDisplay from './TreeDisplay';
+import TreeDisplay from './TreeComponent/TreeDisplay';
 
 import turtleDB from '../turtleDB/turtle';
 
@@ -129,16 +129,23 @@ class Dashboard extends React.Component {
             />
           </div>
           <div className="col-10">
-            <div className="d-flex">
-              <BenchmarkBox benchmark={this.state.benchmark} />
-              <TreeDisplay metaDoc={this.state.metaDoc} />
+            <div className="row">
+              <div className="col-3">
+                <BenchmarkBox benchmark={this.state.benchmark} />
+              </div>
+              <div className="col-9">
+                <TreeDisplay metaDoc={this.state.metaDoc} />
+              </div>
             </div>
-            <TableComponent
-              data={this.state.data}
-              handleSingleDeleteClick={this.handleSingleDeleteClick}
-              handleUpdateClick={this.handleUpdateClick}
-              handleViewTreeClick={this.handleViewTreeClick}
-            />
+
+            <div className="row">
+              <TableComponent
+                data={this.state.data}
+                handleSingleDeleteClick={this.handleSingleDeleteClick}
+                handleUpdateClick={this.handleUpdateClick}
+                handleViewTreeClick={this.handleViewTreeClick}
+              />
+            </div>
           </div>
         </div>
       </div>
