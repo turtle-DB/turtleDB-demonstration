@@ -4,7 +4,6 @@ import axios from 'axios';
 // Components
 import Table from './Table/Table';
 import ControlPanel from './ControlPanel/ControlPanel';
-import TestPanel from './TestPanel/TestPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import turtleDB from '../turtleDB/turtle';
 

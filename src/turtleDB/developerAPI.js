@@ -8,7 +8,7 @@ const developerAPI = {
     return new Promise((resolve, reject) => {
       const syncTo = new SyncTo('http://localhost:3000');
       syncTo.idb = this.idb;
-      return syncTo.start();
+      resolve(syncTo.start());
     })
   },
 
@@ -16,15 +16,14 @@ const developerAPI = {
     return new Promise((resolve, reject) => {
       const syncFrom = new SyncFrom('http://localhost:3000');
       syncFrom.idb = this.idb;
-      return syncFrom.getTurtleID()
-      .then(() => syncFrom.start());
+      resolve(syncFrom.start())
     })
   },
 
   sync() {
     this.syncTo()
-      .then(() => this.syncFrom())
-      .catch((err) => console.log(err));
+    .then(() => this.syncFrom())
+    .catch((err) => console.log(err));
   },
 
   create(data) {
