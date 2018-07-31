@@ -2,18 +2,16 @@ import React from 'react';
 import axios from 'axios';
 
 // Components
-import Table from './Table/Table';
+import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import TreeDisplay from './TreeDisplay';
 
 import turtleDB from '../turtleDB/turtle';
 
-// import peopleData from './../data/peopleData';
-// import peopleData from './../data/HearthstoneBasicData';
+// import data
 import peopleData from './../data/PeopleData';
 
-// Dashboard
 class Dashboard extends React.Component {
   constructor() {
     super()
@@ -38,8 +36,8 @@ class Dashboard extends React.Component {
     );
   }
 
-  handleSingleDeleteClick = (key) => {
-    turtleDB.delete(key).then(() => {
+  handleSingleDeleteClick = _id => {
+    turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
     });
   }
@@ -80,22 +78,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  ////////Example of generic wrapper for profiling
-  // profileAsyncFunction = (func, funcName) => {
-  //   let self = this;
-  //   return function () {
-  //     let startTime = Date.now();
-  //     let returnVal = func.apply(turtleDB.idb, arguments).then(() => {
-  //       let timeSpent = Date.now() - startTime;
-  //       console.log(`${funcName} took ${timeSpent} ms to execute`);
-  //       return returnVal;
-  //     });
-  //   };
-  // }
-
   handleEditClick = n => {
-    // let profiledEditCall = this.profileAsyncFunction(turtleDB.idb.editFirstNDocuments, 'editFirstNDocuments');
-    // profiledEditCall.call(n);
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -121,16 +104,16 @@ class Dashboard extends React.Component {
   }
 
   handleSyncWithMongoDB = () => {
-    axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
-      .then(res => console.log(res))
-      .catch(err => console.log("Error:", err))
+    // axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
+    //   .then(res => console.log(res))
+    //   .catch(err => console.log("Error:", err))
   }
 
   render() {
     return (
       <div>
         <div className="row">
-          <div className="col-3">
+          <div className="col-2">
             <ControlPanel
               handleInsertClick={this.handleInsertClick}
               handleEditClick={this.handleEditClick}
@@ -139,9 +122,9 @@ class Dashboard extends React.Component {
               handleSyncWithMongoDB={this.handleSyncWithMongoDB}
             />
           </div>
-          <div className="col-9">
+          <div className="col-10">
             <BenchmarkBox benchmark={this.state.benchmark} />
-            <Table
+            <TableComponent
               data={this.state.data}
               handleSingleDeleteClick={this.handleSingleDeleteClick}
               handleUpdateClick={this.handleUpdateClick}
