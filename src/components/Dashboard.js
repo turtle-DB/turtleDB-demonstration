@@ -145,7 +145,7 @@ class Dashboard extends React.Component {
 
             <div className="row">
               <TableComponent
-                data={this.state.data}
+                data={this.state.data.docs}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
                 handleSingleUpdateClick={this.handleSingleUpdateClick}
                 handleViewTreeClick={this.handleViewTreeClick}
