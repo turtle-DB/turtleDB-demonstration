@@ -5,7 +5,7 @@ import Modal from 'react-responsive-modal';
 import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
 
-const HEADERS = ['name', 'age', 'gender', 'company', 'phone', 'email'];
+const HEADERS = ['name', 'age', 'gender', 'company', 'email', 'phone'];
 
 class Table extends React.Component {
   state = {
@@ -50,10 +50,8 @@ class Table extends React.Component {
   }
 
   generateRows = () => {
-    // map over every object
     return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
-      let cells = Object.values(doc)
-      .map((value, j) => <td key={doc._id + j}>{String(value)}</td>);
+      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header]}</td>);
 
       return (
         <tr key={doc._id}>
