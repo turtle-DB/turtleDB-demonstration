@@ -12,8 +12,11 @@
     "bootstrap": "^4.1.1",
     "debug": "^3.1.0",
     "express": "^4.16.3",
+    "jquery": "^3.3.1",
     "md5": "^2.2.1",
+    "popper.js": "^1.14.3",
     "react-responsive-modal": "^3.0.3",
+    "react-tree-graph": "^3.1.1",
     "supports-color": "^5.4.0",
     "uuid": "^3.3.2"
   },

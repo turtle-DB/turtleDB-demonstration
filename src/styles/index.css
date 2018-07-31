@@ -9,3 +9,12 @@ body {
 #app-container {
   padding: 30px;
 }
+
+.row-butttons-header {
+  width: 300px;
+}
+
+.row-buttons-container {
+  width: 300px;
+  display: flex;
+}
