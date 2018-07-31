@@ -3,15 +3,13 @@ import DropButton from './DropButton';
 import InsertDocsPanel from './InsertDocsPanel';
 import EditDocsPanel from './EditDocsPanel';
 import DeleteDocsPanel from './DeleteDocsPanel';
-// import PropertyFilter from './PropertyFilter';
 import SyncWithMongoButton from './SyncWithMongoButton';
-
 
 class ControlPanel extends React.Component {
   render() {
     return (
       <div>
-        <h4>turtleDB Functionalities</h4>
+        <h4>turtleDB Functions</h4>
         <InsertDocsPanel handleInsertClick={this.props.handleInsertClick} />
         <DeleteDocsPanel handleDeleteClick={this.props.handleDeleteClick} />
         <EditDocsPanel handleEditClick={this.props.handleEditClick} />

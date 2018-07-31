@@ -1,16 +1,20 @@
 import React from 'react';
-import Modal from 'react-responsive-modal';
+// import Modal from 'react-responsive-modal';
 
 //components
 import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
+import Table from './Table';
+import UpdateModal from './UpdateModal';
 
-class Table extends React.Component {
+const HEADERS = ['name', 'age', 'gender', 'company', 'email', 'phone'];
+
+class TableComponent extends React.Component {
   state = {
     showUpdateModal: false,
     docObj: null,
     page: 1,
-    tableMax: 40,
+    tableMax: 8,
   }
 
   handleOpenModal = (obj) => {
@@ -34,23 +38,21 @@ class Table extends React.Component {
   }
 
   generateHeaders = () => {
-    const thElements = Object.keys(this.props.data[0]).map(property => {
-      return <th key={property}>{property}</th>;
-    })
+    const h = HEADERS.map((header, idx) => <th key={header+idx}>{header}</th>)
 
     return (
       <tr>
         <th></th>
         <th></th>
-        {thElements}
+        {h}
       </tr>
     );
   }
 
   generateRows = () => {
-    // map over every object
     return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
-      let cells = Object.values(doc).map((value, j) => <td key={doc._id + j}>{String(value)}</td>);
+      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header]}</td>);
+
       return (
         <tr key={doc._id}>
           <td>
@@ -88,25 +90,27 @@ class Table extends React.Component {
           page={this.state.page}
           tableMax={this.state.tableMax}
         />
-        <table className='table table-striped table-bordered table-condensed'>
-          <thead>{headerComponents}</thead>
-          <tbody>{rowComponents}</tbody>
-        </table>
-        {this.state.showUpdateModal && <Modal
-          open={this.state.showUpdateModal}
-          onClose={this.handleCloseModal}
-          showCloseIcon={false}
-          center={true}
-        >
-          <UpdateDoc
-            handleUpdateClick={this.props.handleUpdateClick}
-            docObj={this.state.docObj}
-            closeModal={this.handleCloseModal}
-          />
-        </Modal>}
+        <Table
+          headers={headerComponents}
+          rows={rowComponents}
+        />
+        <UpdateModal />
       </div>
     );
   }
 }
 
-export default Table;
+export default TableComponent;
+
+// {this.state.showUpdateModal && <Modal
+//   open={this.state.showUpdateModal}
+//   onClose={this.handleCloseModal}
+//   showCloseIcon={false}
+//   center={true}
+// >
+//   <UpdateDoc
+//     handleUpdateClick={this.props.handleUpdateClick}
+//     docObj={this.state.docObj}
+//     closeModal={this.handleCloseModal}
+//   />
+// </Modal>}

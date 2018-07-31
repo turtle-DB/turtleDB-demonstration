@@ -37,10 +37,9 @@ class TurtleDB {
 
   _readWithoutDeletedError(_id) {
     return this._readMetaDoc(_id)
-      .then(meta => meta._revisions[0])
+      .then(metaDoc => this._getWinningRev(metaDoc._leafRevs))
       .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
-
         if (doc._deleted) { return false; }
 
         const data = Object.assign({}, doc);
