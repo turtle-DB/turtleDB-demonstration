@@ -154,9 +154,7 @@ const developerAPI = {
        let promises = metaDocs.map(doc => this._readWithoutDeletedError(doc._id));
        return Promise.all(promises);
      })
-     .then(docs => {
-       return docs.filter(doc => doc);
-     })
+     .then(docs => docs.filter(doc => !!doc))
      .catch(err => console.log("readAllValues error:", err));
   },
 

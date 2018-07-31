@@ -33,8 +33,8 @@ class Dashboard extends React.Component {
     );
   }
 
-  handleSingleDeleteClick = (key) => {
-    turtleDB.delete(key).then(() => {
+  handleSingleDeleteClick = _id => {
+    turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
     });
   }
@@ -101,9 +101,9 @@ class Dashboard extends React.Component {
   }
 
   handleSyncWithMongoDB = () => {
-    axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
-      .then(res => console.log(res))
-      .catch(err => console.log("Error:", err))
+    // axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
+    //   .then(res => console.log(res))
+    //   .catch(err => console.log("Error:", err))
   }
 
   render() {
