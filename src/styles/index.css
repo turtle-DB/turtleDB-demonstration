@@ -9,3 +9,11 @@ body {
 #app-container {
   padding: 30px;
 }
+
+.table-condensed {
+  font-size: 0.8rem;
+}
+
+.margin-bottom {
+  margin-bottom: 1.25rem;
+}

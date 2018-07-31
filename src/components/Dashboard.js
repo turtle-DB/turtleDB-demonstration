@@ -90,8 +90,8 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleUpdateClick = (newObj) => {
-    turtleDB.update(newObj.id, newObj).then(() => {
+  handleUpdateClick = obj => {
+    turtleDB.update(obj._id, obj).then(() => {
       this.syncStateWithTurtleDB();
     })
   }

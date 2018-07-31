@@ -8,7 +8,7 @@ const SyncWithMongoButton = props => {
           className="btn btn-primary"
           onClick={props.handleSyncWithMongoDB}
         >
-          Sync with MongoDB
+          Sync with Mongo
         </button>
       </div>
     </div>
