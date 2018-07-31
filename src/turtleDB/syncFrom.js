@@ -1,6 +1,10 @@
 import uuidv4 from 'uuid/v4';
 import axios from 'axios';
 
+const debug = require('debug');
+var log = debug('turtleDB:syncFrom');
+var httpLog = debug('turtleDB:http');
+
 class SyncFrom {
   constructor(targetUrl) {
     this.targetUrl = targetUrl;
@@ -13,7 +17,9 @@ class SyncFrom {
   }
 
   start() {
-    this.getLastTurtleKey()
+    log('------- NEW Tortoise ==> Turtle SESSION ------');
+    return this.getTurtleID()
+    .then(() => this.getLastTurtleKey())
     .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
     .then(changedTortoiseMetaDocs => this.findMissingRevIds(changedTortoiseMetaDocs.data)) // this.missingRevIds
     .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
