@@ -109,6 +109,12 @@ class Dashboard extends React.Component {
     //   .catch(err => console.log("Error:", err))
   }
 
+  handleViewTreeClick = (_id) => {
+    turtleDB._readMetaDoc(_id).then(metaDoc => {
+      this.setState({ metaDoc: metaDoc });
+    });
+  }
+
   render() {
     return (
       <div>
@@ -123,19 +129,19 @@ class Dashboard extends React.Component {
             />
           </div>
           <div className="col-10">
-            <BenchmarkBox benchmark={this.state.benchmark} />
+            <div className="d-flex">
+              <BenchmarkBox benchmark={this.state.benchmark} />
+              <TreeDisplay metaDoc={this.state.metaDoc} />
+            </div>
             <TableComponent
               data={this.state.data}
               handleSingleDeleteClick={this.handleSingleDeleteClick}
               handleUpdateClick={this.handleUpdateClick}
+              handleViewTreeClick={this.handleViewTreeClick}
             />
           </div>
         </div>
-        <TreeDisplay
-          metaDoc={this.state.metaDoc}
-        />
       </div>
-
     )
   }
 }

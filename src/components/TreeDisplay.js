@@ -4,13 +4,13 @@ import './../styles/tree.css';
 import Tree from 'react-tree-graph';
 
 class TreeDisplay extends React.Component {
-  // recieve the whole metadoc as a prop - need access to winning rev and rev tree
   generateTree = () => {
+    if (!this.props.metaDoc) { return; }
+
     const newTree = {};
     const revTree = this.props.metaDoc._revisions;
     const winningRev = this.props.metaDoc._winningRev;
 
-    if (!this.props.metaDoc) { return newTree; }
     this.traverseRevTree(revTree, newTree, winningRev);
     return newTree;
   }
@@ -36,7 +36,7 @@ class TreeDisplay extends React.Component {
     }
 
     for (let i = 0; i < nodeChildren.length; i++) {
-      let childNode = traverseRevTree(nodeChildren[i], {}, winningRev);
+      let childNode = this.traverseRevTree(nodeChildren[i], {}, winningRev);
       newNode.children.push(childNode);
     }
 
@@ -47,11 +47,10 @@ class TreeDisplay extends React.Component {
     const treeData = this.generateTree();
 
     return (
-      <div className="row">
-        <div className="col-3">
-        </div>
-        <div className="col-9 tree-container">
-          <Tree
+      <div>
+        <h4>Revision Tree</h4>
+        <div className="tree-container">
+          {this.props.metaDoc && <Tree
             data={treeData}
             height={300}
             width={400}
@@ -59,9 +58,10 @@ class TreeDisplay extends React.Component {
             nodeOffset={-10}
             nodeRadius={10}
             margins={{ bottom: 0, left: 0, right: 100, top: 20 }}
-          />
+          />}
         </div>
       </div>
+
     );
   }
 }

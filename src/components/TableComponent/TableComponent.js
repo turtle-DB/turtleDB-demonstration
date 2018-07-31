@@ -38,12 +38,11 @@ class TableComponent extends React.Component {
   }
 
   generateHeaders = () => {
-    const h = HEADERS.map((header, idx) => <th key={header+idx}>{header}</th>)
+    const h = HEADERS.map((header, idx) => <th key={header + idx}>{header}</th>)
 
     return (
       <tr>
-        <th></th>
-        <th></th>
+        <th className="row-butttons-header"></th>
         {h}
       </tr>
     );
@@ -55,15 +54,17 @@ class TableComponent extends React.Component {
 
       return (
         <tr key={doc._id}>
-          <td>
+          <td className="row-buttons-container">
             <button
-              className="btn btn-danger"
+              className="btn btn-dark mx-2"
+              onClick={() => this.props.handleViewTreeClick(doc._id)}
+            >View Tree</button>
+            <button
+              className="btn btn-danger mx-2"
               onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
-          </td>
-          <td>
             <button
-              className="btn btn-warning"
+              className="btn btn-warning mx-2"
               onClick={() => this.handleOpenModal(doc)}
             >Update</button>
           </td>
