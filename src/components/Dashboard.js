@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 
 // Components
-import Table from './Table/Table';
+import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import turtleDB from '../turtleDB/turtle';
@@ -121,7 +121,7 @@ class Dashboard extends React.Component {
           </div>
           <div className="col-10">
             <BenchmarkBox benchmark={this.state.benchmark} />
-            <Table
+            <TableComponent
               data={this.state.data}
               handleSingleDeleteClick={this.handleSingleDeleteClick}
               handleUpdateClick={this.handleUpdateClick}

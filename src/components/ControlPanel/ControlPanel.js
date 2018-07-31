@@ -5,7 +5,6 @@ import EditDocsPanel from './EditDocsPanel';
 import DeleteDocsPanel from './DeleteDocsPanel';
 import SyncWithMongoButton from './SyncWithMongoButton';
 
-
 class ControlPanel extends React.Component {
   render() {
     return (
