@@ -37,33 +37,12 @@ class TurtleDB {
 
   _readWithoutDeletedError(_id) {
     return this._readMetaDoc(_id)
-      .then(metaDoc => this._getWinningRev(metaDoc._leafRevs))
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
-      .then(doc => {
-        if (doc._deleted) { return false; }
-
-        const data = Object.assign({}, doc);
-        [data._id, data._rev] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
+      .then(metaDoc => {
+        if (!metaDoc._winningRev) { return Promise.resolve(false); }
+        return this._readRevFromIndex(_id, metaDoc._winningRev);
       })
-      .catch(err => console.log("Read error:", err));
-  }
-
-  _readAllLeafDocs() {
-    return this.idb.command(this._meta, "READ_ALL")
-      .then(metaDocs => {
-        let promises = metaDocs.map(doc => this._read(doc._id));
-        return Promise.all(promises);
-      })
-      .catch(err => console.log("readAllLeafDocs error:", err));
-  }
-
-  _read(_id) {
-    return this._readMetaDoc(_id)
-      .then(meta => meta._revisions[0])
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
       .then(doc => {
+        if (!doc) { return false; }
         const data = Object.assign({}, doc);
         [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;

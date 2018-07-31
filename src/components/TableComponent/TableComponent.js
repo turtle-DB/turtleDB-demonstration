@@ -101,7 +101,7 @@ class TableComponent extends React.Component {
           center={true}
         >
           <UpdateDoc
-            handleUpdateClick={this.props.handleUpdateClick}
+            handleSingleUpdateClick={this.props.handleSingleUpdateClick}
             selectedDoc={this.state.selectedDoc}
             closeModal={this.handleCloseModal}
           />

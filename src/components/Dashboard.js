@@ -36,13 +36,13 @@ class Dashboard extends React.Component {
     );
   }
 
-  handleSingleDeleteClick = _id => {
+  handleSingleDeleteClick = (_id) => {
     turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
     });
   }
 
-  handleDeleteClick = n => {
+  handleDeleteClick = (n) => {
     let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -57,7 +57,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleInsertClick = n => { // need to change so it inserts N random cards instead
+  handleInsertClick = (n) => {
     let insertPromises = [];
     let dataLength = peopleData.length;
     for (let i = 0; i < n; i++) {
@@ -78,7 +78,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleEditClick = n => {
+  handleEditClick = (n) => {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -93,7 +93,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleUpdateClick = obj => {
+  handleSingleUpdateClick = (obj) => {
     turtleDB.update(obj._id, obj).then(() => {
       this.syncStateWithTurtleDB();
     })
@@ -136,7 +136,7 @@ class Dashboard extends React.Component {
             <TableComponent
               data={this.state.data}
               handleSingleDeleteClick={this.handleSingleDeleteClick}
-              handleUpdateClick={this.handleUpdateClick}
+              handleSingleUpdateClick={this.handleSingleUpdateClick}
               handleViewTreeClick={this.handleViewTreeClick}
             />
           </div>
