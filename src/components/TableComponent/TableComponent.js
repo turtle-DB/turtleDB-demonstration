@@ -65,7 +65,7 @@ class TableComponent extends React.Component {
             <button
               className="btn btn-warning btn-sm mx-2"
               onClick={() => this.handleOpenModal(doc)}
-            >Edit</button>
+            >Update</button>
           </td>
           {cells}
         </tr>

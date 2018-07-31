@@ -78,7 +78,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleEditClick = (n) => {
+  handleUpdateClick = (n) => {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -97,7 +97,7 @@ class Dashboard extends React.Component {
     turtleDB.dropDB().then(() => this.setState({ data: [] }));
   }
 
-  handleSyncWithMongoDB = () => {
+  handleSync = () => {
     // axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
     //   .then(res => console.log(res))
     //   .catch(err => console.log("Error:", err))
@@ -123,8 +123,6 @@ class Dashboard extends React.Component {
     });
   }
 
-
-
   render() {
     return (
       <div>
@@ -132,10 +130,10 @@ class Dashboard extends React.Component {
           <div className="col-2">
             <ControlPanel
               handleInsertClick={this.handleInsertClick}
-              handleEditClick={this.handleEditClick}
+              handleUpdateClick={this.handleUpdateClick}
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
-              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              handleSync={this.handleSync}
             />
           </div>
           <div className="col-10">
@@ -152,7 +150,7 @@ class Dashboard extends React.Component {
               <TableComponent
                 data={this.state.data}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
-                handleUpdateClick={this.handleUpdateClick}
+                handleSingleUpdateClick={this.handleSingleUpdateClick}
                 handleViewTreeClick={this.handleViewTreeClick}
               />
             </div>
