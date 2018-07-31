@@ -157,24 +157,20 @@ const developerAPI = {
 
   // BULK OPERATIONS
 
-  readAllValues() {
-    return this.idb.command(this.idb._meta, "READ_ALL", {})
-      .then(metaDocs => {
-        let promises = metaDocs.map(doc => this._readWithoutDeletedError(doc._id));
-        return Promise.all(promises);
-      })
-      .then(docs => docs.filter(doc => !!doc))
-      .catch(err => console.log("readAllValues error:", err));
-  },
-
   readAllMetaDocsAndDocs() {
     const result = {};
 
     return this.idb.command(this.idb._meta, "READ_ALL", {})
       .then(metaDocs => {
-        result.metaDocs = metaDocs;
-        let promises = metaDocs.map
+        result.metaDocs = metaDocs.filter(doc => doc._winningRev);
+        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
+        return Promise.all(promises);
       })
+      .then(docs => {
+        result.docs = docs.filter(doc => !!doc);
+        return result;
+      })
+      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   },
 
   filterBy(selector) {
