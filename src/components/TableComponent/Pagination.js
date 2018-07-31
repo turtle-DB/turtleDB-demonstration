@@ -22,25 +22,31 @@ class Pagination extends React.Component {
   render() {
     return (
       <nav>
-        <ul className="pagination">
-          <li className={`page-item ${this.props.page <= 1 ? "disabled" : ""}`}>
-            <a
-              className="page-link"
-              onClick={this.handleLeftClick}
-              >Previous
-            </a>
-          </li>
-          <li className={`page-item ${(this.props.page * this.props.tableMax) > this.props.dataLength ? "disabled" : ""}`}>
-            <a
-              className="page-link"
-              onClick={this.handleRightClick}
-              >Next
-            </a>
-          </li>
-        </ul>
-        <p>
-          Displaying {this.getMinRange()} - {this.getMaxRange()} of {this.props.dataLength}
-        </p>
+        <div className="row">
+          <div className="col">
+            <ul className="pagination">
+              <li className={`page-item ${this.props.page <= 1 ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  onClick={this.handleLeftClick}
+                  >Previous
+                </a>
+              </li>
+              <li className={`page-item ${(this.props.page * this.props.tableMax) > this.props.dataLength ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  onClick={this.handleRightClick}
+                  >Next
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div className="col">
+            <p className="no-margin">
+              Displaying {this.getMinRange()} - {this.getMaxRange()} of {this.props.dataLength}
+            </p>
+          </div>
+        </div>
       </nav>
 
   )}
