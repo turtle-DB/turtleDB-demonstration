@@ -16,13 +16,15 @@ class Dashboard extends React.Component {
   constructor() {
     super()
     this.state = {
-      data: [],
+      data: {
+        docs: [],
+        metaDocs: []
+      },
       benchmark: {
         time: null,
         type: null,
         count: null,
-      },
-      metaDoc: null
+      }
     }
   }
 
@@ -31,33 +33,13 @@ class Dashboard extends React.Component {
   }
 
   syncStateWithTurtleDB = () => {
-    turtleDB.readAllValues().then(docs =>
-      this.setState({ data: docs })
-    );
+    turtleDB.readAllMetaDocsAndDocs()
+      .then(data => this.setState({ data: data }));
   }
 
-  handleSingleDeleteClick = _id => {
-    turtleDB.delete(_id).then(() => {
-      this.syncStateWithTurtleDB();
-    });
-  }
+  // DASHBOARD HANDLERS
 
-  handleDeleteClick = n => {
-    let startTime = Date.now();
-    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "DELETE",
-          count: n
-        }
-      });
-      this.syncStateWithTurtleDB();
-    });
-  }
-
-  handleInsertClick = n => { // need to change so it inserts N random cards instead
+  handleInsertClick = (n) => {
     let insertPromises = [];
     let dataLength = peopleData.length;
     for (let i = 0; i < n; i++) {
@@ -78,7 +60,22 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleEditClick = n => {
+  handleDeleteClick = (n) => {
+    let startTime = Date.now();
+    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
+      let timeSpent = Date.now() - startTime;
+      this.setState({
+        benchmark: {
+          time: timeSpent,
+          type: "DELETE",
+          count: n
+        }
+      });
+      this.syncStateWithTurtleDB();
+    });
+  }
+
+  handleUpdateClick = (n) => {
     let startTime = Date.now();
     turtleDB.idb.editFirstNDocuments(n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -93,23 +90,30 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleUpdateClick = obj => {
+  handleDropDatabase = () => {
+    turtleDB.dropDB().then(() => this.setState({ data: { docs: [], metaDocs: [] } }));
+  }
+
+  handleSyncWithMongoDB = () => {
+    turtleDB.sync();
+
+  // DOCUMENT HANDLERS
+
+  handleViewTreeClick = (_id) => {
+    turtleDB._readMetaDoc(_id).then(metaDoc => {
+      this.setState({ metaDoc: metaDoc });
+    });
+  }
+
+  handleSingleUpdateClick = (obj) => {
     turtleDB.update(obj._id, obj).then(() => {
       this.syncStateWithTurtleDB();
     })
   }
 
-  handleDropDatabase = () => {
-    turtleDB.dropDB().then(() => this.setState({ data: [] }));
-  }
-
-  handleSyncWithMongoDB = () => {
-    turtleDB.sync();
-  }
-
-  handleViewTreeClick = (_id) => {
-    turtleDB._readMetaDoc(_id).then(metaDoc => {
-      this.setState({ metaDoc: metaDoc });
+  handleSingleDeleteClick = (_id) => {
+    turtleDB.delete(_id).then(() => {
+      this.syncStateWithTurtleDB();
     });
   }
 
@@ -120,10 +124,10 @@ class Dashboard extends React.Component {
           <div className="col-2">
             <ControlPanel
               handleInsertClick={this.handleInsertClick}
-              handleEditClick={this.handleEditClick}
+              handleUpdateClick={this.handleUpdateClick}
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
-              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              handleSync={this.handleSync}
             />
           </div>
           <div className="col-10">
@@ -138,9 +142,9 @@ class Dashboard extends React.Component {
 
             <div className="row">
               <TableComponent
-                data={this.state.data}
+                data={this.state.data.docs}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
-                handleUpdateClick={this.handleUpdateClick}
+                handleSingleUpdateClick={this.handleSingleUpdateClick}
                 handleViewTreeClick={this.handleViewTreeClick}
               />
             </div>

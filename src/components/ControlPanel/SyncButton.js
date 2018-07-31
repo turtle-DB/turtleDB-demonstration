@@ -1,18 +1,18 @@
 import React from 'react';
 
-const SyncWithMongoButton = props => {
+const Sync = props => {
   return (
     <div className="row">
       <div className="col">
         <button
           className="btn btn-primary"
-          onClick={props.handleSyncWithMongoDB}
+          onClick={props.handleSync}
         >
-          Sync with Mongo
+          Sync
         </button>
       </div>
     </div>
   )
 }
 
-export default SyncWithMongoButton
+export default Sync;

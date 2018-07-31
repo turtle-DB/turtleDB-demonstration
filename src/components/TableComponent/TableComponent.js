@@ -54,20 +54,18 @@ class TableComponent extends React.Component {
       return (
         <tr key={doc._id}>
           <td>
-            <div>
-              <button
-                className="btn btn-dark btn-sm mx-2"
-                onClick={() => this.props.handleViewTreeClick(doc._id)}
-              >View Tree</button>
-              <button
-                className="btn btn-danger btn-sm mx-2"
-                onClick={() => this.props.handleSingleDeleteClick(doc._id)}
-              >Del</button>
-              <button
-                className="btn btn-warning btn-sm mx-2"
-                onClick={() => this.handleOpenModal(doc)}
-              >Edit</button>
-            </div>
+            <button
+              className="btn btn-dark btn-sm mx-2"
+              onClick={() => this.props.handleViewTreeClick(doc._id)}
+            >View Tree</button>
+            <button
+              className="btn btn-danger btn-sm mx-2"
+              onClick={() => this.props.handleSingleDeleteClick(doc._id)}
+            >Del</button>
+            <button
+              className="btn btn-warning btn-sm mx-2"
+              onClick={() => this.handleOpenModal(doc)}
+            >Edit</button>
           </td>
           {cells}
         </tr>
@@ -103,7 +101,7 @@ class TableComponent extends React.Component {
           center={true}
         >
           <UpdateDoc
-            handleUpdateClick={this.props.handleUpdateClick}
+            handleSingleUpdateClick={this.props.handleSingleUpdateClick}
             selectedDoc={this.state.selectedDoc}
             closeModal={this.handleCloseModal}
           />
