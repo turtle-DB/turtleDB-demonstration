@@ -26,3 +26,7 @@ body {
   width: 300px;
   display: flex;
 }
+
+.no-margin {
+  margin-top: 1rem;
+}

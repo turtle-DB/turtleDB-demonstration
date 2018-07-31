@@ -1,6 +1,6 @@
 import React from 'react';
 import 'react-tree-graph/dist/style.css'
-import './../styles/tree.css';
+import './../../styles/tree.css';
 import Tree from 'react-tree-graph';
 
 class TreeDisplay extends React.Component {
