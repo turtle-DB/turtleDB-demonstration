@@ -53,7 +53,6 @@ class Dashboard extends React.Component {
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
       .then(data => this.setState({ data: data }))
-      .then(() => this.updateTreeDocs());
   }
 
   updateTreeDocs = () => {
@@ -172,10 +171,8 @@ class Dashboard extends React.Component {
     console.log('Doc to select as winner:', this.state.selectedTreeDoc);
   }
 
-  handleViewTreeClick = (_id) => {
-    turtleDB._readMetaDoc(_id).then(metaDoc => {
-      this.setState({ metaDoc: metaDoc });
-    });
+  handleViewTreeClick = (metaDoc) => {
+    this.setState({ selectedTreeMetaDoc: metaDoc });
   }
 
   render() {
