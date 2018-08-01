@@ -60,7 +60,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleDeleteClick = (n) => {
+  handleDeleteClick = n => {
     let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -70,9 +70,9 @@ class Dashboard extends React.Component {
           type: "DELETE",
           count: n
         }
-      });
-      this.syncStateWithTurtleDB();
-    });
+      })
+    })
+    .then(() => this.syncStateWithTurtleDB());
   }
 
   handleUpdateClick = (n) => {
@@ -96,6 +96,7 @@ class Dashboard extends React.Component {
 
   handleSyncWithMongoDB = () => {
     turtleDB.sync();
+  }
 
   // DOCUMENT HANDLERS
 
