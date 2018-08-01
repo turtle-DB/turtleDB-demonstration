@@ -13,28 +13,30 @@ class SyncTo {
 
   start() {
     return this.getSyncToTortoiseDoc() //this.syncToTortoiseDoc
-    .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
-    .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
-    .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-    .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
-    .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
-    .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
-    .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
-    .then(() => this.updateSyncToTortoiseDoc())
-    .catch(err => console.log(err));
+      .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
+      .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
+      .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
+      .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
+      .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
+      .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
+      .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
+      .then(() => this.updateSyncToTortoiseDoc())
+      .catch(err => console.log(err));
   }
 
   getSyncToTortoiseDoc() {
     return this.idb.command(this.idb._syncToStore, "READ_ALL", {})
-    .then(syncRecords => this.syncToTortoiseDoc = syncRecords[0])
-    .then(() => log('\n Get record of previous syncs to Tortoise', 'getSyncToTortoiseDoc'))
+      .then(syncRecords => this.syncToTortoiseDoc = syncRecords[0])
+      .then(() => log('\n Get record of previous syncs to Tortoise', 'getSyncToTortoiseDoc'))
   }
 
   getHighestTurtleKey() {
     return this.idb.command(this.idb._store, "GET_ALL_KEYS", {})
-      .then(keys => keys[keys.length - 1])
-      .then(key => this.highestTurtleKey = key)
-      .then(() => log(`\n Get highest primary key in the Turtle store (${this.highestTurtleKey})`))
+      .then(keys => {
+        const lastKey = keys[keys.length - 1];
+        this.highestTurtleKey = lastKey ? lastKey : 0;
+        log(`\n Get highest primary key in the Turtle store (${this.highestTurtleKey})`)
+      });
   }
 
   sendRequestForLastTortoiseKey(path) {
@@ -42,6 +44,7 @@ class SyncTo {
     return axios.post(this.targetUrl + path, this.syncToTortoiseDoc)
       .then(res => {
         this.lastTortoiseKey = res.data;
+        console.log('lastTortoiseKey', res.data);
         log(`\n #2 HTTP <== receive response from Tortoise with checkpoint (${this.lastTortoiseKey})`);
       })
   }
@@ -51,19 +54,21 @@ class SyncTo {
       return Promise.reject("No sync needed.")
     } else {
       return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
-      .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
-      .then(() => log(`\n Get revision trees for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`))
+        .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
+        .then(() => log(`\n Get revision trees for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`))
     }
   }
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
-    lastTortoiseKey = (!lastTortoiseKey && lastTortoiseKey !== 0) ? 0 : lastTortoiseKey;
-    highestTurtleKey = (!highestTurtleKey && highestTurtleKey !== 0) ? 0 : highestTurtleKey;
-    console.log(lastTortoiseKey, highestTurtleKey);
+    // lastTortoiseKey = (!lastTortoiseKey && lastTortoiseKey !== 0) ? 0 : lastTortoiseKey;
+    // highestTurtleKey = (!highestTurtleKey && highestTurtleKey !== 0) ? 0 : highestTurtleKey;
 
-    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey, y: highestTurtleKey })
-    .then(docs => this.getUniqueIDs(docs))
-    .then(ids => this.getMetaDocsByIDs(ids))
+    console.log('lastTortoiseKey:', lastTortoiseKey);
+    console.log('highestTurtleKey:', highestTurtleKey);
+
+    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
+      .then(docs => this.getUniqueIDs(docs))
+      .then(ids => this.getMetaDocsByIDs(ids))
   }
 
   getUniqueIDs(docs) {
@@ -91,11 +96,11 @@ class SyncTo {
   getStoreDocsForTortoise(revIdsFromTortoise) {
     log(`\n #4 HTTP <== receive request from Tortoise for ${revIdsFromTortoise.length} records`);
     const promises = revIdsFromTortoise.map(_id_rev => {
-      return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+      return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
     });
     return Promise.all(promises)
-    .then(docs => this.storeDocsForTortoise = docs)
-    .then(() => log(`\n Get ${this.storeDocsForTortoise.length} changed records for Tortoise`))
+      .then(docs => this.storeDocsForTortoise = docs)
+      .then(() => log(`\n Get ${this.storeDocsForTortoise.length} changed records for Tortoise`))
   }
 
   createNewSyncToTortoiseDoc() {
