@@ -172,6 +172,12 @@ class Dashboard extends React.Component {
     console.log('Doc to select as winner:', this.state.selectedTreeDoc);
   }
 
+  handleViewTreeClick = (_id) => {
+    turtleDB._readMetaDoc(_id).then(metaDoc => {
+      this.setState({ metaDoc: metaDoc });
+    });
+  }
+
   render() {
     return (
       <div>
