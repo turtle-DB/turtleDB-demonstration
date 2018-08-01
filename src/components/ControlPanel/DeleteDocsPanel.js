@@ -1,7 +1,7 @@
 import React from 'react';
 
 class DeleteDocsPanel extends React.Component {
-  handleDeleteClick = (event) => {
+  handleDeleteClick = event => {
     event.preventDefault();
     this.props.handleDeleteClick(
       document.querySelector('input[name="delete-number"]:checked').value
