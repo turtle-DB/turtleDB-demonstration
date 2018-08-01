@@ -84,34 +84,36 @@ class Dashboard extends React.Component {
 
   handleDeleteClick = (n) => {
     let startTime = Date.now();
-    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "DELETE",
-          count: n
-        }
-      });
-      this.syncStateWithTurtleDB();
-      this.updateTreeDocs();
-    });
+    turtleDB.idb.deleteBetweenNumbers(0, n)
+      .then(() => {
+        let timeSpent = Date.now() - startTime;
+        this.setState({
+          benchmark: {
+            time: timeSpent,
+            type: "DELETE",
+            count: n
+          }
+        })
+      })
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   handleUpdateClick = (n) => {
     let startTime = Date.now();
-    turtleDB.idb.editFirstNDocuments(n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "EDIT",
-          count: n
-        }
-      });
-      this.syncStateWithTurtleDB();
-      this.updateTreeDocs();
-    });
+    turtleDB.idb.editFirstNDocuments(n)
+      .then(() => {
+        let timeSpent = Date.now() - startTime;
+        this.setState({
+          benchmark: {
+            time: timeSpent,
+            type: "EDIT",
+            count: n
+          }
+        });
+      })
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   handleDropDatabase = () => {
@@ -137,17 +139,15 @@ class Dashboard extends React.Component {
   }
 
   handleSingleUpdateClick = (obj) => {
-    turtleDB.update(obj._id, obj).then(() => {
-      this.syncStateWithTurtleDB();
-      this.updateTreeDocs();
-    })
+    turtleDB.update(obj._id, obj)
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   handleSingleDeleteClick = (_id) => {
-    turtleDB.delete(_id).then(() => {
-      this.syncStateWithTurtleDB();
-      this.updateTreeDocs();
-    });
+    turtleDB.delete(_id)
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   // TREE HANDLERS
