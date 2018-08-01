@@ -52,12 +52,13 @@ class Dashboard extends React.Component {
 
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
-      .then(data => this.setState({ data: data }));
+      .then(data => this.setState({ data: data }))
+      .then(() => this.updateTreeDocs());
   }
 
   updateTreeDocs = () => {
     if (this.state.selectedTreeMetaDoc) {
-      const updatedMetaDoc = this.state.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
+      const updatedMetaDoc = this.state.data.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
       if (updatedMetaDoc) {
         this.setState({ selectedTreeMetaDoc: updatedMetaDoc });
       } else {
@@ -66,7 +67,7 @@ class Dashboard extends React.Component {
     }
 
     if (this.state.selectedTreeDoc) {
-      const updatedRevDoc = this.state.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
+      const updatedRevDoc = this.state.data.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
       if (updatedRevDoc) {
         this.setState({ selectedTreeDoc: updatedRevDoc });
       } else {
@@ -150,13 +151,11 @@ class Dashboard extends React.Component {
   handleSingleUpdateClick = (obj) => {
     turtleDB.update(obj._id, obj)
       .then(() => this.syncStateWithTurtleDB())
-      .then(() => this.updateTreeDocs());
   }
 
   handleSingleDeleteClick = (_id) => {
     turtleDB.delete(_id)
       .then(() => this.syncStateWithTurtleDB())
-      .then(() => this.updateTreeDocs());
   }
 
   // TREE HANDLERS
