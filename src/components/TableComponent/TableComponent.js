@@ -48,7 +48,7 @@ class TableComponent extends React.Component {
   }
 
   generateRows = () => {
-    return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map(doc => {
+    return this.props.data.docs.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map(doc => {
       const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header.toLowerCase()]}</td>);
 
       const metaDoc = this.props.data.metaDocs.find(metaDoc => metaDoc._id === doc._id);
