@@ -39,28 +39,6 @@ class Dashboard extends React.Component {
       .then(data => this.setState({ data: data }));
   }
 
-  updateTreeDocs = () => {
-    if (this.state.selectedTreeMetaDoc) {
-      const updatedMetaDoc = this.state.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
-      if (updatedMetaDoc) {
-        this.setState({ selectedTreeMetaDoc: updatedMetaDoc });
-      } else {
-        this.setState({ selectedTreeMetaDoc: {} });
-      }
-    }
-
-    if (this.state.selectedTreeDoc) {
-      const updatedRevDoc = this.state.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
-      if (updatedRevDoc) {
-        this.setState({ selectedTreeDoc: updatedRevDoc });
-      } else {
-        this.setState({ selectedTreeDoc: {} });
-      }
-    }
-  }
-
-  // DASHBOARD HANDLERS
-
   handleInsertClick = (n) => {
     let insertPromises = [];
     let dataLength = peopleData.length;
@@ -172,7 +150,7 @@ class Dashboard extends React.Component {
               handleUpdateClick={this.handleUpdateClick}
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
-              handleSync={this.handleSync}
+              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
             />
           </div>
           <div className="col-10">

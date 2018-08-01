@@ -6,7 +6,7 @@ import UpdateDoc from './UpdateDoc';
 import Pagination from './Pagination';
 import Table from './Table';
 
-const HEADERS = ['name', 'age', 'gender', 'company', 'email', 'phone'];
+const HEADERS = ['Name', 'Age', 'Gender', 'Company', 'Email', 'Phone'];
 
 class TableComponent extends React.Component {
   state = {
@@ -48,8 +48,8 @@ class TableComponent extends React.Component {
   }
 
   generateRows = () => {
-    return this.props.data.docs.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc) => {
-      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header]}</td>);
+    return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map(doc => {
+      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header.toLowerCase()]}</td>);
 
       const metaDoc = this.props.data.metaDocs.find(metaDoc => metaDoc._id === doc._id);
       const conflictBoolean = metaDoc._leafRevs.length > 1;
@@ -64,13 +64,13 @@ class TableComponent extends React.Component {
               onClick={() => this.props.handleViewTreeClick(metaDoc)}
             >View Tree</button>
             <button
-              className="btn btn-danger btn-sm mx-2"
+              className="btn btn-warning btn-sm mx-2"
               onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
             <button
               className="btn btn-info btn-sm mx-2"
               onClick={() => this.handleOpenModal(doc)}
-            >Edit</button>
+            >Update</button>
           </td>
           {cells}
         </tr>
