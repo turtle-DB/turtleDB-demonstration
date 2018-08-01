@@ -70,7 +70,7 @@ class TableComponent extends React.Component {
             <button
               className="btn btn-info btn-sm mx-2"
               onClick={() => this.handleOpenModal(doc)}
-            >Update</button>
+            >Edit</button>
           </td>
           {cells}
         </tr>

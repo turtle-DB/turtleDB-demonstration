@@ -82,7 +82,7 @@ class Dashboard extends React.Component {
     });
   }
 
-  handleDeleteClick = (n) => {
+  handleDeleteClick = n => {
     let startTime = Date.now();
     turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
       let timeSpent = Date.now() - startTime;
@@ -92,10 +92,9 @@ class Dashboard extends React.Component {
           type: "DELETE",
           count: n
         }
-      });
-      this.syncStateWithTurtleDB();
-      this.updateTreeDocs();
-    });
+      })
+    })
+    .then(() => this.syncStateWithTurtleDB());
   }
 
   handleUpdateClick = (n) => {
@@ -123,10 +122,8 @@ class Dashboard extends React.Component {
       }));
   }
 
-  handleSync = () => {
-    // axios.post("mongodb://localhost:27017/Hearthstone", this.state.hearthstone)
-    //   .then(res => console.log(res))
-    //   .catch(err => console.log("Error:", err))
+  handleSyncWithMongoDB = () => {
+    turtleDB.sync();
   }
 
   // DOCUMENT HANDLERS
