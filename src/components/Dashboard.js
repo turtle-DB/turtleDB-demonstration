@@ -5,7 +5,7 @@ import axios from 'axios';
 import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
-import TreeDisplay from './TreeComponent/TreeDisplay';
+import TreeComponent from './TreeComponent/TreeComponent';
 
 import turtleDB from '../turtleDB/turtle';
 
@@ -24,7 +24,9 @@ class Dashboard extends React.Component {
         time: null,
         type: null,
         count: null,
-      }
+      },
+      selectedTreeMetaDoc: {},
+      selectedTreeDoc: {}
     }
   }
 
@@ -60,36 +62,45 @@ class Dashboard extends React.Component {
 
   handleDeleteClick = n => {
     let startTime = Date.now();
-    turtleDB.idb.deleteBetweenNumbers(0, n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "DELETE",
-          count: n
-        }
+    turtleDB.idb.deleteBetweenNumbers(0, n)
+      .then(() => {
+        let timeSpent = Date.now() - startTime;
+        this.setState({
+          benchmark: {
+            time: timeSpent,
+            type: "DELETE",
+            count: n
+          }
+        })
       })
-    })
-    .then(() => this.syncStateWithTurtleDB());
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   handleUpdateClick = (n) => {
     let startTime = Date.now();
-    turtleDB.idb.editFirstNDocuments(n).then(() => {
-      let timeSpent = Date.now() - startTime;
-      this.setState({
-        benchmark: {
-          time: timeSpent,
-          type: "EDIT",
-          count: n
-        }
-      });
-      this.syncStateWithTurtleDB();
-    });
+    turtleDB.idb.editFirstNDocuments(n)
+      .then(() => {
+        let timeSpent = Date.now() - startTime;
+        this.setState({
+          benchmark: {
+            time: timeSpent,
+            type: "EDIT",
+            count: n
+          }
+        });
+      })
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
   handleDropDatabase = () => {
-    turtleDB.dropDB().then(() => this.setState({ data: { docs: [], metaDocs: [] } }));
+    turtleDB.dropDB()
+      .then(() => this.setState({
+        data: { docs: [], metaDocs: [] },
+        selectedTreeMetaDoc: {},
+        selectedTreeDoc: {}
+      }));
   }
 
   handleSyncWithMongoDB = () => {
@@ -98,22 +109,35 @@ class Dashboard extends React.Component {
 
   // DOCUMENT HANDLERS
 
-  handleViewTreeClick = _id => {
-    turtleDB._readMetaDoc(_id).then(metaDoc => {
-      this.setState({ metaDoc: metaDoc });
-    });
+  handleViewTreeClick = (metaDoc) => {
+    this.setState({ selectedTreeMetaDoc: metaDoc });
+    this.setState({ selectedTreeDoc: {} });
   }
 
-  handleSingleUpdateClick = obj => {
-    turtleDB.update(obj._id, obj).then(() => {
-      this.syncStateWithTurtleDB();
-    })
+  handleSingleUpdateClick = (obj) => {
+    turtleDB.update(obj._id, obj)
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
   }
 
-  handleSingleDeleteClick = _id => {
-    turtleDB.delete(_id).then(() => {
-      this.syncStateWithTurtleDB();
-    });
+  handleSingleDeleteClick = (_id) => {
+    turtleDB.delete(_id)
+      .then(() => this.syncStateWithTurtleDB())
+      .then(() => this.updateTreeDocs());
+  }
+
+  // TREE HANDLERS
+
+  handleTreeDocClick = (_id, rev) => {
+    turtleDB.read(_id, rev)
+      .then(doc => {
+        this.setState({ selectedTreeDoc: doc })
+      });
+  }
+
+  handlePickWinnerClick = () => {
+    // access to doc in 'this.state.selectedTreeDoc'
+    console.log('Doc to select as winner:', this.state.selectedTreeDoc);
   }
 
   render() {
@@ -135,13 +159,18 @@ class Dashboard extends React.Component {
                 <BenchmarkBox benchmark={this.state.benchmark} />
               </div>
               <div className="col-9">
-                <TreeDisplay metaDoc={this.state.metaDoc} />
+                <TreeComponent
+                  selectedTreeMetaDoc={this.state.selectedTreeMetaDoc}
+                  selectedTreeDoc={this.state.selectedTreeDoc}
+                  handleTreeDocClick={this.handleTreeDocClick}
+                  handlePickWinnerClick={this.handlePickWinnerClick}
+                />
               </div>
             </div>
 
             <div className="row">
               <TableComponent
-                data={this.state.data.docs}
+                data={this.state.data}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
                 handleSingleUpdateClick={this.handleSingleUpdateClick}
                 handleViewTreeClick={this.handleViewTreeClick}
