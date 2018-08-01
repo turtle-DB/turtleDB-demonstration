@@ -4,16 +4,12 @@ import './../../styles/tree.css';
 import Tree from 'react-tree-graph';
 
 class TreeDisplay extends React.Component {
-  metaDocExists = () => {
-    return Object.keys(this.props.metaDoc).length !== 0;
-  }
-
   generateTree = () => {
-    if (!this.metaDocExists()) { return; }
+    if (!this.props.selectedTreeMetaDoc) { return; }
 
     const newTree = {};
-    const revTree = this.props.metaDoc._revisions;
-    const winningRev = this.props.metaDoc._winningRev;
+    const revTree = this.props.selectedTreeMetaDoc._revisions;
+    const winningRev = this.props.selectedTreeMetaDoc._winningRev;
 
     this.traverseRevTree(revTree, newTree, winningRev);
     return newTree;
@@ -33,11 +29,11 @@ class TreeDisplay extends React.Component {
 
       if (!node[1]._deleted) {
         newNode.gProps.className = newNode.gProps.className + ' leaf-node';
-        newNode.gProps.onClick = () => this.props.handleTreeDocClick(this.props.metaDoc._id, node[0]);
+        newNode.gProps.onClick = () => this.props.handleTreeDocClick(this.props.selectedTreeMetaDoc._id, node[0]);
       }
     };
 
-    if (node[0] === this.props.metaDoc._winningRev) {
+    if (node[0] === this.props.selectedTreeMetaDoc._winningRev) {
       newNode.circleProps.className = 'winning-rev';
     }
 
@@ -59,7 +55,7 @@ class TreeDisplay extends React.Component {
     return (
       <div>
         <div className="tree-container">
-          {this.metaDocExists() && <Tree
+          {this.props.selectedTreeMetaDoc && <Tree
             data={treeData}
             height={300}
             width={450}
