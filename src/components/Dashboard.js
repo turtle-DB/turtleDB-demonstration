@@ -25,8 +25,8 @@ class Dashboard extends React.Component {
         type: null,
         count: null,
       },
-      selectedTreeMetaDoc: null,
-      selectedTreeDoc: null
+      selectedTreeMetaDoc: {},
+      selectedTreeDoc: {}
     }
   }
 
@@ -37,6 +37,26 @@ class Dashboard extends React.Component {
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
       .then(data => this.setState({ data: data }));
+  }
+
+  updateTreeDocs = () => {
+    if (this.state.selectedTreeMetaDoc) {
+      const updatedMetaDoc = this.state.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
+      if (updatedMetaDoc) {
+        this.setState({ selectedTreeMetaDoc: updatedMetaDoc });
+      } else {
+        this.setState({ selectedTreeMetaDoc: {} });
+      }
+    }
+
+    if (this.state.selectedTreeDoc) {
+      const updatedRevDoc = this.state.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
+      if (updatedRevDoc) {
+        this.setState({ selectedTreeDoc: updatedRevDoc });
+      } else {
+        this.setState({ selectedTreeDoc: {} });
+      }
+    }
   }
 
   // DASHBOARD HANDLERS
@@ -74,6 +94,7 @@ class Dashboard extends React.Component {
         }
       });
       this.syncStateWithTurtleDB();
+      this.updateTreeDocs();
     });
   }
 
@@ -89,11 +110,17 @@ class Dashboard extends React.Component {
         }
       });
       this.syncStateWithTurtleDB();
+      this.updateTreeDocs();
     });
   }
 
   handleDropDatabase = () => {
-    turtleDB.dropDB().then(() => this.setState({ data: { docs: [], metaDocs: [] } }));
+    turtleDB.dropDB()
+      .then(() => this.setState({
+        data: { docs: [], metaDocs: [] },
+        selectedTreeMetaDoc: {},
+        selectedTreeDoc: {}
+      }));
   }
 
   handleSync = () => {
@@ -105,22 +132,21 @@ class Dashboard extends React.Component {
   // DOCUMENT HANDLERS
 
   handleViewTreeClick = (metaDoc) => {
-    // turtleDB._readMetaDoc(_id).then(metaDoc => {
-    //   this.setState({ metaDoc: metaDoc });
-    // });
-
     this.setState({ selectedTreeMetaDoc: metaDoc });
+    this.setState({ selectedTreeDoc: {} });
   }
 
   handleSingleUpdateClick = (obj) => {
     turtleDB.update(obj._id, obj).then(() => {
       this.syncStateWithTurtleDB();
+      this.updateTreeDocs();
     })
   }
 
   handleSingleDeleteClick = (_id) => {
     turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
+      this.updateTreeDocs();
     });
   }
 
@@ -131,6 +157,11 @@ class Dashboard extends React.Component {
       .then(doc => {
         this.setState({ selectedTreeDoc: doc })
       });
+  }
+
+  handlePickWinnerClick = () => {
+    // access to doc in 'this.state.selectedTreeDoc'
+    console.log('Doc to select as winner:', this.state.selectedTreeDoc);
   }
 
   render() {
@@ -156,6 +187,7 @@ class Dashboard extends React.Component {
                   selectedTreeMetaDoc={this.state.selectedTreeMetaDoc}
                   selectedTreeDoc={this.state.selectedTreeDoc}
                   handleTreeDocClick={this.handleTreeDocClick}
+                  handlePickWinnerClick={this.handlePickWinnerClick}
                 />
               </div>
             </div>

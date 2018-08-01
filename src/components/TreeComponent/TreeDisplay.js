@@ -4,8 +4,12 @@ import './../../styles/tree.css';
 import Tree from 'react-tree-graph';
 
 class TreeDisplay extends React.Component {
+  metaDocExists = () => {
+    return Object.keys(this.props.metaDoc).length !== 0;
+  }
+
   generateTree = () => {
-    if (!this.props.metaDoc) { return; }
+    if (!this.metaDocExists()) { return; }
 
     const newTree = {};
     const revTree = this.props.metaDoc._revisions;
@@ -55,10 +59,10 @@ class TreeDisplay extends React.Component {
     return (
       <div>
         <div className="tree-container">
-          {this.props.metaDoc && <Tree
+          {this.metaDocExists() && <Tree
             data={treeData}
             height={300}
-            width={400}
+            width={450}
             svgProps={{ className: 'custom' }}
             nodeOffset={-10}
             nodeRadius={10}

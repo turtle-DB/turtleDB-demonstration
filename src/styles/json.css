@@ -4,27 +4,27 @@
   background: #FAFAFA;
   border-radius: 10px;
   border: solid rgb(138, 138, 138) 1px;
-  font-size: 13px;
+  font-size: 12px;
   padding: 10px;
   height: 220px;
 }
 
 .json-pretty .json-key {
-	color: #E000CD;
-}
-
-.json-pretty .json-value {
-	color: #5BC27A;
+  color: #FF2000;
 }
 
 .json-pretty .json-string {
-	color: #00B7EB;
+  color: #00B7EB;
+}
+
+.json-pretty .json-value {
+	color: #00A313;
 }
 
 .json-pretty .json-boolean {
-	color: #FF5543;
+	color: #E000CD;
 }
 
 .json-container {
-  width: 400px;
+  width: 380px;
 }

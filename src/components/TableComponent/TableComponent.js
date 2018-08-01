@@ -58,6 +58,7 @@ class TableComponent extends React.Component {
       return (
         <tr key={doc._id}>
           <td className="row-buttons-container">
+            <span>{conflictBoolean ? '⚠️' : '✅'}</span>
             <button
               className={`btn btn-${treeBtnColor} btn-sm mx-2`}
               onClick={() => this.props.handleViewTreeClick(metaDoc)}

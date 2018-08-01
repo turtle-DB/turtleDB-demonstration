@@ -14,6 +14,7 @@ class TreeComponent extends React.Component {
           />
           <DocumentDisplay
             selectedTreeDoc={this.props.selectedTreeDoc}
+            handlePickWinnerClick={this.props.handlePickWinnerClick}
           />
         </div>
       </div>
