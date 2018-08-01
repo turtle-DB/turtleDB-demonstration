@@ -32,8 +32,8 @@ const developerAPI = {
 
   sync() {
     return this.syncTo()
-    .then(() => this.syncFrom())
-    .catch((err) => console.log(err));
+      .then(() => this.syncFrom())
+      .catch((err) => console.log(err));
   },
 
   create(data) {
@@ -153,6 +153,16 @@ const developerAPI = {
 
   delete(_id, revId = null) {
     return this.update(_id, { _deleted: true }, revId);
+  },
+
+  makeRevWinner(_id, _rev) {
+    return this._readMetaDoc(_id)
+      .then(metaDoc => {
+        const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
+        const promises = leafRevsToDelete.map(rev => this.delete(_id, rev));
+        return Promise.all(promises);
+      })
+      .catch(err => console.log("makeRevWinner error:", err));
   },
 
   // BULK OPERATIONS

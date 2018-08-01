@@ -14,7 +14,7 @@ class ControlPanel extends React.Component {
         <DeleteDocsPanel handleDeleteClick={this.props.handleDeleteClick} />
         <UpdateDocsPanel handleUpdateClick={this.props.handleUpdateClick} />
         <DropButton handleDropDatabase={this.props.handleDropDatabase} />
-        <SyncButton handleSyncWithMongoDB={this.props.handleSyncWithMongoDB} />
+        <SyncButton handleSyncClick={this.props.handleSyncClick} />
       </div>
     )
   }
