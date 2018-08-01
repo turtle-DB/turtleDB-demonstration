@@ -29,7 +29,7 @@ class TableComponent extends React.Component {
       this.setState(prevState => {
         return { page: prevState.page - 1 }
       });
-    } else if (direction === 'RIGHT' && this.state.page < Math.ceil(this.props.data.length / this.state.tableMax)) {
+    } else if (direction === 'RIGHT' && this.state.page < Math.ceil(this.props.data.docs.length / this.state.tableMax)) {
       this.setState(prevState => {
         return { page: prevState.page + 1 }
       });
@@ -48,22 +48,27 @@ class TableComponent extends React.Component {
   }
 
   generateRows = () => {
-    return this.props.data.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc, i) => {
+    return this.props.data.docs.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map((doc) => {
       const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header]}</td>);
+
+      const metaDoc = this.props.data.metaDocs.find(metaDoc => metaDoc._id === doc._id);
+      const conflictBoolean = metaDoc._leafRevs.length > 1;
+      const treeBtnColor = conflictBoolean ? 'warning' : 'success';
 
       return (
         <tr key={doc._id}>
-          <td>
+          <td className="row-buttons-container">
+            <span>{conflictBoolean ? '⚠️' : '✅'}</span>
             <button
-              className="btn btn-dark btn-sm mx-2"
-              onClick={() => this.props.handleViewTreeClick(doc._id)}
+              className={`btn btn-${treeBtnColor} btn-sm mx-2`}
+              onClick={() => this.props.handleViewTreeClick(metaDoc)}
             >View Tree</button>
             <button
               className="btn btn-danger btn-sm mx-2"
               onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
             <button
-              className="btn btn-warning btn-sm mx-2"
+              className="btn btn-info btn-sm mx-2"
               onClick={() => this.handleOpenModal(doc)}
             >Edit</button>
           </td>
@@ -77,7 +82,7 @@ class TableComponent extends React.Component {
     let headerComponents;
     let rowComponents;
 
-    if (this.props.data.length > 0) {
+    if (this.props.data.docs.length > 0) {
       headerComponents = this.generateHeaders();
       rowComponents = this.generateRows()
     }
@@ -86,7 +91,7 @@ class TableComponent extends React.Component {
       <div>
         <Pagination
           handlePaginationClick={this.handlePaginationClick}
-          dataLength={this.props.data.length}
+          dataLength={this.props.data.docs.length}
           page={this.state.page}
           tableMax={this.state.tableMax}
         />
