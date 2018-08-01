@@ -57,7 +57,11 @@ class SyncTo {
   }
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
-    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
+    lastTortoiseKey = (!lastTortoiseKey && lastTortoiseKey !== 0) ? 0 : lastTortoiseKey;
+    highestTurtleKey = (!highestTurtleKey && highestTurtleKey !== 0) ? 0 : highestTurtleKey;
+    console.log(lastTortoiseKey, highestTurtleKey);
+
+    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey, y: highestTurtleKey })
     .then(docs => this.getUniqueIDs(docs))
     .then(ids => this.getMetaDocsByIDs(ids))
   }
