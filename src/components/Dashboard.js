@@ -37,8 +37,6 @@ class Dashboard extends React.Component {
       .then(data => this.setState({ data: data }));
   }
 
-  // DASHBOARD HANDLERS
-
   handleInsertClick = (n) => {
     let insertPromises = [];
     let dataLength = peopleData.length;
@@ -100,19 +98,19 @@ class Dashboard extends React.Component {
 
   // DOCUMENT HANDLERS
 
-  handleViewTreeClick = (_id) => {
+  handleViewTreeClick = _id => {
     turtleDB._readMetaDoc(_id).then(metaDoc => {
       this.setState({ metaDoc: metaDoc });
     });
   }
 
-  handleSingleUpdateClick = (obj) => {
+  handleSingleUpdateClick = obj => {
     turtleDB.update(obj._id, obj).then(() => {
       this.syncStateWithTurtleDB();
     })
   }
 
-  handleSingleDeleteClick = (_id) => {
+  handleSingleDeleteClick = _id => {
     turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
     });
@@ -128,7 +126,7 @@ class Dashboard extends React.Component {
               handleUpdateClick={this.handleUpdateClick}
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
-              handleSync={this.handleSync}
+              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
             />
           </div>
           <div className="col-10">

@@ -24,7 +24,7 @@ class UpdateDoc extends React.Component {
           <h5 className="modal-title">Update Doc</h5>
         </div>
 
-        <form onSubmit={this.handleUpdateClick}>
+        <form onSubmit={this.handleSingleUpdateClick}>
           <div className="form-row">
             <div className="form-group col">
               <label htmlFor="name">Name</label>
@@ -41,9 +41,8 @@ class UpdateDoc extends React.Component {
             <div className="form-group col-md-6">
               <label htmlFor="gender">Gender</label>
               <select id="gender" className="form-control" defaultValue={this.props.selectedDoc.gender}>
-                <option selected>Choose...</option>
-                <option>Male</option>
-                <option>Female</option>
+                <option>male</option>
+                <option>female</option>
               </select>
             </div>
           </div>
