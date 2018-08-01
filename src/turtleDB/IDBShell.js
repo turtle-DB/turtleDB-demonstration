@@ -1,4 +1,5 @@
 import uuidv4 from 'uuid/v4';
+import turtleDB from './turtle'
 
 class IDBShell {
   constructor(name) {
@@ -77,6 +78,7 @@ class IDBShell {
     })
   }
 
+  // BULK OPERATIONS
   // currently won't work for _id in store
   // need to filter by winning & non-deleted docs
   filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
@@ -91,17 +93,46 @@ class IDBShell {
   deleteBetweenNumbers(start, end) {
     return new Promise((resolve, reject) => {
       let counter = 0;
-        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          let cursor = e.target.result;
-          if (cursor) {
-            counter += 1;
-            if (counter >= start && counter <= end) {
-              cursor.delete();
+        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+          const cursor = e.target.result;
+          if (!cursor) {
+            console.log("cursor finished!");
+            resolve();
+          } else {
+            if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
+              const _id = e.target.result.value._id;
+              turtleDB.delete(_id);
+              counter += 1;
+            }
+            cursor.continue()
+          }
+      }
+    })
+  }
+
+  editFirstNDocuments(n) {
+    return new Promise((resolve, reject) => {
+      let counter = 0;
+        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+          const cursor = e.target.result;
+          if (!cursor) {
+            console.log('Cursor finished!');
+            resolve();
+          } else {
+            if (!!e.target.result.value._winningRev && counter < n) {
+              const _id = e.target.result.value._id;
+              const doc = turtleDB.read(_id)
+                .then(d => {
+                  const data = Object.assign(d, {
+                    age: Math.floor(Math.random() * 100 + 1)
+                  })
+                  return turtleDB.update(_id, data)
+                })
+              counter++;
             }
             cursor.continue();
           }
-        }
-        resolve();
+      }
     })
   }
 
@@ -132,32 +163,6 @@ class IDBShell {
 
   hasStoreName(store) {
     return this.getAllStoreNames().includes(store);
-  }
-
-// need to clean up:
-  editFirstNDocuments(amount) {
-    return new Promise((resolve, reject) => {
-      let counter = 0;
-        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          let cursor = e.target.result;
-          if (!cursor) {
-            console.log('Cursor finished!');
-            resolve();
-          }
-          if (cursor) {
-            counter += 1;
-            if (counter <= amount) {
-              let updateData = cursor.value;
-              updateData.eyeColor = 'green';
-              let request = cursor.update(updateData);
-              // request.onsuccess = function() {
-              //   console.log(counter);
-              // };
-            }
-            cursor.continue();
-          }
-        }
-    })
   }
 
   // DATABASE OPERATIONS
