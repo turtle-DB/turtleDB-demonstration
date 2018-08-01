@@ -31,7 +31,7 @@ const developerAPI = {
   },
 
   sync() {
-    this.syncTo()
+    return this.syncTo()
     .then(() => this.syncFrom())
     .catch((err) => console.log(err));
   },
