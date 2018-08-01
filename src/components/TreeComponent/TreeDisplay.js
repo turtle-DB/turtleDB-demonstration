@@ -58,7 +58,6 @@ class TreeDisplay extends React.Component {
 
     return (
       <div>
-        <h4 className="text-center">Revision Tree Visualizer</h4>
         <div className="tree-container">
           {this.metaDocExists() && <Tree
             data={treeData}
