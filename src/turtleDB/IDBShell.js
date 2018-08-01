@@ -94,8 +94,10 @@ class IDBShell {
       let counter = 0;
         this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
           let cursor = e.target.result;
-          if (cursor) {
-            if (e.target.result.value._winningRev) {
+          if (!cursor) {
+            console.log("cursor finished!");
+            resolve();
+          } else if (e.target.result.value._winningRev) {
               const _id = e.target.result.value._id;
               if (counter >= start && counter < end) {
                 turtleDB.delete(_id);
@@ -104,10 +106,9 @@ class IDBShell {
             }
             cursor.continue()
           }
-        }
-        resolve();
-    })
-  }
+        })
+    }
+
 
   getStoreDocsByIdRevs(idRevsArr) {
     const promises = idRevsArr.map(_id_rev => {
@@ -148,8 +149,7 @@ class IDBShell {
           if (!cursor) {
             console.log('Cursor finished!');
             resolve();
-          }
-          if (cursor) {
+          } else if (cursor) {
             const _id = e.target.result.value._id_rev.split("::")[0];
             if (counter <= amount) {
               let data = Object.assign(cursor.value, {
