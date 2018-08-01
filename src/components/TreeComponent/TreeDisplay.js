@@ -5,7 +5,7 @@ import Tree from 'react-tree-graph';
 
 class TreeDisplay extends React.Component {
   generateTree = () => {
-    if (!this.props.selectedTreeMetaDoc) { return; }
+    if (!this.props.selectedTreeMetaDoc) { return false; }
 
     const newTree = {};
     const revTree = this.props.selectedTreeMetaDoc._revisions;
@@ -52,18 +52,25 @@ class TreeDisplay extends React.Component {
   render() {
     const treeData = this.generateTree();
 
+    let tree;
+    if (treeData) {
+      tree = <Tree
+        data={treeData}
+        height={300}
+        width={450}
+        svgProps={{ className: 'custom' }}
+        nodeOffset={-10}
+        nodeRadius={10}
+        margins={{ bottom: 0, left: 0, right: 100, top: 20 }}
+      />;
+    } else {
+      tree = <p>No tree to display</p>
+    }
+
     return (
       <div>
         <div className="tree-container">
-          {this.props.selectedTreeMetaDoc && <Tree
-            data={treeData}
-            height={300}
-            width={450}
-            svgProps={{ className: 'custom' }}
-            nodeOffset={-10}
-            nodeRadius={10}
-            margins={{ bottom: 0, left: 0, right: 100, top: 20 }}
-          />}
+          {tree}
         </div>
       </div>
 

@@ -54,8 +54,11 @@ class TurtleDB {
   _generateNewDoc(oldDoc, newProperties, metaDoc) {
     const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
-
     const newDoc = Object.assign({}, newProperties);
+
+    delete newDoc._rev;
+    delete newDoc._id;
+
     const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(metaDoc._revisions) + JSON.stringify(newDoc));
     newDoc._id_rev = _id + "::" + newRev;
     return newDoc;

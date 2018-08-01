@@ -53,11 +53,13 @@ class Dashboard extends React.Component {
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
       .then(data => this.setState({ data: data }))
+      .then(() => this.updateTreeDocs());
   }
 
   updateTreeDocs = () => {
     if (this.state.selectedTreeMetaDoc) {
       const updatedMetaDoc = this.state.data.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
+
       if (updatedMetaDoc) {
         this.setState({ selectedTreeMetaDoc: updatedMetaDoc });
       } else {
@@ -65,14 +67,7 @@ class Dashboard extends React.Component {
       }
     }
 
-    if (this.state.selectedTreeDoc) {
-      const updatedRevDoc = this.state.data.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
-      if (updatedRevDoc) {
-        this.setState({ selectedTreeDoc: updatedRevDoc });
-      } else {
-        this.setState({ selectedTreeDoc: null });
-      }
-    }
+    this.setState({ selectedTreeDoc: null });
   }
 
   // DASHBOARD HANDLERS
@@ -135,7 +130,7 @@ class Dashboard extends React.Component {
       .then(() => this.setDefaultState());
   }
 
-  handleSyncWithMongoDB = () => {
+  handleSyncClick = () => {
     turtleDB.sync()
       .then(() => this.syncStateWithTurtleDB());
   }
@@ -169,10 +164,13 @@ class Dashboard extends React.Component {
   handlePickWinnerClick = () => {
     // access to doc in 'this.state.selectedTreeDoc'
     console.log('Doc to select as winner:', this.state.selectedTreeDoc);
-  }
-
-  handleViewTreeClick = (metaDoc) => {
-    this.setState({ selectedTreeMetaDoc: metaDoc });
+    // {what: "ever", _id: "a8fcdeaa-d8ef-4503-9762-d8499bbc571c", _rev: "3-ba09f2c2cf66edc8a5efee5e52a502a6"}
+    const doc = this.state.selectedTreeDoc;
+    turtleDB.makeRevWinner(doc._id, doc._rev)
+      .then((res) => {
+        console.log(res);
+        this.syncStateWithTurtleDB();
+      });
   }
 
   render() {
@@ -185,7 +183,7 @@ class Dashboard extends React.Component {
               handleUpdateClick={this.handleUpdateClick}
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
-              handleSyncWithMongoDB={this.handleSyncWithMongoDB}
+              handleSyncClick={this.handleSyncClick}
             />
           </div>
           <div className="col-10">
