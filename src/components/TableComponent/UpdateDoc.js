@@ -11,7 +11,6 @@ class UpdateDoc extends React.Component {
         company: event.target.company.value,
         email: event.target.email.value,
         phone: event.target.phone.value,
-        address: event.target.address.value,
       })
     this.props.handleSingleUpdateClick(updatedObj);
     this.props.closeModal();
@@ -63,20 +62,13 @@ class UpdateDoc extends React.Component {
 
           <div className="form-row">
             <div className="form-group col">
-              <label htmlFor="address">Address</label>
-              <input type="text" className="form-control" name="address" defaultValue={this.props.selectedDoc.address} />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group col">
               <label htmlFor="company">Company</label>
               <input type="text" className="form-control" name="company" defaultValue={this.props.selectedDoc.company} />
             </div>
           </div>
 
           <input className="btn btn-primary" type="submit" value="Update" />
-          <button className="btn btn-danger" value="cancel" onClick={this.handleCloseModal}>Cancel</button>
+          <button className="btn btn-danger" value="cancel" onClick={this.props.closeModal}>Cancel</button>
         </form>
       </div>
     )
