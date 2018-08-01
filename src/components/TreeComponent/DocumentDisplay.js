@@ -5,13 +5,15 @@ import WinnerButton from './WinnerButton';
 
 class DocumentDisplay extends React.Component {
   render() {
+    const doc = this.props.selectedTreeDoc ? this.props.selectedTreeDoc : {};
+
     return (
       <div>
-        <h6 className="text-center">Revision:</h6>
+        <h6 className="text-center">Document Revision:</h6>
         <div className="json-container">
           <JSONPretty
             id="json-pretty"
-            json={this.props.selectedTreeDoc}
+            json={doc}
           ></JSONPretty>
           <WinnerButton
             handlePickWinnerClick={this.props.handlePickWinnerClick}

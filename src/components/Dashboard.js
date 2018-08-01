@@ -25,8 +25,8 @@ class Dashboard extends React.Component {
         type: null,
         count: null,
       },
-      selectedTreeMetaDoc: {},
-      selectedTreeDoc: {}
+      selectedTreeMetaDoc: null,
+      selectedTreeDoc: null
     }
   }
 
@@ -34,10 +34,48 @@ class Dashboard extends React.Component {
     this.syncStateWithTurtleDB();
   }
 
+  setDefaultState = () => {
+    this.setState({
+      data: {
+        docs: [],
+        metaDocs: []
+      },
+      benchmark: {
+        time: null,
+        type: null,
+        count: null,
+      },
+      selectedTreeMetaDoc: null,
+      selectedTreeDoc: null
+    });
+  }
+
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
       .then(data => this.setState({ data: data }));
   }
+
+  updateTreeDocs = () => {
+    if (this.state.selectedTreeMetaDoc) {
+      const updatedMetaDoc = this.state.metaDocs.find(metaDoc => metaDoc._id === this.state.selectedTreeMetaDoc._id);
+      if (updatedMetaDoc) {
+        this.setState({ selectedTreeMetaDoc: updatedMetaDoc });
+      } else {
+        this.setState({ selectedTreeMetaDoc: null });
+      }
+    }
+
+    if (this.state.selectedTreeDoc) {
+      const updatedRevDoc = this.state.docs.find(doc => doc._rev === this.state.selectedTreeDoc._rev);
+      if (updatedRevDoc) {
+        this.setState({ selectedTreeDoc: updatedRevDoc });
+      } else {
+        this.setState({ selectedTreeDoc: null });
+      }
+    }
+  }
+
+  // DASHBOARD HANDLERS
 
   handleInsertClick = (n) => {
     let insertPromises = [];
@@ -74,7 +112,6 @@ class Dashboard extends React.Component {
         })
       })
       .then(() => this.syncStateWithTurtleDB())
-      .then(() => this.updateTreeDocs());
   }
 
   handleUpdateClick = (n) => {
@@ -91,27 +128,23 @@ class Dashboard extends React.Component {
         });
       })
       .then(() => this.syncStateWithTurtleDB())
-      .then(() => this.updateTreeDocs());
   }
 
   handleDropDatabase = () => {
     turtleDB.dropDB()
-      .then(() => this.setState({
-        data: { docs: [], metaDocs: [] },
-        selectedTreeMetaDoc: {},
-        selectedTreeDoc: {}
-      }));
+      .then(() => this.setDefaultState());
   }
 
   handleSyncWithMongoDB = () => {
-    turtleDB.sync();
+    turtleDB.sync()
+      .then(() => this.syncStateWithTurtleDB());
   }
 
   // DOCUMENT HANDLERS
 
   handleViewTreeClick = (metaDoc) => {
     this.setState({ selectedTreeMetaDoc: metaDoc });
-    this.setState({ selectedTreeDoc: {} });
+    this.setState({ selectedTreeDoc: null });
   }
 
   handleSingleUpdateClick = (obj) => {
