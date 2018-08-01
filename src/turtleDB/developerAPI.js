@@ -32,8 +32,8 @@ const developerAPI = {
 
   sync() {
     this.syncTo()
-      .then(() => this.syncFrom())
-      .catch((err) => console.log(err));
+    .then(() => this.syncFrom())
+    .catch((err) => console.log(err));
   },
 
   create(data) {
