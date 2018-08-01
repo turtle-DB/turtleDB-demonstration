@@ -44,7 +44,6 @@ class SyncTo {
     return axios.post(this.targetUrl + path, this.syncToTortoiseDoc)
       .then(res => {
         this.lastTortoiseKey = res.data;
-        console.log('lastTortoiseKey', res.data);
         log(`\n #2 HTTP <== receive response from Tortoise with checkpoint (${this.lastTortoiseKey})`);
       })
   }
@@ -60,12 +59,6 @@ class SyncTo {
   }
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
-    // lastTortoiseKey = (!lastTortoiseKey && lastTortoiseKey !== 0) ? 0 : lastTortoiseKey;
-    // highestTurtleKey = (!highestTurtleKey && highestTurtleKey !== 0) ? 0 : highestTurtleKey;
-
-    console.log('lastTortoiseKey:', lastTortoiseKey);
-    console.log('highestTurtleKey:', highestTurtleKey);
-
     return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
       .then(docs => this.getUniqueIDs(docs))
       .then(ids => this.getMetaDocsByIDs(ids))
