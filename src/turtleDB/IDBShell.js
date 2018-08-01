@@ -78,6 +78,7 @@ class IDBShell {
     })
   }
 
+  // BULK OPERATIONS
   // currently won't work for _id in store
   // need to filter by winning & non-deleted docs
   filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
@@ -93,22 +94,47 @@ class IDBShell {
     return new Promise((resolve, reject) => {
       let counter = 0;
         this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
-          let cursor = e.target.result;
+          const cursor = e.target.result;
           if (!cursor) {
             console.log("cursor finished!");
             resolve();
-          } else if (e.target.result.value._winningRev) {
+          } else {
+            if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
               const _id = e.target.result.value._id;
-              if (counter >= start && counter < end) {
-                turtleDB.delete(_id);
-                counter += 1;
-              }
+              turtleDB.delete(_id);
+              counter += 1;
             }
             cursor.continue()
           }
-        })
-    }
+      }
+    })
+  }
 
+  editFirstNDocuments(n) {
+    return new Promise((resolve, reject) => {
+      let counter = 0;
+        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+          const cursor = e.target.result;
+          if (!cursor) {
+            console.log('Cursor finished!');
+            resolve();
+          } else {
+            if (!!e.target.result.value._winningRev && counter < n) {
+              const _id = e.target.result.value._id;
+              const doc = turtleDB.read(_id)
+                .then(d => {
+                  const data = Object.assign(d, {
+                    age: Math.floor(Math.random() * 100 + 1)
+                  })
+                  return turtleDB.update(_id, data)
+                })
+              counter++;
+            }
+            cursor.continue();
+          }
+      }
+    })
+  }
 
   getStoreDocsByIdRevs(idRevsArr) {
     const promises = idRevsArr.map(_id_rev => {
@@ -137,34 +163,6 @@ class IDBShell {
 
   hasStoreName(store) {
     return this.getAllStoreNames().includes(store);
-  }
-
-// need to clean up:
-  editFirstNDocuments(amount) {
-    return new Promise((resolve, reject) => {
-      let counter = 0;
-        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          const cursor = e.target.result;
-          counter += 1;
-          if (!cursor) {
-            console.log('Cursor finished!');
-            resolve();
-          } else if (cursor) {
-            const _id = e.target.result.value._id_rev.split("::")[0];
-            if (counter <= amount) {
-              let data = Object.assign(cursor.value, {
-                age: Math.floor(Math.random() * 100 + 1)
-              })
-              turtleDB.update(_id, data)
-              let request = cursor.update(data);
-              // request.onsuccess = function() {
-              //   console.log(counter);
-              // };
-            }
-            cursor.continue();
-          }
-        }
-    })
   }
 
   // DATABASE OPERATIONS
