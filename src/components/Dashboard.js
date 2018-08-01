@@ -5,7 +5,7 @@ import axios from 'axios';
 import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
-import TreeDisplay from './TreeComponent/TreeDisplay';
+import TreeComponent from './TreeComponent/TreeComponent';
 
 import turtleDB from '../turtleDB/turtle';
 
@@ -24,7 +24,9 @@ class Dashboard extends React.Component {
         time: null,
         type: null,
         count: null,
-      }
+      },
+      selectedTreeMetaDoc: null,
+      selectedTreeDoc: null
     }
   }
 
@@ -102,10 +104,12 @@ class Dashboard extends React.Component {
 
   // DOCUMENT HANDLERS
 
-  handleViewTreeClick = (_id) => {
-    turtleDB._readMetaDoc(_id).then(metaDoc => {
-      this.setState({ metaDoc: metaDoc });
-    });
+  handleViewTreeClick = (metaDoc) => {
+    // turtleDB._readMetaDoc(_id).then(metaDoc => {
+    //   this.setState({ metaDoc: metaDoc });
+    // });
+
+    this.setState({ selectedTreeMetaDoc: metaDoc });
   }
 
   handleSingleUpdateClick = (obj) => {
@@ -118,6 +122,15 @@ class Dashboard extends React.Component {
     turtleDB.delete(_id).then(() => {
       this.syncStateWithTurtleDB();
     });
+  }
+
+  // TREE HANDLERS
+
+  handleTreeDocClick = (_id, rev) => {
+    turtleDB.read(_id, rev)
+      .then(doc => {
+        this.setState({ selectedTreeDoc: doc })
+      });
   }
 
   render() {
@@ -139,13 +152,17 @@ class Dashboard extends React.Component {
                 <BenchmarkBox benchmark={this.state.benchmark} />
               </div>
               <div className="col-9">
-                <TreeDisplay metaDoc={this.state.metaDoc} />
+                <TreeComponent
+                  selectedTreeMetaDoc={this.state.selectedTreeMetaDoc}
+                  selectedTreeDoc={this.state.selectedTreeDoc}
+                  handleTreeDocClick={this.handleTreeDocClick}
+                />
               </div>
             </div>
 
             <div className="row">
               <TableComponent
-                data={this.state.data.docs}
+                data={this.state.data}
                 handleSingleDeleteClick={this.handleSingleDeleteClick}
                 handleSingleUpdateClick={this.handleSingleUpdateClick}
                 handleViewTreeClick={this.handleViewTreeClick}

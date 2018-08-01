@@ -15,19 +15,25 @@ class TreeDisplay extends React.Component {
     return newTree;
   }
 
-  traverseRevTree = (node, newNode, winningRev) => {
+  traverseRevTree = (node, newNode) => {
     // Set up new node
     newNode.name = node[0].slice(0, 5) + '...';
     newNode.circleProps = { className: '' };
+    newNode.gProps = { className: 'node' };
     newNode.children = [];
 
     const nodeChildren = node[2];
 
     if (nodeChildren.length === 0) {
       newNode.circleProps.className = 'leaf-rev';
-    }
 
-    if (node[0] === winningRev) {
+      if (!node[1]._deleted) {
+        newNode.gProps.className = newNode.gProps.className + ' leaf-node';
+        newNode.gProps.onClick = () => this.props.handleTreeDocClick(this.props.metaDoc._id, node[0]);
+      }
+    };
+
+    if (node[0] === this.props.metaDoc._winningRev) {
       newNode.circleProps.className = 'winning-rev';
     }
 
@@ -36,7 +42,7 @@ class TreeDisplay extends React.Component {
     }
 
     for (let i = 0; i < nodeChildren.length; i++) {
-      let childNode = this.traverseRevTree(nodeChildren[i], {}, winningRev);
+      let childNode = this.traverseRevTree(nodeChildren[i], {});
       newNode.children.push(childNode);
     }
 
@@ -48,7 +54,6 @@ class TreeDisplay extends React.Component {
 
     return (
       <div>
-        <h4>Revision Tree</h4>
         <div className="tree-container">
           {this.props.metaDoc && <Tree
             data={treeData}
