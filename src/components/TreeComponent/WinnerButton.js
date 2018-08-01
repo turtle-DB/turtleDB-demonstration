@@ -8,7 +8,7 @@ class WinnerButton extends React.Component {
           className="btn btn-primary"
           onClick={this.props.handlePickWinnerClick}
         >
-          Pick Document Version As Winner
+          Pick Document Revision As Winner
         </button>
       </div>
     );
