@@ -7,7 +7,7 @@ class DocumentDisplay extends React.Component {
   render() {
     return (
       <div>
-        <h6>Revision:</h6>
+        <h6 className="text-center">Revision:</h6>
         <div className="json-container">
           <JSONPretty
             id="json-pretty"
