@@ -98,12 +98,12 @@ const developerAPI = {
   update(_id, newProperties, revId = null) {
     let metaDoc;
     let newDoc;
+    let rev;
 
     return this._readMetaDoc(_id)
       .then(doc => {
         // save metaDoc to be used later
         metaDoc = doc;
-        let rev;
 
         if (!metaDoc._winningRev) {
           throw new Error("This document has been deleted.");
@@ -117,15 +117,16 @@ const developerAPI = {
           }
         }
 
-        return this._readRevFromIndex(_id, rev);
+        // return this._readRevFromIndex(_id, rev);
+        return rev;
       })
-      .then(oldDoc => {
-        newDoc = this._generateNewDoc(oldDoc, newProperties);
+      .then(oldRev => {
+        newDoc = this._generateNewDoc(_id, oldRev, newProperties);
         this.idb.command(this.idb._store, "CREATE", { data: newDoc });
 
         return {
           newRev: newDoc._id_rev.split('::')[1],
-          oldRev: oldDoc._id_rev.split("::")[1]
+          oldRev: rev
         };
       })
       .then(({ newRev, oldRev }) => {
@@ -171,6 +172,16 @@ const developerAPI = {
         return result.then(() => this.update(_id, doc, _rev));
       })
       .catch(err => console.log("makeRevWinner error:", err));
+  },
+
+  editNDocumentsMTimes(docs, times) {
+    let result = Promise.resolve();
+
+    for (let i = 0; i < times; i += 1) {
+      result = result.then(() => this.idb.editFirstNDocuments(docs));
+    }
+
+    result.then(() => console.log('finished editing'));
   },
 
   // BULK OPERATIONS
