@@ -178,6 +178,7 @@ const developerAPI = {
     let result = Promise.resolve();
 
     for (let i = 0; i < times; i += 1) {
+      //create promise chain
       result = result.then(() => this.idb.editFirstNDocuments(docs));
     }
 
