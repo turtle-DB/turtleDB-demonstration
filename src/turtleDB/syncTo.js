@@ -12,7 +12,8 @@ class SyncTo {
   }
 
   start() {
-    return this.getSyncToTortoiseDoc() //this.syncToTortoiseDoc
+    return this.checkServerConnection('/connect')
+      .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
       .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
       .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
       .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
@@ -21,7 +22,25 @@ class SyncTo {
       .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
       .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
       .then(() => this.updateSyncToTortoiseDoc())
-      .catch(err => console.log(err));
+      .catch(err => console.log('Sync To Error:', err));
+  }
+
+  checkServerConnection(path) {
+    return axios.get(this.targetUrl + path)
+      .then((res) => {
+        return res.status === 200 ? true : false;
+      })
+      .catch((error) => {
+        if (!error.response) {
+          // network error
+          return Promise.reject('Failed to connect to server');
+        } else {
+          // http status code
+          const code = error.response.status
+          // response data
+          const response = error.response.data
+        }
+      });
   }
 
   getSyncToTortoiseDoc() {

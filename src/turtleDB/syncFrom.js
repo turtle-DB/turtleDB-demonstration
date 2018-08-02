@@ -13,27 +13,46 @@ class SyncFrom {
 
   getTurtleID() {
     return this.idb.command(this.idb._turtleDBMeta, "READ_ALL", {})
-    .then(docs => this.turtleID = docs[0]._id);
+      .then(docs => this.turtleID = docs[0]._id);
   }
 
   start() {
-    return this.getTurtleID()
-    .then(() => this.getLastTurtleKey())
-    .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
-    .then(changedTortoiseMetaDocs => this.findMissingRevIds(changedTortoiseMetaDocs.data)) // this.missingRevIds
-    .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
-    .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
-    .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
-    .catch((err) => console.log('Sync From Error:', err));
+    return this.checkServerConnection('/connect')
+      .then(() => this.getTurtleID())
+      .then(() => this.getLastTurtleKey())
+      .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
+      .then(changedTortoiseMetaDocs => this.findMissingRevIds(changedTortoiseMetaDocs.data)) // this.missingRevIds
+      .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
+      .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
+      .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
+      .catch((err) => console.log('Sync From Error:', err));
+  }
+
+  checkServerConnection(path) {
+    return axios.get(this.targetUrl + path)
+      .then((res) => {
+        return res.status === 200 ? true : false;
+      })
+      .catch((error) => {
+        if (!error.response) {
+          // network error
+          return Promise.reject('Failed to connect to server');
+        } else {
+          // http status code
+          const code = error.response.status
+          // response data
+          const response = error.response.data
+        }
+      });
   }
 
   getLastTurtleKey() {
     return this.idb.command(this.idb._syncFromStore, "READ_ALL", {})
-    .then(docs => {
-      const syncFromTortoiseDoc = docs[0];
-      this.lastTurtleKey = syncFromTortoiseDoc.history.length === 0 ?
-        '0' : syncFromTortoiseDoc.history[0].lastKey;
-    })
+      .then(docs => {
+        const syncFromTortoiseDoc = docs[0];
+        this.lastTurtleKey = syncFromTortoiseDoc.history.length === 0 ?
+          '0' : syncFromTortoiseDoc.history[0].lastKey;
+      })
   }
 
   sendRequestForTortoiseMetaDocs(path) {
@@ -71,17 +90,17 @@ class SyncFrom {
                 });
             }
           } else {
-              let revs = this.collectAllLeafRevs(tortoiseMetaDoc._revisions);
-              let idRevs = revs.map(rev => tortoiseMetaDoc._id + '::' + rev);
-              missingLeafNodes.push(...idRevs);
-              return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
+            let revs = this.collectAllLeafRevs(tortoiseMetaDoc._revisions);
+            let idRevs = revs.map(rev => tortoiseMetaDoc._id + '::' + rev);
+            missingLeafNodes.push(...idRevs);
+            return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
           }
         })
     });
 
     return Promise.all(promises)
-    .then(() => this.missingRevIds = missingLeafNodes)
-    .then(() => log(`\n compare Turtle/Tortoise metadocs to make a list of ${this.missingRevIds.length} missing records`));
+      .then(() => this.missingRevIds = missingLeafNodes)
+      .then(() => log(`\n compare Turtle/Tortoise metadocs to make a list of ${this.missingRevIds.length} missing records`));
   }
 
   collectAllLeafRevs(node, leafRevs = []) {
@@ -127,8 +146,8 @@ class SyncFrom {
     log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.length} missing records`);
     const { docs, newSyncToTurtleDoc } = docsFromTortoise;
     this.insertNewDocsIntoStore(docs)
-    .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
-    .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
+      .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
+      .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
   }
 
   insertNewDocsIntoStore(docs) {
