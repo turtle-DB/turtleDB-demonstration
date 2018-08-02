@@ -113,20 +113,18 @@ class IDBShell {
   }
 
   editFirstNDocuments(n) {
-    let promises = [];
-
     return new Promise((resolve, reject) => {
+      let updatePromises = [];
       let counter = 0;
         this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
           const cursor = e.target.result;
           if (!cursor) {
             console.log('Cursor finished!');
-            console.log('promises', promises.length);
             resolve(Promise.all(promises));
           } else {
             if (!!e.target.result.value._winningRev && counter < n) {
               const _id = e.target.result.value._id;
-              promises.push(
+              updatePromises.push(
                 turtleDB.read(_id)
                 .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
                 .then(data => turtleDB.update(_id, data))
@@ -137,10 +135,6 @@ class IDBShell {
           }
       }
     })
-    // return promise.then(() => {
-    //   console.log('promises', promises.length);
-    //   return Promise.all(promises);
-    // });
   }
 
   getStoreDocsByIdRevs(idRevsArr) {
