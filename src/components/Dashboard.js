@@ -166,9 +166,8 @@ class Dashboard extends React.Component {
     console.log('Doc to select as winner:', this.state.selectedTreeDoc);
     // {what: "ever", _id: "a8fcdeaa-d8ef-4503-9762-d8499bbc571c", _rev: "3-ba09f2c2cf66edc8a5efee5e52a502a6"}
     const doc = this.state.selectedTreeDoc;
-    turtleDB.makeRevWinner(doc._id, doc._rev)
-      .then((res) => {
-        console.log(res);
+    turtleDB.makeRevWinner(doc)
+      .then(() => {
         this.syncStateWithTurtleDB();
       });
   }
@@ -188,9 +187,6 @@ class Dashboard extends React.Component {
           </div>
           <div className="col-10">
             <div className="row">
-              <div className="col-3">
-                <BenchmarkBox benchmark={this.state.benchmark} />
-              </div>
               <div className="col-9">
                 <TreeComponent
                   selectedTreeMetaDoc={this.state.selectedTreeMetaDoc}
@@ -198,6 +194,9 @@ class Dashboard extends React.Component {
                   handleTreeDocClick={this.handleTreeDocClick}
                   handlePickWinnerClick={this.handlePickWinnerClick}
                 />
+              </div>
+              <div className="col-3">
+                <BenchmarkBox benchmark={this.state.benchmark} />
               </div>
             </div>
 

@@ -64,7 +64,7 @@ class TableComponent extends React.Component {
               onClick={() => this.props.handleViewTreeClick(metaDoc)}
             >View Tree</button>
             <button
-              className="btn btn-warning btn-sm mx-2"
+              className="btn btn-dark btn-sm mx-2"
               onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
             <button
@@ -88,7 +88,7 @@ class TableComponent extends React.Component {
     }
 
     return (
-      <div>
+      <div className="table-container">
         <Pagination
           handlePaginationClick={this.handlePaginationClick}
           dataLength={this.props.data.docs.length}

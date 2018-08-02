@@ -7,7 +7,7 @@ class TreeComponent extends React.Component {
     return (
       <div>
         <h4>Revision Tree Visualizer</h4>
-        <div className="d-flex justify-content-between">
+        <div className="d-flex">
           <TreeDisplay
             selectedTreeMetaDoc={this.props.selectedTreeMetaDoc}
             handleTreeDocClick={this.props.handleTreeDocClick}
