@@ -187,9 +187,6 @@ class Dashboard extends React.Component {
           </div>
           <div className="col-10">
             <div className="row">
-              <div className="col-3">
-                <BenchmarkBox benchmark={this.state.benchmark} />
-              </div>
               <div className="col-9">
                 <TreeComponent
                   selectedTreeMetaDoc={this.state.selectedTreeMetaDoc}
@@ -197,6 +194,9 @@ class Dashboard extends React.Component {
                   handleTreeDocClick={this.handleTreeDocClick}
                   handlePickWinnerClick={this.handlePickWinnerClick}
                 />
+              </div>
+              <div className="col-3">
+                <BenchmarkBox benchmark={this.state.benchmark} />
               </div>
             </div>
 

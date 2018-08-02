@@ -14,19 +14,23 @@ body {
   font-size: 0.8rem;
 }
 
+.table-container {
+  margin-top: 40px;
+}
+
+.display-pages {
+  margin: 6px 0 0 20px;
+}
+
 .margin-bottom {
   margin-bottom: 1.25rem;
 }
 
 .row-butttons-header {
-  width: 300px;
+  width: 270px;
 }
 
 .row-buttons-container {
-  width: 300px;
+  width: 270px;
   display: flex;
-}
-
-.no-margin {
-  margin-top: 1rem;
 }

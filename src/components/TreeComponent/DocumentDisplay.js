@@ -9,8 +9,8 @@ class DocumentDisplay extends React.Component {
 
     return (
       <div>
-        <h6>Document Revision</h6>
         <div className="json-container">
+          <h6>Document Revision</h6>
           <JSONPretty
             id="json-pretty"
             json={doc}

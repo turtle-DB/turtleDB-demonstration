@@ -12,7 +12,7 @@ class Pagination extends React.Component {
   getMaxRange = () => {
     const maxMultiple = this.props.page * this.props.tableMax;
     return maxMultiple <= this.props.dataLength ?
-           maxMultiple : this.props.dataLength;
+      maxMultiple : this.props.dataLength;
   }
 
   getMinRange = () => {
@@ -22,34 +22,31 @@ class Pagination extends React.Component {
   render() {
     return (
       <nav>
-        <div className="row">
-          <div className="col">
-            <ul className="pagination">
-              <li className={`page-item ${this.props.page <= 1 ? "disabled" : ""}`}>
-                <a
-                  className="page-link"
-                  onClick={this.handleLeftClick}
-                  >Previous
+        <div className="d-flex">
+          <ul className="pagination">
+            <li className={`page-item ${this.props.page <= 1 ? "disabled" : ""}`}>
+              <a
+                className="page-link"
+                onClick={this.handleLeftClick}
+              >Previous
                 </a>
-              </li>
-              <li className={`page-item ${(this.props.page * this.props.tableMax) > this.props.dataLength ? "disabled" : ""}`}>
-                <a
-                  className="page-link"
-                  onClick={this.handleRightClick}
-                  >Next
+            </li>
+            <li className={`page-item ${(this.props.page * this.props.tableMax) > this.props.dataLength ? "disabled" : ""}`}>
+              <a
+                className="page-link"
+                onClick={this.handleRightClick}
+              >Next
                 </a>
-              </li>
-            </ul>
-          </div>
-          <div className="col">
-            <p className="no-margin">
-              Displaying {this.getMinRange()} - {this.getMaxRange()} of {this.props.dataLength}
-            </p>
-          </div>
+            </li>
+          </ul>
+          <p className="display-pages">
+            Displaying {this.getMinRange()} - {this.getMaxRange()} of {this.props.dataLength}
+          </p>
         </div>
       </nav>
 
-  )}
+    )
+  }
 }
 
 export default Pagination;
