@@ -31,9 +31,19 @@ const developerAPI = {
   },
 
   sync() {
-    return this.syncTo()
-      .then(() => this.syncFrom())
-      .catch((err) => console.log(err));
+    console.log('');
+    console.log('syncInProgess', this.syncInProgress);
+    console.log('');
+
+    if (!this.syncInProgress) {
+      this.syncInProgress = true;
+      return this.syncTo()
+        .then(() => this.syncFrom())
+        .then(() => this.syncInProgress = false)
+        .catch((err) => console.log(err));
+    } else {
+      return Promise.reject('Sync already in progress');
+    }
   },
 
   create(data) {
@@ -186,7 +196,7 @@ const developerAPI = {
   },
 
   autoSyncOn() {
-    this.intervalId = setInterval(this.sync.bind(this), 1000);
+    this.intervalId = setInterval(this.sync.bind(this), 3000);
   },
 
   autoSyncOff() {
