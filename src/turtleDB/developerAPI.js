@@ -120,7 +120,7 @@ const developerAPI = {
         return this._readRevFromIndex(_id, rev);
       })
       .then(oldDoc => {
-        newDoc = this._generateNewDoc(oldDoc, newProperties, metaDoc);
+        newDoc = this._generateNewDoc(oldDoc, newProperties);
         this.idb.command(this.idb._store, "CREATE", { data: newDoc });
 
         return {
@@ -155,12 +155,20 @@ const developerAPI = {
     return this.update(_id, { _deleted: true }, revId);
   },
 
-  makeRevWinner(_id, _rev) {
+  makeRevWinner(doc) {
+    const { _id, _rev } = doc;
+
     return this._readMetaDoc(_id)
       .then(metaDoc => {
         const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
-        const promises = leafRevsToDelete.map(rev => this.delete(_id, rev));
-        return Promise.all(promises);
+
+        let result = Promise.resolve();
+
+        leafRevsToDelete.forEach(rev => {
+          result = result.then(() => this.delete(_id, rev));
+        });
+
+        return result.then(() => this.update(_id, doc, _rev));
       })
       .catch(err => console.log("makeRevWinner error:", err));
   },
