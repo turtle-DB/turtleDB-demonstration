@@ -25,6 +25,8 @@ class IDBShell {
             .add({ _id: turtleID, history: [] });
           this.db.createObjectStore(this._turtleDBMeta, { keyPath: '_id' })
             .add({ _id: turtleID });
+
+          this.db.onversionchange = e => e.target.close();
         }
       };
 
