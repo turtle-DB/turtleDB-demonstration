@@ -92,16 +92,17 @@ class IDBShell {
 
   deleteBetweenNumbers(start, end) {
     return new Promise((resolve, reject) => {
+      let deletePromises = [];
       let counter = 0;
         this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
           const cursor = e.target.result;
           if (!cursor) {
             console.log("cursor finished!");
-            resolve();
+            resolve(Promise.all(deletePromises));
           } else {
             if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
               const _id = e.target.result.value._id;
-              turtleDB.delete(_id);
+              deletePromises.push(turtleDB.delete(_id));
               counter += 1;
             }
             cursor.continue()
