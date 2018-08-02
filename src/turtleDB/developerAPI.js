@@ -185,6 +185,14 @@ const developerAPI = {
     result.then(() => console.log('finished editing'));
   },
 
+  autoSyncOn() {
+    this.intervalId = setInterval(this.sync.bind(this), 1000);
+  },
+
+  autoSyncOff() {
+    clearInterval(this.intervalId);
+  },
+
   // BULK OPERATIONS
 
   readAllMetaDocsAndDocs() {

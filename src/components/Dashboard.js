@@ -26,7 +26,8 @@ class Dashboard extends React.Component {
         count: null,
       },
       selectedTreeMetaDoc: null,
-      selectedTreeDoc: null
+      selectedTreeDoc: null,
+      autoSync: false
     }
   }
 
@@ -46,7 +47,8 @@ class Dashboard extends React.Component {
         count: null,
       },
       selectedTreeMetaDoc: null,
-      selectedTreeDoc: null
+      selectedTreeDoc: null,
+      autoSync: false
     });
   }
 
@@ -135,6 +137,17 @@ class Dashboard extends React.Component {
       .then(() => this.syncStateWithTurtleDB());
   }
 
+  handleAutoSyncClick = () => {
+    if (this.state.autoSync) {
+      // if auto-sync on
+      turtleDB.autoSyncOff();
+    } else {
+      turtleDB.autoSyncOn();
+    }
+
+    this.setState((prevState) => ({ autoSync: !prevState.autoSync }));
+  }
+
   // DOCUMENT HANDLERS
 
   handleViewTreeClick = (metaDoc) => {
@@ -183,6 +196,8 @@ class Dashboard extends React.Component {
               handleDeleteClick={this.handleDeleteClick}
               handleDropDatabase={this.handleDropDatabase}
               handleSyncClick={this.handleSyncClick}
+              handleAutoSyncClick={this.handleAutoSyncClick}
+              autoSync={this.state.autoSync}
             />
           </div>
           <div className="col-10">
