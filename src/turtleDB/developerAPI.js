@@ -31,10 +31,6 @@ const developerAPI = {
   },
 
   sync() {
-    console.log('');
-    console.log('syncInProgess', this.syncInProgress);
-    console.log('');
-
     if (!this.syncInProgress) {
       this.syncInProgress = true;
       return this.syncTo()
