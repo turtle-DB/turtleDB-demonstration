@@ -68,6 +68,11 @@ class SyncFrom {
 
   findMissingRevIds(tortoiseMetaDocs) {
     log(`\n #2 HTTP <== from Tortoise with ${tortoiseMetaDocs.length} changed metadocs`);
+
+    if (tortoiseMetaDocs.length === 0) {
+      return Promise.reject("No sync needed - no changes waiting in Tortoise")
+    }
+
     // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
 
     // returns a list of all tortoise leaf nodes that turtle doesn't have
