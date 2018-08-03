@@ -6,6 +6,7 @@ import TableComponent from './TableComponent/TableComponent';
 import ControlPanel from './ControlPanel/ControlPanel';
 import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import TreeComponent from './TreeComponent/TreeComponent';
+import StorageDisplay from './StorageComponent/StorageDisplay';
 
 import turtleDB from '../turtleDB/turtle';
 
@@ -27,7 +28,12 @@ class Dashboard extends React.Component {
       },
       selectedTreeMetaDoc: null,
       selectedTreeDoc: null,
-      autoSync: false
+      autoSync: false,
+      storage: {
+        appUsage: "0 B",
+        appQuota: "0 B",
+        totalQuota: "0 B"
+      }
     }
   }
 
@@ -48,14 +54,20 @@ class Dashboard extends React.Component {
       },
       selectedTreeMetaDoc: null,
       selectedTreeDoc: null,
-      autoSync: false
+      autoSync: false,
+      storage: {
+        appUsage: "0 B",
+        appQuota: "0 B",
+        totalQuota: "0 B"
+      }
     });
   }
 
   syncStateWithTurtleDB = () => {
     turtleDB.readAllMetaDocsAndDocs()
       .then(data => this.setState({ data: data }))
-      .then(() => this.updateTreeDocs());
+      .then(() => this.updateTreeDocs())
+      .then(() => this.updateStorageInfo());
   }
 
   updateTreeDocs = () => {
@@ -70,6 +82,11 @@ class Dashboard extends React.Component {
     }
 
     this.setState({ selectedTreeDoc: null });
+  }
+
+  updateStorageInfo = () => {
+    turtleDB.getStorageInfo()
+      .then(info => this.setState({ storage: info }));
   }
 
   // DASHBOARD HANDLERS
@@ -151,6 +168,11 @@ class Dashboard extends React.Component {
     this.setState((prevState) => ({ autoSync: !prevState.autoSync }));
   }
 
+  handleCompactClick = () => {
+    turtleDB.compactStore()
+      .then(() => this.syncStateWithTurtleDB());
+  }
+
   // DOCUMENT HANDLERS
 
   handleViewTreeClick = (metaDoc) => {
@@ -201,6 +223,7 @@ class Dashboard extends React.Component {
               handleSyncClick={this.handleSyncClick}
               handleAutoSyncClick={this.handleAutoSyncClick}
               autoSync={this.state.autoSync}
+              handleCompactClick={this.handleCompactClick}
             />
           </div>
           <div className="col-10">
@@ -215,6 +238,7 @@ class Dashboard extends React.Component {
               </div>
               <div className="col-3">
                 <BenchmarkBox benchmark={this.state.benchmark} />
+                <StorageDisplay storageInfo={this.state.storage} />
               </div>
             </div>
 

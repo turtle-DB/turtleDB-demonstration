@@ -13,7 +13,7 @@ const developerAPI = {
     return new Promise((resolve, reject) => {
       const syncTo = new SyncTo('http://localhost:3000');
       syncTo.idb = this.idb;
-      resolve(syncTo.start().then(() => {
+      resolve(this.syncToUntilFinished().then(() => {
         logTo('\n ------- Turtle ==> Tortoise sync complete ------');
       }));
     })
@@ -22,12 +22,26 @@ const developerAPI = {
   syncFrom(remoteURL) {
     logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
     return new Promise((resolve, reject) => {
-      const syncFrom = new SyncFrom('http://localhost:3000');
-      syncFrom.idb = this.idb;
-      resolve(syncFrom.start().then(() => {
+      resolve(this.syncFromUntilFinished().then(() => {
         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
       }));
     })
+  },
+
+  syncToUntilFinished() {
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+    .then(() => this.syncToUntilFinished())
+    .catch(() => console.log('Turtle->Tortoise finished'));
+  },
+
+  syncFromUntilFinished() {
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+    .then(() => this.syncFromUntilFinished())
+    .catch(() => console.log('finished'));
   },
 
   sync() {
@@ -169,6 +183,52 @@ const developerAPI = {
 
   autoSyncOff() {
     clearInterval(this.intervalId);
+  },
+
+  compactStore() {
+    const allLeafIdRevs = [];
+
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then((metaDocs) => {
+        metaDocs.forEach(metaDoc => {
+          let idRevs = metaDoc._leafRevs.map(rev => metaDoc._id + '::' + rev);
+          allLeafIdRevs.push(...idRevs);
+        });
+
+        this.idb.getStore(this.idb._store, 'readwrite').openCursor().onsuccess = (e) => {
+          let cursor = e.target.result;
+
+          if (cursor) {
+            let doc = cursor.value;
+            // If document is not a leaf rev
+            if (!allLeafIdRevs.includes(doc._id_rev) && !doc._deleted) {
+              var request = cursor.delete();
+            }
+            cursor.continue();
+          } else {
+            console.log('Compation deletion finished!');
+          }
+        }
+      })
+  },
+
+  getStorageInfo() {
+    return navigator.storage.estimate()
+      .then(({ quota, usage }) => {
+        return {
+          // Quota here is total/shared temporary storage space available for all Chrome apps
+          // Technically, one app/origin (like localhost) only has access to 20% of this value
+          appUsage: this.sizeOf(usage),
+          appQuota: this.sizeOf(quota * 0.2),
+          totalQuota: this.sizeOf(quota)
+        };
+      });
+  },
+
+  sizeOf(bytes) {
+    if (bytes == 0) { return "0.00 B"; }
+    var e = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, e)).toFixed(2) + ' ' + ' KMGTP'.charAt(e) + 'B';
   },
 
   // BULK OPERATIONS
