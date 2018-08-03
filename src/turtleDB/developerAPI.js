@@ -168,15 +168,15 @@ const developerAPI = {
     return this._readMetaDoc(_id)
       .then(metaDoc => {
         const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
-        const returnedDocs = [];
 
         let result = Promise.resolve();
         leafRevsToDelete.forEach(rev => {
-          result = result.then(() => this.delete(_id, rev)).then((doc) => returnedDocs.push(doc));
+          result = result.then(() => this.delete(_id, rev));
         });
 
-        return result.then(() => returnedDocs);
+        return result;
       })
+      .then(() => this.update(_id, doc, _rev))
       .catch(err => console.log("makeRevWinner error:", err));
   },
 
