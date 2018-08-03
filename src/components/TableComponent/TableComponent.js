@@ -88,7 +88,7 @@ class TableComponent extends React.Component {
     }
 
     return (
-      <div className="table-container">
+      <div>
         <Pagination
           handlePaginationClick={this.handlePaginationClick}
           dataLength={this.props.data.docs.length}

@@ -30,9 +30,9 @@ class Dashboard extends React.Component {
       selectedTreeDoc: null,
       autoSync: false,
       storage: {
-        totalQuota: "0 B",
+        appUsage: "0 B",
         appQuota: "0 B",
-        appUsage: "0 B"
+        totalQuota: "0 B"
       }
     }
   }
@@ -56,9 +56,9 @@ class Dashboard extends React.Component {
       selectedTreeDoc: null,
       autoSync: false,
       storage: {
-        totalQuota: "0 B",
+        appUsage: "0 B",
         appQuota: "0 B",
-        appUsage: "0 B"
+        totalQuota: "0 B"
       }
     });
   }
@@ -168,6 +168,11 @@ class Dashboard extends React.Component {
     this.setState((prevState) => ({ autoSync: !prevState.autoSync }));
   }
 
+  handleCompactClick = () => {
+    turtleDB.compactStore()
+      .then(() => this.syncStateWithTurtleDB());
+  }
+
   // DOCUMENT HANDLERS
 
   handleViewTreeClick = (metaDoc) => {
@@ -218,6 +223,7 @@ class Dashboard extends React.Component {
               handleSyncClick={this.handleSyncClick}
               handleAutoSyncClick={this.handleAutoSyncClick}
               autoSync={this.state.autoSync}
+              handleCompactClick={this.handleCompactClick}
             />
           </div>
           <div className="col-10">

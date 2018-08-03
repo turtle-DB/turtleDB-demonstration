@@ -200,74 +200,30 @@ const developerAPI = {
   },
 
   compactStore() {
-    // (could also generate list of NON-leaf rev ids via traversal of tree and use that list to either: w/ a cursor OR make individual delete calls.)
+    const allLeafIdRevs = [];
 
-    // get all metadocs, generate master list of _id_revs from _leafRevs
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then((metaDocs) => {
+        metaDocs.forEach(metaDoc => {
+          let idRevs = metaDoc._leafRevs.map(rev => metaDoc._id + '::' + rev);
+          allLeafIdRevs.push(...idRevs);
+        });
 
-    // iterate through all store docs using cursor, can check value using cursor.value._id_rev
+        this.idb.getStore(this.idb._store, 'readwrite').openCursor().onsuccess = (e) => {
+          let cursor = e.target.result;
 
-    // if id_rev not in array of _id_rev values AND is not _deleted: true, can delete it using cursor.delete
-
-    // const allLeafRevIds = [];
-
-    // this.idb.command(this.idb._meta, "READ_ALL", {})
-    //   .then((metaDocs) => {
-
-    //   })
-
-
-    // let startTime = Date.now();
-    // Promise.all(insertPromises).then(() => {
-    //   let timeSpent = Date.now() - startTime;
-    //   this.setState({
-    //     benchmark: {
-    //       time: timeSpent,
-    //       type: "INSERT",
-    //       count: n
-    //     }
-    //   });
-
-
-
-    // this.idb.getStore(this.idb._store, 'readonly').openCursor().onsuccess = e => {
-    //   const cursor = e.target.result;
-    //   if (!cursor) {
-    //     console.log("cursor finished!");
-    //     resolve(Promise.all(deletePromises));
-    //   } else {
-    //     if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
-    //       const _id = e.target.result.value._id;
-    //       deletePromises.push(turtleDB.delete(_id));
-    //       counter += 1;
-    //     }
-    //     cursor.continue()
-    //   }
-    // }
-
-    // function deleteResult() {
-    //   list.innerHTML = '';
-    //   var transaction = db.transaction(['rushAlbumList'], 'readwrite');
-    //   var objectStore = transaction.objectStore('rushAlbumList');
-
-    //   objectStore.openCursor().onsuccess = function (event) {
-    //     var cursor = event.target.result;
-    //     if (cursor) {
-    //       if (cursor.value.albumTitle === 'Grace under pressure') {
-    //         var request = cursor.delete();
-    //         request.onsuccess = function () {
-    //           console.log('Deleted that mediocre album from 1984. Even Power windows is better.');
-    //         };
-    //       } else {
-    //         var listItem = document.createElement('li');
-    //         listItem.innerHTML = '<strong>' + cursor.value.albumTitle + '</strong>, ' + cursor.value.year;
-    //         list.appendChild(listItem);
-    //       }
-    //       cursor.continue();
-    //     } else {
-    //       console.log('Entries displayed.');
-    //     }
-    //   };
-    // };
+          if (cursor) {
+            let doc = cursor.value;
+            // If document is not a leaf rev
+            if (!allLeafIdRevs.includes(doc._id_rev) && !doc._deleted) {
+              var request = cursor.delete();
+            }
+            cursor.continue();
+          } else {
+            console.log('Compation deletion finished!');
+          }
+        }
+      })
   },
 
   getStorageInfo() {
@@ -276,9 +232,9 @@ const developerAPI = {
         return {
           // Quota here is total/shared temporary storage space available for all Chrome apps
           // Technically, one app/origin (like localhost) only has access to 20% of this value
-          totalQuota: this.sizeOf(quota),
+          appUsage: this.sizeOf(usage),
           appQuota: this.sizeOf(quota * 0.2),
-          appUsage: this.sizeOf(usage)
+          totalQuota: this.sizeOf(quota)
         };
       });
   },
