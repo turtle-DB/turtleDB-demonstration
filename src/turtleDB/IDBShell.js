@@ -118,18 +118,6 @@ class IDBShell {
     return new Promise((resolve, reject) => {
       let updatePromises = [];
       let counter = 0;
-<<<<<<< HEAD
-        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
-          const cursor = e.target.result;
-          if (!cursor) {
-            console.log('Cursor finished!');
-            resolve(Promise.all(updatePromises));
-          } else {
-            if (!!e.target.result.value._winningRev && counter < n) {
-              const _id = e.target.result.value._id;
-              updatePromises.push(
-                turtleDB.read(_id)
-=======
 
       this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
         const cursor = e.target.result;
@@ -141,7 +129,6 @@ class IDBShell {
             const _id = e.target.result.value._id;
             updatePromises.push(
               turtleDB.read(_id)
->>>>>>> e553711794c7c829025488672a10f61822f1834d
                 .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
                 .then(data => turtleDB.update(_id, data))
             );
