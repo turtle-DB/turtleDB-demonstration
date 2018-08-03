@@ -205,6 +205,52 @@ const developerAPI = {
     clearInterval(this.intervalId);
   },
 
+  compactStore() {
+    const allLeafIdRevs = [];
+
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then((metaDocs) => {
+        metaDocs.forEach(metaDoc => {
+          let idRevs = metaDoc._leafRevs.map(rev => metaDoc._id + '::' + rev);
+          allLeafIdRevs.push(...idRevs);
+        });
+
+        this.idb.getStore(this.idb._store, 'readwrite').openCursor().onsuccess = (e) => {
+          let cursor = e.target.result;
+
+          if (cursor) {
+            let doc = cursor.value;
+            // If document is not a leaf rev
+            if (!allLeafIdRevs.includes(doc._id_rev) && !doc._deleted) {
+              var request = cursor.delete();
+            }
+            cursor.continue();
+          } else {
+            console.log('Compation deletion finished!');
+          }
+        }
+      })
+  },
+
+  getStorageInfo() {
+    return navigator.storage.estimate()
+      .then(({ quota, usage }) => {
+        return {
+          // Quota here is total/shared temporary storage space available for all Chrome apps
+          // Technically, one app/origin (like localhost) only has access to 20% of this value
+          appUsage: this.sizeOf(usage),
+          appQuota: this.sizeOf(quota * 0.2),
+          totalQuota: this.sizeOf(quota)
+        };
+      });
+  },
+
+  sizeOf(bytes) {
+    if (bytes == 0) { return "0.00 B"; }
+    var e = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, e)).toFixed(2) + ' ' + ' KMGTP'.charAt(e) + 'B';
+  },
+
   // BULK OPERATIONS
 
   readAllMetaDocsAndDocs() {
