@@ -5,7 +5,7 @@ const debug = require('debug');
 var log = debug('turtleDB:syncTo');
 var httpLog = debug('turtleDB:http');
 
-const BATCH_LIMIT = 5;
+const BATCH_LIMIT = 25;
 
 class SyncTo {
   constructor(targetUrl) {
