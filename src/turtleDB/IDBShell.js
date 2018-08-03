@@ -118,6 +118,7 @@ class IDBShell {
     return new Promise((resolve, reject) => {
       let updatePromises = [];
       let counter = 0;
+
       this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
         const cursor = e.target.result;
         if (!cursor) {
