@@ -162,34 +162,6 @@ const developerAPI = {
     return this.update(_id, { _deleted: true }, revId);
   },
 
-  makeRevWinner(doc) {
-    const { _id, _rev } = doc;
-
-    return this._readMetaDoc(_id)
-      .then(metaDoc => {
-        const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
-
-        let result = Promise.resolve();
-        leafRevsToDelete.forEach(rev => {
-          result = result.then(() => this.delete(_id, rev));
-        });
-
-        return result;
-      })
-      .then(() => this.update(_id, doc, _rev))
-      .catch(err => console.log("makeRevWinner error:", err));
-  },
-
-  editNDocumentsMTimes(docs, times) {
-    let result = Promise.resolve();
-
-    for (let i = 0; i < times; i += 1) {
-      //create promise chain
-      result = result.then(() => this.idb.editFirstNDocuments(docs));
-    }
-
-    result.then(() => console.log('finished editing'));
-  },
 
   autoSyncOn() {
     this.intervalId = setInterval(this.sync.bind(this), 3000);
@@ -200,22 +172,6 @@ const developerAPI = {
   },
 
   // BULK OPERATIONS
-
-  readAllMetaDocsAndDocs() {
-    const result = {};
-
-    return this.idb.command(this.idb._meta, "READ_ALL", {})
-      .then(metaDocs => {
-        result.metaDocs = metaDocs.filter(doc => doc._winningRev);
-        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
-        return Promise.all(promises);
-      })
-      .then(docs => {
-        result.docs = docs.filter(doc => !!doc);
-        return result;
-      })
-      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
-  },
 
   filterBy(selector) {
     return this.idb.filterBy(selector);
