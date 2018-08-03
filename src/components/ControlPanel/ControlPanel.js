@@ -4,6 +4,7 @@ import InsertDocsPanel from './InsertDocsPanel';
 import UpdateDocsPanel from './UpdateDocsPanel';
 import DeleteDocsPanel from './DeleteDocsPanel';
 import SyncButton from './SyncButton';
+import CompactButton from './CompactButton';
 
 class ControlPanel extends React.Component {
   render() {
@@ -19,6 +20,7 @@ class ControlPanel extends React.Component {
           handleAutoSyncClick={this.props.handleAutoSyncClick}
           autoSync={this.props.autoSync}
         />
+        <CompactButton handleCompactClick={this.props.handleCompactClick} />
       </div>
     )
   }
