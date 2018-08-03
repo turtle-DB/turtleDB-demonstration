@@ -25,7 +25,13 @@ class SyncFrom {
       .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
       .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
       .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
-      .catch((err) => console.log('Sync From Error:', err));
+      .catch((err) => {
+        if (err === 'SYNC_COMPLETE') {
+          return Promise.reject();
+        } else {
+          console.log('Sync From Error:', err)
+        }
+      });
   }
 
   checkServerConnection(path) {
@@ -70,7 +76,7 @@ class SyncFrom {
     log(`\n #2 HTTP <== from Tortoise with ${tortoiseMetaDocs.length} changed metadocs`);
 
     if (tortoiseMetaDocs.length === 0) {
-      return Promise.reject("No sync needed - no changes waiting in Tortoise")
+      return Promise.reject("SYNC_COMPLETE")
     }
 
     // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
