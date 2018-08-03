@@ -1,6 +1,4 @@
-import uuidv4 from 'uuid/v4';
 import IDBShell from './IDBShell';
-import axios from 'axios';
 import md5 from 'md5';
 
 // turtleDB specific
@@ -9,6 +7,7 @@ import developerAPI from './developerAPI';
 class TurtleDB {
   constructor() {
     this.idb = new IDBShell('turtleDB');
+    this.syncInProgress = false;
 
     for (const prop in developerAPI) {
       if (typeof developerAPI[prop] === 'function') {
