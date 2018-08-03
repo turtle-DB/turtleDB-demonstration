@@ -90,26 +90,26 @@ class IDBShell {
       .then(docs => docs.filter(doc => fields.every(field => {
         return doc[field] === selector[field]
       }))
-    );
+      );
   }
 
   deleteBetweenNumbers(start, end) {
     return new Promise((resolve, reject) => {
       let deletePromises = [];
       let counter = 0;
-        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
-          const cursor = e.target.result;
-          if (!cursor) {
-            console.log("cursor finished!");
-            resolve(Promise.all(deletePromises));
-          } else {
-            if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
-              const _id = e.target.result.value._id;
-              deletePromises.push(turtleDB.delete(_id));
-              counter += 1;
-            }
-            cursor.continue()
+      this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+        const cursor = e.target.result;
+        if (!cursor) {
+          console.log("cursor finished!");
+          resolve(Promise.all(deletePromises));
+        } else {
+          if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
+            const _id = e.target.result.value._id;
+            deletePromises.push(turtleDB.delete(_id));
+            counter += 1;
           }
+          cursor.continue()
+        }
       }
     })
   }
@@ -118,6 +118,7 @@ class IDBShell {
     return new Promise((resolve, reject) => {
       let updatePromises = [];
       let counter = 0;
+<<<<<<< HEAD
         this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
           const cursor = e.target.result;
           if (!cursor) {
@@ -128,26 +129,39 @@ class IDBShell {
               const _id = e.target.result.value._id;
               updatePromises.push(
                 turtleDB.read(_id)
+=======
+
+      this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+        const cursor = e.target.result;
+        if (!cursor) {
+          console.log('Cursor finished!');
+          resolve(Promise.all(updatePromises));
+        } else {
+          if (!!e.target.result.value._winningRev && counter < n) {
+            const _id = e.target.result.value._id;
+            updatePromises.push(
+              turtleDB.read(_id)
+>>>>>>> e553711794c7c829025488672a10f61822f1834d
                 .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
                 .then(data => turtleDB.update(_id, data))
-              );
-            }
-            counter++;
-            cursor.continue();
+            );
           }
+          counter++;
+          cursor.continue();
+        }
       }
     })
   }
 
   getStoreDocsByIdRevs(idRevsArr) {
     const promises = idRevsArr.map(_id_rev => {
-      return this.command(this._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+      return this.command(this._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
     });
 
     return Promise.all(promises);
   }
 
-// STORE OPERATIONS
+  // STORE OPERATIONS
 
   getStore(store, op) {
     if (this.hasStoreName(store)) {
