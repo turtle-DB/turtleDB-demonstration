@@ -19,9 +19,11 @@ class SyncTo {
       .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
       .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
       .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
+
       .then(() => this.createChangeLog())
       .then(() => this.syncBatches())
       .then(() => console.log('all batches completed'))
+
       .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
       .then(() => this.sendUpdatedSyncToTortoiseDoc('/_complete_sync')) //this.newSyncToTortoiseDoc
       .then(() => this.updateSyncToTortoiseDoc())

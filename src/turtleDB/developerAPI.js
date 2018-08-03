@@ -22,12 +22,18 @@ const developerAPI = {
   syncFrom(remoteURL) {
     logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
     return new Promise((resolve, reject) => {
-      const syncFrom = new SyncFrom('http://localhost:3000');
-      syncFrom.idb = this.idb;
-      resolve(syncFrom.start().then(() => {
+      resolve(this.syncFromUntilFinished().then(() => {
         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
       }));
     })
+  },
+
+  syncFromUntilFinished() {
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+    .then(() => this.syncFromUntilFinished())
+    .catch(() => console.log('finished'));
   },
 
   sync() {
