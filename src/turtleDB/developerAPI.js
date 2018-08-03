@@ -13,7 +13,7 @@ const developerAPI = {
     return new Promise((resolve, reject) => {
       const syncTo = new SyncTo('http://localhost:3000');
       syncTo.idb = this.idb;
-      resolve(syncTo.start().then(() => {
+      resolve(this.syncToUntilFinished().then(() => {
         logTo('\n ------- Turtle ==> Tortoise sync complete ------');
       }));
     })
@@ -26,6 +26,14 @@ const developerAPI = {
         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
       }));
     })
+  },
+
+  syncToUntilFinished() {
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+    .then(() => this.syncToUntilFinished())
+    .catch(() => console.log('Turtle->Tortoise finished'));
   },
 
   syncFromUntilFinished() {
