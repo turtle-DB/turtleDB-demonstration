@@ -122,7 +122,7 @@ class IDBShell {
           const cursor = e.target.result;
           if (!cursor) {
             console.log('Cursor finished!');
-            resolve(Promise.all(promises));
+            resolve(Promise.all(updatePromises));
           } else {
             if (!!e.target.result.value._winningRev && counter < n) {
               const _id = e.target.result.value._id;
