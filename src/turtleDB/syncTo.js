@@ -5,6 +5,9 @@ const debug = require('debug');
 var log = debug('turtleDB:syncTo');
 var httpLog = debug('turtleDB:http');
 
+const BATCH_LIMIT = 5;
+const STORE_BATCH_LIMIT = 5;
+
 class SyncTo {
   constructor(targetUrl) {
     this.targetUrl = targetUrl;
@@ -16,13 +19,83 @@ class SyncTo {
       .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
       .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
       .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
-      .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-      .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
-      .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
+      .then(() => this.createChangeLog())
+      .then(() => this.syncBatches())
+      .then(() => console.log('all batches completed'))
       .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
-      .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
+      .then(() => this.sendUpdatedSyncToTortoiseDoc('/_complete_sync')) //this.newSyncToTortoiseDoc
       .then(() => this.updateSyncToTortoiseDoc())
-      .catch(err => console.log('Sync To Error:', err));
+      .catch(err => console.log('Sync start error:', err));
+  }
+
+  //default to 5 metadocs at a time until tree compaction is complete
+  createChangeLog() {
+    if (this.lastTortoiseKey === this.highestTurtleKey) {
+      return Promise.reject("No sync needed.")
+    }
+
+    this.changeLog = [];
+
+    return this.getIDsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
+    .then(ids => {
+      this.changeLog = ids;
+    })
+  }
+
+  syncBatches() {
+    let end = (this.changeLog.length <= BATCH_LIMIT ? this.changeLog.length - 1 : BATCH_LIMIT - 1);
+    let currentBatch = this.changeLog.slice(0, end + 1);
+
+    if (currentBatch.length === 0) {
+      return;
+    }
+
+    return this.syncBatch(currentBatch)
+    .then(() => {
+      console.log('Finished current batch');
+      this.changeLog = this.changeLog.splice(end + 1);
+      return this.syncBatches();
+    });
+  }
+
+  syncBatch(currentBatch) {
+    return this.getMetaDocsByIDs(currentBatch)
+    .then(docs => this.changedTurtleMetaDocs = docs)
+    .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
+    .then(revIdsFromTortoise => this.createStoreChangeLog(revIdsFromTortoise.data))
+    .then(() => this.syncStoreBatches())
+    .then(() => console.log('all store batches complete'))
+
+    //.catch(err => console.log('Sync batch Error:', err));
+  }
+
+  //default to 5 metadocs at a time until tree compaction is complete
+  createStoreChangeLog(revIdsFromTortoise) {
+    log(`\n #4 HTTP <== receive request from Tortoise for ${revIdsFromTortoise.length} records`);
+    this.storeChangeLog = revIdsFromTortoise;
+  }
+
+  syncStoreBatches() {
+    let storeBatchEnd = (this.storeChangeLog.length <= STORE_BATCH_LIMIT ? this.storeChangeLog.length - 1 : STORE_BATCH_LIMIT - 1);
+    let currentStoreBatch = this.storeChangeLog.slice(0, storeBatchEnd + 1);
+
+    if (currentStoreBatch.length === 0) {
+      return this.sendTurtleDocsToTortoise('/_insert_docs', true)
+      .then(() => console.log('Tortoise confirmed batch complete'));
+    }
+
+    return this.syncStoreBatch(currentStoreBatch)
+    .then(() => {
+      this.storeChangeLog = this.storeChangeLog.splice(storeBatchEnd + 1);
+
+      return this.syncStoreBatches();
+    });
+  }
+
+  syncStoreBatch(listOfRevIds) {
+    return this.getStoreDocsForTortoise(listOfRevIds)
+    .then(() => console.log('store docs for tortoise', this.storeDocsForTortoise))
+    .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
   }
 
   checkServerConnection(path) {
@@ -77,6 +150,11 @@ class SyncTo {
     }
   }
 
+  getIDsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
+    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
+      .then(docs => this.getUniqueIDs(docs))
+  }
+
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
     return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
       .then(docs => this.getUniqueIDs(docs))
@@ -106,7 +184,6 @@ class SyncTo {
   }
 
   getStoreDocsForTortoise(revIdsFromTortoise) {
-    log(`\n #4 HTTP <== receive request from Tortoise for ${revIdsFromTortoise.length} records`);
     const promises = revIdsFromTortoise.map(_id_rev => {
       return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
     });
@@ -123,9 +200,13 @@ class SyncTo {
     log('\n prepare updated record of sync history with Tortoise');
   }
 
-  sendTurtleDocsToTortoise(path) {
-    log('\n #5 HTTP ==> Tortoise with requested records and new sync history');
-    return axios.post(this.targetUrl + path, { docs: this.storeDocsForTortoise, newSyncToTortoiseDoc: this.newSyncToTortoiseDoc })
+  sendUpdatedSyncToTortoiseDoc(path) {
+    return axios.post(this.targetUrl + path, { newSyncToTortoiseDoc: this.newSyncToTortoiseDoc });
+  }
+
+  sendTurtleDocsToTortoise(path, finishedBatch=false) {
+    log('\n #5 HTTP ==> Tortoise with batch of store docs');
+    return axios.post(this.targetUrl + path, { finishedBatch: finishedBatch, docs: this.storeDocsForTortoise }) //, newSyncToTortoiseDoc: this.newSyncToTortoiseDoc })
   }
 
   updateSyncToTortoiseDoc() {
