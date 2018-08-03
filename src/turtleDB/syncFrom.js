@@ -79,8 +79,6 @@ class SyncFrom {
       return Promise.reject("SYNC_COMPLETE")
     }
 
-    // console.log('metaDocs from tortoise:', tortoiseMetaDocs);
-
     // returns a list of all tortoise leaf nodes that turtle doesn't have
     const missingLeafNodes = [];
 
