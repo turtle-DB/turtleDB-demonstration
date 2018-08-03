@@ -31,9 +31,15 @@ const developerAPI = {
   },
 
   sync() {
-    return this.syncTo()
-      //.then(() => this.syncFrom())
-      .catch((err) => console.log(err));
+    if (!this.syncInProgress) {
+      this.syncInProgress = true;
+      return this.syncTo()
+        .then(() => this.syncFrom())
+        .then(() => this.syncInProgress = false)
+        .catch((err) => console.log(err));
+    } else {
+      return Promise.reject('Sync already in progress');
+    }
   },
 
   create(data) {
@@ -162,15 +168,15 @@ const developerAPI = {
     return this._readMetaDoc(_id)
       .then(metaDoc => {
         const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
-        const returnedDocs = [];
 
         let result = Promise.resolve();
         leafRevsToDelete.forEach(rev => {
-          result = result.then(() => this.delete(_id, rev)).then((doc) => returnedDocs.push(doc));
+          result = result.then(() => this.delete(_id, rev));
         });
 
-        return result.then(() => returnedDocs);
+        return result;
       })
+      .then(() => this.update(_id, doc, _rev))
       .catch(err => console.log("makeRevWinner error:", err));
   },
 
@@ -186,7 +192,7 @@ const developerAPI = {
   },
 
   autoSyncOn() {
-    this.intervalId = setInterval(this.sync.bind(this), 1000);
+    this.intervalId = setInterval(this.sync.bind(this), 3000);
   },
 
   autoSyncOff() {

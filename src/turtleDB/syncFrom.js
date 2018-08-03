@@ -148,7 +148,7 @@ class SyncFrom {
   }
 
   updateStoreAndSyncFromStore(docsFromTortoise) {
-    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.length} missing records`);
+    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.docs.length} missing records`);
     const { docs, newSyncToTurtleDoc } = docsFromTortoise;
     this.insertNewDocsIntoStore(docs)
       .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
