@@ -3,6 +3,10 @@ import md5 from 'md5';
 import SyncTo from './syncTo';
 import SyncFrom from './syncFrom';
 
+const debug = require('debug');
+var logTo = debug('turtleDB:syncToSummary');
+var logFrom = debug('turtleDB:syncFromSummary');
+
 // turtleDB specific
 import developerAPI from './developerAPI';
 
@@ -141,9 +145,8 @@ class TurtleDB {
   syncTo(remoteURL) {
     logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
     return new Promise((resolve, reject) => {
-      const syncTo = new SyncTo('http://localhost:3000');
-      syncTo.idb = this.idb;
-      resolve(this.syncToUntilFinished().then(() => {
+      resolve(this.syncToUntilFinished()
+        .then(() => {
         logTo('\n ------- Turtle ==> Tortoise sync complete ------');
       }));
     })
@@ -152,7 +155,8 @@ class TurtleDB {
   syncFrom(remoteURL) {
     logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
     return new Promise((resolve, reject) => {
-      resolve(this.syncFromUntilFinished().then(() => {
+      resolve(this.syncFromUntilFinished()
+        .then(() => {
         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
       }));
     })
@@ -177,7 +181,6 @@ class TurtleDB {
   // For Testing Purposes
   editNDocumentsMTimes(docs, times) {
     let result = Promise.resolve();
-
     for (let i = 0; i < times; i += 1) {
       //create promise chain
       result = result.then(() => this.idb.editFirstNDocuments(docs));

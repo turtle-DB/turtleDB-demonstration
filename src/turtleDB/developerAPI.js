@@ -1,49 +1,7 @@
 import md5 from 'md5';
 import uuidv4 from 'uuid/v4';
-import SyncTo from './syncTo';
-import SyncFrom from './syncFrom';
-const debug = require('debug');
-
-var logTo = debug('turtleDB:syncToSummary');
-var logFrom = debug('turtleDB:syncFromSummary');
 
 const developerAPI = {
-  syncTo(remoteURL) {
-    logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
-    return new Promise((resolve, reject) => {
-      const syncTo = new SyncTo('http://localhost:3000');
-      syncTo.idb = this.idb;
-      resolve(this.syncToUntilFinished().then(() => {
-        logTo('\n ------- Turtle ==> Tortoise sync complete ------');
-      }));
-    })
-  },
-
-  syncFrom(remoteURL) {
-    logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
-    return new Promise((resolve, reject) => {
-      resolve(this.syncFromUntilFinished().then(() => {
-        logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
-      }));
-    })
-  },
-
-  syncToUntilFinished() {
-    const syncTo = new SyncTo('http://localhost:3000');
-    syncTo.idb = this.idb;
-    return syncTo.start()
-    .then(() => this.syncToUntilFinished())
-    .catch(() => console.log('Turtle->Tortoise finished'));
-  },
-
-  syncFromUntilFinished() {
-    const syncFrom = new SyncFrom('http://localhost:3000');
-    syncFrom.idb = this.idb;
-    return syncFrom.start()
-    .then(() => this.syncFromUntilFinished())
-    .catch(() => console.log('finished'));
-  },
-
   sync() {
     if (!this.syncInProgress) {
       this.syncInProgress = true;
@@ -224,7 +182,6 @@ const developerAPI = {
         };
       });
   },
-
 
   // BULK OPERATIONS
 
