@@ -1,5 +1,7 @@
 import IDBShell from './IDBShell';
 import md5 from 'md5';
+import SyncTo from './syncTo';
+import SyncFrom from './syncFrom';
 
 // turtleDB specific
 import developerAPI from './developerAPI';
@@ -108,6 +110,96 @@ class TurtleDB {
     for (let i = 0; i < node[2].length; i++) {
       this._insertNewRev(node[2][i], newRev, oldRev, _deleted);
     }
+  }
+
+  makeRevWinner(doc) {
+    const { _id, _rev } = doc;
+
+    return this._readMetaDoc(_id)
+      .then(metaDoc => {
+        const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
+
+        let result = Promise.resolve();
+        leafRevsToDelete.forEach(rev => {
+          result = result.then(() => this.delete(_id, rev));
+        });
+
+        return result;
+      })
+      .then(() => this.update(_id, doc, _rev))
+      .catch(err => console.log("makeRevWinner error:", err));
+  }
+
+  sizeOf(bytes) {
+    if (bytes == 0) { return "0.00 B"; }
+    var e = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, e)).toFixed(2) + ' ' + ' KMGTP'.charAt(e) + 'B';
+  }
+
+  // Sync
+
+  syncTo(remoteURL) {
+    logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
+    return new Promise((resolve, reject) => {
+      const syncTo = new SyncTo('http://localhost:3000');
+      syncTo.idb = this.idb;
+      resolve(this.syncToUntilFinished().then(() => {
+        logTo('\n ------- Turtle ==> Tortoise sync complete ------');
+      }));
+    })
+  }
+
+  syncFrom(remoteURL) {
+    logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
+    return new Promise((resolve, reject) => {
+      resolve(this.syncFromUntilFinished().then(() => {
+        logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
+      }));
+    })
+  }
+
+  syncToUntilFinished() {
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+    .then(() => this.syncToUntilFinished())
+    .catch(() => console.log('Turtle->Tortoise finished'));
+  }
+
+  syncFromUntilFinished() {
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+    .then(() => this.syncFromUntilFinished())
+    .catch(() => console.log('finished'));
+  }
+
+  // For Testing Purposes
+  editNDocumentsMTimes(docs, times) {
+    let result = Promise.resolve();
+
+    for (let i = 0; i < times; i += 1) {
+      //create promise chain
+      result = result.then(() => this.idb.editFirstNDocuments(docs));
+    }
+
+    result.then(() => console.log('finished editing'));
+  }
+
+  readAllMetaDocsAndDocs() {
+    const result = {};
+
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then(metaDocs => {
+        result.metaDocs = metaDocs.filter(doc => doc._winningRev);
+        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
+        return Promise.all(promises);
+      })
+      .then(docs => {
+        result.docs = docs.filter(doc => !!doc);
+        return result;
+      })
+      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   }
 }
 
