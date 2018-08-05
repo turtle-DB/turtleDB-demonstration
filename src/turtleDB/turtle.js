@@ -144,16 +144,6 @@ class TurtleDB {
 
   // Sync
 
-  // syncTo(remoteURL) {
-  //   logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
-  //   return new Promise((resolve, reject) => {
-  //     resolve(this.syncToUntilFinished()
-  //       .then(() => {
-  //         logTo('\n ------- Turtle ==> Tortoise sync complete ------');
-  //       }));
-  //   })
-  // }
-
   syncTo(remoteURL) {
     logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
     const syncTo = new SyncTo('http://localhost:3000');
@@ -164,13 +154,21 @@ class TurtleDB {
 
   syncFrom(remoteURL) {
     logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
-    return new Promise((resolve, reject) => {
-      resolve(this.syncFromUntilFinished()
-        .then(() => {
-          logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
-        }));
-    })
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+      .then(() => logFrom('\n ------- Tortoise ==> Turtle sync complete ------'));
   }
+
+  // syncFrom(remoteURL) {
+  //   logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
+  //   return new Promise((resolve, reject) => {
+  //     resolve(this.syncFromUntilFinished()
+  //       .then(() => {
+  //         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
+  //       }));
+  //   })
+  // }
 
   syncToUntilFinished() {
     logToBatch(`\n Beginning sync to batch...`);
