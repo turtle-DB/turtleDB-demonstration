@@ -153,7 +153,7 @@ class TurtleDB {
   }
 
   syncFrom(remoteURL) {
-    logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
+    logFrom('\n ------- NEW Tortoise ==> Turtle SYNC ------');
     const syncFrom = new SyncFrom('http://localhost:3000');
     syncFrom.idb = this.idb;
     return syncFrom.start()

@@ -14,7 +14,7 @@ class SyncFrom {
     this.updatedMetaDocs = [];
     this.newTortoiseMetaDocs = [];
 
-    this.docsFromTurtle = [];
+    this.docsFromTortoise = [];
   }
 
   start() {
@@ -23,10 +23,12 @@ class SyncFrom {
       .then(() => this.getLastTurtleKey())
       .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
       .then(() => this.findMissingRevIds()) // this.missingRevIds, this.updatedMetaDocs, this.newTortoiseMetaDocs
-      .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
-    // .then(docsFromTortoise => this.updateStoreAndSyncFromStore(docsFromTortoise.data))
-    // .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
-    // .catch((err) => console.log('Sync From Error:', err));
+      .then(() => this.sendRequestForTortoiseDocs('/_changed_docs')) // this.syncToTurtleDoc, this.docsFromTortoise
+      .then(() => this.insertUpdatedMetaDocs())
+      .then(() => this.insertNewDocsIntoStore())
+      .then(() => this.updateSyncFromTortoiseDoc())
+      .then(() => this.sendSuccessConfirmation('/_confirm_sync'))
+      .catch((err) => console.log('Sync From Error:', err));
   }
 
   checkServerConnection(path) {
@@ -78,7 +80,7 @@ class SyncFrom {
           this.metaDocsFromTortoise.push(...data.metaDocs);
 
           if (!data.lastBatch) {
-            this.sendNextMetaDocRequest(path);
+            return this.sendNextMetaDocRequest(path);
           } else {
             log(`\n Recieved all metadocs from Tortoise`);
             return;
@@ -93,14 +95,14 @@ class SyncFrom {
   }
 
   sendNextMetaDocRequest(path) {
-    log('\n #1 HTTP ==> Initial request to Tortoise requesting any changed metadocs');
+    log('\n #1 HTTP ==> NEXT request to Tortoise requesting any changed metadocs');
     return axios.post(this.targetUrl + path, { initial: false })
       .then(({ data }) => {
         log(`\n #2 HTTP <== from Tortoise with ${data.metaDocs.length} changed metadocs`);
         this.metaDocsFromTortoise.push(...data.metaDocs);
 
         if (!data.lastBatch) {
-          this.sendNextMetaDocRequest(path);
+          return this.sendNextMetaDocRequest(path);
         } else {
           log(`\n Recieved all metadocs from Tortoise`);
           return;
@@ -127,9 +129,10 @@ class SyncFrom {
                   // Probably/definitely shouldn't do this here...probably should wait until we recieve all the docs from Tortoise as well
                   // So we don't end up with half the meta docs inserted and none of the docs...
                   // Do this somewhere later? Save them up to an array? Like this:
-                  // this.updatedMetaDocs.push(tortoiseMetaDoc);
+                  this.updatedMetaDocs.push(tortoiseMetaDoc);
 
-                  return this.idb.command(this.idb._meta, "UPDATE", { data: tortoiseMetaDoc });
+                  // Instead of this:
+                  // return this.idb.command(this.idb._meta, "UPDATE", { data: tortoiseMetaDoc });
                 });
             }
           } else {
@@ -139,9 +142,10 @@ class SyncFrom {
             // Probably/definitely shouldn't do this here...probably should wait until we recieve all the docs from Tortoise as well
             // So we don't end up with half the meta docs inserted and none of the docs...
             // Do this somewhere later? Save them up to an array? Like this:
-            // this.newTortoiseMetaDocs.push(tortoiseMetaDoc);
+            this.newTortoiseMetaDocs.push(tortoiseMetaDoc);
 
-            return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
+            // Instead of this:
+            // return this.idb.command(this.idb._meta, "CREATE", { data: tortoiseMetaDoc });
           }
         })
     });
@@ -178,46 +182,75 @@ class SyncFrom {
 
   // #3 - #4 HTTP POST '/_changed_docs'
 
-
-
   sendRequestForTortoiseDocs(path) {
-    log('\n #3 HTTP ==> to Tortoise requesting missing records');
-    return axios.post(this.targetUrl + path, { revIds: this.missingRevIds });
+    return this.sendInitialDocsRequest(path)
+      .then((res) => this.handleTortoiseDocsResponse(res, path));
   }
 
-  updateStoreAndSyncFromStore(docsFromTortoise) {
-    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.docs.length} missing records`);
-    const { docs, newSyncToTurtleDoc } = docsFromTortoise;
-    this.insertNewDocsIntoStore(docs)
-      .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
-      .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
+  sendInitialDocsRequest(path) {
+    log(`\n #3 HTTP ==> to Tortoise initial request for ${this.missingRevIds.length} missing store docs`);
+    return axios.post(this.targetUrl + path, { revIds: this.missingRevIds, initial: true });
   }
+
+  sendNextDocsRequest(path) {
+    log('\n #3 HTTP ==> to Tortoise follow up request for more store docs');
+    return axios.post(this.targetUrl + path, { initial: false })
+      .then((res) => this.handleTortoiseDocsResponse(res, path));
+  }
+
+  handleTortoiseDocsResponse(response, path) {
+    const data = response.data;
+    log(`\n #4 HTTP <== from Tortoise with ${data.docs.length} store docs`);
+
+    this.docsFromTortoise.push(...data.docs);
+
+    if (!data.lastBatch) {
+      return this.sendNextDocsRequest(path);
+    } else {
+      this.syncToTurtleDoc = data.newSyncToTurtleDoc;
+      log(`\n Recieved all docs from Tortoise`);
+      return;
+    }
+  }
+
+  // Insert and Update All Documents
+
+  insertUpdatedMetaDocs() {
+    const updatePromises = this.updatedMetaDocs.map((metaDoc) => {
+      return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
+    });
+
+    const createPromises = this.newTortoiseMetaDocs.map((metaDocs) => {
+      return this.idb.command(this.idb._meta, "CREATE", { data: metaDocs });
+    });
+
+    const metadocPromises = [...updatePromises, ...createPromises];
+
+    return Promise.all(metadocPromises)
+      .then(() => log('\n all recieved metadocs inserted into Turtle metastore'));
+  }
+
+
+  insertNewDocsIntoStore() {
+    const promises = this.docsFromTortoise.map((doc) => {
+      return this.idb.command(this.idb._store, "CREATE", { data: doc });
+    });
+
+    return Promise.all(promises)
+      .then(() => log('\n all recieved docs inserted into Turtle store'));
+  }
+
+
+  updateSyncFromTortoiseDoc() {
+    return this.idb.command(this.idb._syncFromStore, "UPDATE", { data: this.syncToTurtleDoc })
+      .then(() => log('\n new sync from history document inserted'));
+  }
+
+  // #5 HTTP GET '/_confirm_sync'
 
   sendSuccessConfirmation(path) {
     log('\n #5 HTTP ==> to Tortoise with confirmation of sync');
     return axios.get(this.targetUrl + path);
-  }
-
-  // Helpers
-
-
-
-
-
-  updateTurtleMetaDocStore(missingMetaDocs) {
-    let promises = [];
-    missingMetaDocs.forEach(doc => promises.push(this.idb.command(this.idb._meta, "UPDATE", { data: doc })))
-    return Promise.all(promises);
-  }
-
-  insertNewDocsIntoStore(docs) {
-    let promises = [];
-    docs.forEach(doc => promises.push(this.idb.command(this.idb._store, "CREATE", { data: doc })))
-    return Promise.all(promises);
-  }
-
-  updateSyncFromDoc(newSyncToTurtleDoc) {
-    return this.idb.command(this.idb._syncFromStore, "UPDATE", { data: newSyncToTurtleDoc });
   }
 }
 

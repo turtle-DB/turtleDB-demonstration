@@ -97,14 +97,13 @@ class SyncTo {
 
   batchSendChangedMetaDocsToTortoise(path) {
     if (this.changedTurtleMetaDocs.length === 0) {
-      console.log('finished sending all metadocs');
+      log(`\n finished sending all batches of metadocs to Tortoise`);
       return;
     }
     let currentBatch = this.changedTurtleMetaDocs.splice(0, BATCH_LIMIT);
 
     return this.sendBatchOfMetaDocs(path, currentBatch)
       .then(() => {
-        console.log('finished metadoc batch');
         return this.batchSendChangedMetaDocsToTortoise(path);
       });
 
@@ -115,7 +114,7 @@ class SyncTo {
 
     return axios.post(this.targetUrl + path, { metaDocs: batch })
       .then((revIdsFromTortoise) => {
-        log(`\n #4 HTTP <== Response from Tortoise requesting ${revIdsFromTortoise.data.length} docs`);
+        log(`\n #4 HTTP <== Response from Tortoise requesting ${revIdsFromTortoise.data.length} leaf revs/docs`);
         this.revIdsFromTortoise.push(...revIdsFromTortoise.data);
       });
   }
@@ -142,11 +141,10 @@ class SyncTo {
 
     if (this.storeDocsForTortoise.length === 0) {
       return this.sendBatchOfDocs(path, currentBatch, true)
-        .then(() => console.log('finished all doc batches'));
+        .then(() => log(`\n finished sending all batches of metadocs to Tortoise`));
     } else {
       return this.sendBatchOfDocs(path, currentBatch)
         .then(() => {
-          console.log('finished doc batch');
           return this.batchSendTurtleDocsToTortoise(path);
         });
     }
@@ -160,7 +158,7 @@ class SyncTo {
       payload.lastBatch = lastBatch;
     }
 
-    log(`\n #5 HTTP ==> Sending batch of ${batch.length} docs to Tortoise`);
+    log(`\n #5 HTTP ==> Sending batch of ${batch.length} docs to Tortoise ${lastBatch ? 'with sync history' : ''}`);
     return axios.post(this.targetUrl + path, payload);
   }
 
