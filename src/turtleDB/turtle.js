@@ -6,6 +6,8 @@ import SyncFrom from './syncFrom';
 const debug = require('debug');
 var logTo = debug('turtleDB:syncToSummary');
 var logFrom = debug('turtleDB:syncFromSummary');
+var logToBatch = debug('turtleDB:syncToBatch');
+var logFromBatch = debug('turtleDB:syncFromBatch');
 
 // turtleDB specific
 import developerAPI from './developerAPI';
@@ -142,14 +144,22 @@ class TurtleDB {
 
   // Sync
 
+  // syncTo(remoteURL) {
+  //   logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
+  //   return new Promise((resolve, reject) => {
+  //     resolve(this.syncToUntilFinished()
+  //       .then(() => {
+  //         logTo('\n ------- Turtle ==> Tortoise sync complete ------');
+  //       }));
+  //   })
+  // }
+
   syncTo(remoteURL) {
     logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
-    return new Promise((resolve, reject) => {
-      resolve(this.syncToUntilFinished()
-        .then(() => {
-        logTo('\n ------- Turtle ==> Tortoise sync complete ------');
-      }));
-    })
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+      .then(() => logTo('\n ------- Turtle ==> Tortoise sync complete ------'));
   }
 
   syncFrom(remoteURL) {
@@ -157,25 +167,29 @@ class TurtleDB {
     return new Promise((resolve, reject) => {
       resolve(this.syncFromUntilFinished()
         .then(() => {
-        logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
-      }));
+          logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
+        }));
     })
   }
 
   syncToUntilFinished() {
+    logToBatch(`\n Beginning sync to batch...`);
     const syncTo = new SyncTo('http://localhost:3000');
     syncTo.idb = this.idb;
     return syncTo.start()
-    .then(() => this.syncToUntilFinished())
-    .catch(() => console.log('Turtle->Tortoise finished'));
+      .then(() => logToBatch(`\n Finished sync to batch`))
+      .then(() => this.syncToUntilFinished())
+      .catch(() => logToBatch(`\n Finished sync to batch`));
   }
 
   syncFromUntilFinished() {
+    logFromBatch(`\n Beginning sync from batch...`);
     const syncFrom = new SyncFrom('http://localhost:3000');
     syncFrom.idb = this.idb;
     return syncFrom.start()
-    .then(() => this.syncFromUntilFinished())
-    .catch(() => console.log('finished'));
+      .then(() => logFromBatch(`\n Finished sync from batch`))
+      .then(() => this.syncFromUntilFinished())
+      .catch(() => logFromBatch(`\n Finished sync to batch`));
   }
 
   // For Testing Purposes
