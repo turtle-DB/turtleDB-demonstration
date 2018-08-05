@@ -5,12 +5,13 @@ const debug = require('debug');
 var log = debug('turtleDB:syncTo');
 var httpLog = debug('turtleDB:http');
 
-const BATCH_LIMIT = 25;
+const BATCH_LIMIT = 5;
 
 class SyncTo {
   constructor(targetUrl) {
     this.targetUrl = targetUrl;
     this.sessionID = new Date().toISOString();
+    this.revIdsFromTortoise = [];
   }
 
   start() {
@@ -18,37 +19,21 @@ class SyncTo {
       .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
       .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
       .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
-      .then(() => this.setBatchLimits())
-
       .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-      .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
-      .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
+
+      .then(() => this.batchSendChangedMetaDocsToTortoise('/_missing_rev_ids')) // this.revIdsFromTortoise
+      .then(() => this.getStoreDocsForTortoise())
       .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
-      .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
+      .then(() => this.batchSendTurtleDocsToTortoise('/_insert_docs'))
+
       .then(() => this.updateSyncToTortoiseDoc())
-      .catch((err) => {
-        if (err === 'SYNC_COMPLETE') {
-          return Promise.reject();
-        } else {
-          console.log('Sync To Error:', err)
-        }
-      });
-  }
-
-  setBatchLimits() {
-    if (this.lastTortoiseKey === this.highestTurtleKey) {
-      return Promise.reject("SYNC_COMPLETE")
-    }
-
-    let changes = this.highestTurtleKey - this.lastTortoiseKey;
-    if (changes > BATCH_LIMIT) {
-      this.highestTurtleKey = this.lastTortoiseKey + BATCH_LIMIT;
-    }
+      .catch(err => console.log('Sync To Error:', err));
   }
 
   checkServerConnection(path) {
     return axios.get(this.targetUrl + path)
       .then((res) => {
+        log(`\n #0 HTTP <==> Tortoise connection checked`);
         return res.status === 200 ? true : false;
       })
       .catch((error) => {
@@ -67,7 +52,7 @@ class SyncTo {
   getSyncToTortoiseDoc() {
     return this.idb.command(this.idb._syncToStore, "READ_ALL", {})
       .then(syncRecords => this.syncToTortoiseDoc = syncRecords[0])
-      .then(() => log('\n Get record of previous syncs to Tortoise', 'getSyncToTortoiseDoc'))
+      .then(() => log('\n getSyncToTortoiseDoc() - Get record of previous syncs to Tortoise'))
   }
 
   getHighestTurtleKey() {
@@ -75,7 +60,7 @@ class SyncTo {
       .then(keys => {
         const lastKey = keys[keys.length - 1];
         this.highestTurtleKey = lastKey ? lastKey : 0;
-        log(`\n Get highest primary key in the Turtle store (${this.highestTurtleKey})`)
+        log(`\n getHighestTurtleKey() - Get highest primary key in the Turtle store (${this.highestTurtleKey})`)
       });
   }
 
@@ -91,8 +76,87 @@ class SyncTo {
   getChangedMetaDocsForTortoise() {
     return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
       .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
-      .then(() => log(`\n Get revision trees for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`))
+      .then(() => {
+        log(`\n getChangedMetaDocsForTortoise() - Get metadocs for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`);
+        log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
+      })
   }
+
+  batchSendChangedMetaDocsToTortoise(path) {
+    if (this.changedTurtleMetaDocs.length === 0) {
+      console.log('finished sending all metadocs');
+      return;
+    }
+    let currentBatch = this.changedTurtleMetaDocs.splice(0, BATCH_LIMIT);
+
+    return this.sendBatchOfMetaDocs(path, currentBatch)
+      .then(() => {
+        console.log('finished metadoc batch');
+        return this.batchSendChangedMetaDocsToTortoise(path);
+      });
+
+  }
+
+  sendBatchOfMetaDocs(path, batch) {
+    log(`\n #3 HTTP ==> Sending batch of ${batch.length} metadocs to Tortoise`);
+
+    return axios.post(this.targetUrl + path, { metaDocs: batch })
+      .then((revIdsFromTortoise) => {
+        log(`\n #4 HTTP <== Response from Tortoise requesting ${revIdsFromTortoise.data.length} docs`);
+        this.revIdsFromTortoise.push(...revIdsFromTortoise.data);
+      });
+  }
+
+  getStoreDocsForTortoise() {
+    const promises = this.revIdsFromTortoise.map(_id_rev => {
+      return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
+    });
+    return Promise.all(promises)
+      .then(docs => this.storeDocsForTortoise = docs)
+      .then(() => log(`\n getStoreDocsForTortoise() - Get ${this.storeDocsForTortoise.length} changed records for Tortoise`))
+  }
+
+  createNewSyncToTortoiseDoc() {
+    let newHistory = { lastKey: this.highestTurtleKey, sessionID: this.sessionID };
+    this.newSyncToTortoiseDoc = Object.assign(
+      this.syncToTortoiseDoc, { history: [newHistory].concat(this.syncToTortoiseDoc.history) }
+    );
+    log('\n createNewSyncToTortoiseDoc() - prepare updated record of sync history with Tortoise');
+  }
+
+  batchSendTurtleDocsToTortoise(path) {
+    let currentBatch = this.storeDocsForTortoise.splice(0, BATCH_LIMIT);
+
+    if (this.storeDocsForTortoise.length === 0) {
+      return this.sendBatchOfDocs(path, currentBatch, true)
+        .then(() => console.log('finished all doc batches'));
+    } else {
+      return this.sendBatchOfDocs(path, currentBatch)
+        .then(() => {
+          console.log('finished doc batch');
+          return this.batchSendTurtleDocsToTortoise(path);
+        });
+    }
+  }
+
+  sendBatchOfDocs(path, batch, lastBatch = false) {
+    let payload = { docs: batch };
+
+    if (lastBatch) {
+      payload.newSyncToTortoiseDoc = this.newSyncToTortoiseDoc;
+      payload.lastBatch = lastBatch;
+    }
+
+    log(`\n #5 HTTP ==> Sending batch of ${batch.length} docs to Tortoise`);
+    return axios.post(this.targetUrl + path, payload);
+  }
+
+  updateSyncToTortoiseDoc() {
+    log('\n #6 HTTP <== receive confirmation from Tortoise, update sync history');
+    return this.idb.command(this.idb._syncToStore, "UPDATE", { data: this.newSyncToTortoiseDoc });
+  }
+
+  // Utility Methods
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
     return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
@@ -115,38 +179,6 @@ class SyncTo {
     let promises = [];
     ids.forEach(_id => promises.push(this.idb.command(this.idb._meta, "READ", { _id })))
     return Promise.all(promises);
-  }
-
-  sendChangedMetaDocsToTortoise(path) {
-    log(`\n #3 HTTP ==> Tortoise with ${this.changedTurtleMetaDocs.length} changed revision trees`);
-    return axios.post(this.targetUrl + path, { metaDocs: this.changedTurtleMetaDocs });
-  }
-
-  getStoreDocsForTortoise(revIdsFromTortoise) {
-    const promises = revIdsFromTortoise.map(_id_rev => {
-      return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
-    });
-    return Promise.all(promises)
-      .then(docs => this.storeDocsForTortoise = docs)
-      .then(() => log(`\n Get ${this.storeDocsForTortoise.length} changed records for Tortoise`))
-  }
-
-  createNewSyncToTortoiseDoc() {
-    let newHistory = { lastKey: this.highestTurtleKey, sessionID: this.sessionID };
-    this.newSyncToTortoiseDoc = Object.assign(
-      this.syncToTortoiseDoc, { history: [newHistory].concat(this.syncToTortoiseDoc.history) }
-    );
-    log('\n prepare updated record of sync history with Tortoise');
-  }
-
-  sendTurtleDocsToTortoise(path) {
-    log('\n #5 HTTP ==> Tortoise with batch of store docs');
-    return axios.post(this.targetUrl + path, { docs: this.storeDocsForTortoise, newSyncToTortoiseDoc: this.newSyncToTortoiseDoc }) //, newSyncToTortoiseDoc: this.newSyncToTortoiseDoc })
-  }
-
-  updateSyncToTortoiseDoc() {
-    log('\n #6 HTTP <== receive confirmation from Tortoise, update sync history');
-    return this.idb.command(this.idb._syncToStore, "UPDATE", { data: this.newSyncToTortoiseDoc });
   }
 }
 

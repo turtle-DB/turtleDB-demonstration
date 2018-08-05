@@ -11,11 +11,6 @@ class SyncFrom {
     this.sessionID = new Date().toISOString();
   }
 
-  getTurtleID() {
-    return this.idb.command(this.idb._turtleDBMeta, "READ_ALL", {})
-      .then(docs => this.turtleID = docs[0]._id);
-  }
-
   start() {
     return this.checkServerConnection('/connect')
       .then(() => this.getTurtleID())
@@ -37,6 +32,7 @@ class SyncFrom {
   checkServerConnection(path) {
     return axios.get(this.targetUrl + path)
       .then((res) => {
+        log(`\n #0 HTTP <==> Tortoise connection checked`);
         return res.status === 200 ? true : false;
       })
       .catch((error) => {
@@ -52,9 +48,18 @@ class SyncFrom {
       });
   }
 
+  getTurtleID() {
+    return this.idb.command(this.idb._turtleDBMeta, "READ_ALL", {})
+      .then(docs => {
+        log(`\n getTurtleID()`);
+        return this.turtleID = docs[0]._id;
+      });
+  }
+
   getLastTurtleKey() {
     return this.idb.command(this.idb._syncFromStore, "READ_ALL", {})
       .then(docs => {
+        log(`\n getLastTurtleKey()`);
         const syncFromTortoiseDoc = docs[0];
         this.lastTurtleKey = syncFromTortoiseDoc.history.length === 0 ?
           '0' : syncFromTortoiseDoc.history[0].lastKey;
@@ -65,11 +70,6 @@ class SyncFrom {
     log(`\n Get TurtleDBs ID and local checkpoint (${this.lastTurtleKey}) from previous sync session`);
     log('\n #1 HTTP ==> to Tortoise requesting any changed metadocs');
     return axios.post(this.targetUrl + path, { turtleID: this.turtleID, lastTurtleKey: this.lastTurtleKey });
-  }
-
-  sendSuccessConfirmation(path) {
-    log('\n #5 HTTP ==> to Tortoise with confirmation of sync');
-    return axios.get(this.targetUrl + path);
   }
 
   findMissingRevIds(tortoiseMetaDocs) {
@@ -109,8 +109,28 @@ class SyncFrom {
 
     return Promise.all(promises)
       .then(() => this.missingRevIds = missingLeafNodes)
-      .then(() => log(`\n compare Turtle/Tortoise metadocs to make a list of ${this.missingRevIds.length} missing records`));
+      .then(() => log(`\n findMissingRevIds() - compare Turtle/Tortoise metadocs to make a list of ${this.missingRevIds.length} missing records`));
   }
+
+  sendRequestForTortoiseDocs(path) {
+    log('\n #3 HTTP ==> to Tortoise requesting missing records');
+    return axios.post(this.targetUrl + path, { revIds: this.missingRevIds });
+  }
+
+  updateStoreAndSyncFromStore(docsFromTortoise) {
+    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.docs.length} missing records`);
+    const { docs, newSyncToTurtleDoc } = docsFromTortoise;
+    this.insertNewDocsIntoStore(docs)
+      .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
+      .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
+  }
+
+  sendSuccessConfirmation(path) {
+    log('\n #5 HTTP ==> to Tortoise with confirmation of sync');
+    return axios.get(this.targetUrl + path);
+  }
+
+  // Helpers
 
   collectAllLeafRevs(node, leafRevs = []) {
     if (node[2].length === 0) {
@@ -140,23 +160,10 @@ class SyncFrom {
       });
   }
 
-  sendRequestForTortoiseDocs(path) {
-    log('\n #3 HTTP ==> to Tortoise requesting missing records');
-    return axios.post(this.targetUrl + path, { revIds: this.missingRevIds });
-  }
-
   updateTurtleMetaDocStore(missingMetaDocs) {
     let promises = [];
     missingMetaDocs.forEach(doc => promises.push(this.idb.command(this.idb._meta, "UPDATE", { data: doc })))
     return Promise.all(promises);
-  }
-
-  updateStoreAndSyncFromStore(docsFromTortoise) {
-    log(`\n #4 HTTP <== from Tortoise with ${docsFromTortoise.docs.length} missing records`);
-    const { docs, newSyncToTurtleDoc } = docsFromTortoise;
-    this.insertNewDocsIntoStore(docs)
-      .then(() => this.updateSyncFromDoc(newSyncToTurtleDoc))
-      .then(() => log('\n insert missing records and updated sync history into IndexedDB'))
   }
 
   insertNewDocsIntoStore(docs) {
