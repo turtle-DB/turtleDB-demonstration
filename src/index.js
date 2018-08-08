@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import 'bootstrap/dist/css/bootstrap.css';
-import './styles/index.css';
+import './styles/index.min.css';
 import registerServiceWorker from './registerServiceWorker';
 
 if (process.env.NODE_ENV !== 'production') {
@@ -11,4 +11,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 import App from './App';
 ReactDOM.render(<App />, document.getElementById('root'));
-// registerServiceWorker();
+registerServiceWorker();

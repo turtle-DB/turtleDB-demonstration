@@ -13,39 +13,6 @@ class SyncTo {
     this.sessionID = new Date().toISOString();
   }
 
-  start() {
-    return this.checkServerConnection('/connect')
-      .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
-      .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
-      .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
-      .then(() => this.setBatchLimits())
-
-      .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-      .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
-      .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
-      .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
-      .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
-      .then(() => this.updateSyncToTortoiseDoc())
-      .catch((err) => {
-        if (err === 'SYNC_COMPLETE') {
-          return Promise.reject();
-        } else {
-          console.log('Sync To Error:', err)
-        }
-      });
-  }
-
-  setBatchLimits() {
-    if (this.lastTortoiseKey === this.highestTurtleKey) {
-      return Promise.reject("SYNC_COMPLETE")
-    }
-
-    let changes = this.highestTurtleKey - this.lastTortoiseKey;
-    if (changes > BATCH_LIMIT) {
-      this.highestTurtleKey = this.lastTortoiseKey + BATCH_LIMIT;
-    }
-  }
-
   checkServerConnection(path) {
     return axios.get(this.targetUrl + path)
       .then((res) => {
@@ -64,10 +31,42 @@ class SyncTo {
       });
   }
 
+  setBatchLimits() {
+    if (this.lastTortoiseKey === this.highestTurtleKey) {
+      return Promise.reject("SYNC_COMPLETE")
+    }
+
+    let changes = this.highestTurtleKey - this.lastTortoiseKey;
+    if (changes > BATCH_LIMIT) {
+      this.highestTurtleKey = this.lastTortoiseKey + BATCH_LIMIT;
+    }
+  }
+
+  start() {
+    return this.checkServerConnection('/connect')
+      .then(() => this.getSyncToTortoiseDoc())
+      .then(() => this.getHighestTurtleKey())
+      .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key'))
+      .then(() => this.setBatchLimits())
+      .then(() => this.getChangedMetaDocsForTortoise())
+      .then(() => this.sendChangedMetaDocsToTortoise('/_missing_rev_ids'))
+      .then(revIdsFromTortoise => this.getStoreDocsForTortoise(revIdsFromTortoise.data))
+      .then(() => this.createNewSyncToTortoiseDoc())
+      .then(() => this.sendTurtleDocsToTortoise('/_insert_docs'))
+      .then(() => this.updateSyncToTortoiseDoc())
+      .catch((err) => {
+        if (err === 'SYNC_COMPLETE') {
+          return Promise.reject();
+        } else {
+          console.log('Sync To Error:', err)
+        }
+      });
+  }
+
   getSyncToTortoiseDoc() {
     return this.idb.command(this.idb._syncToStore, "READ_ALL", {})
       .then(syncRecords => this.syncToTortoiseDoc = syncRecords[0])
-      .then(() => log('\n Get record of previous syncs to Tortoise', 'getSyncToTortoiseDoc'))
+      .then(() => log(`\n Get record of previous syncs to Tortoise', '${this.syncToTortoiseDoc}`))
   }
 
   getHighestTurtleKey() {
