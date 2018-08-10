@@ -42,10 +42,7 @@ class SyncTo {
           // network error
           return Promise.reject('Failed to connect to server');
         } else {
-          // http status code
-          const code = error.response.status
-          // response data
-          const response = error.response.data
+          console.log('Sync To Error:', err)
         }
       });
   }
