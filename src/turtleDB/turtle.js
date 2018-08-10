@@ -1,7 +1,13 @@
-import uuidv4 from 'uuid/v4';
 import IDBShell from './IDBShell';
-import axios from 'axios';
 import md5 from 'md5';
+import SyncTo from './syncTo';
+import SyncFrom from './syncFrom';
+
+const debug = require('debug');
+var logTo = debug('turtleDB:syncToSummary');
+var logFrom = debug('turtleDB:syncFromSummary');
+var logToBatch = debug('turtleDB:syncToBatch');
+var logFromBatch = debug('turtleDB:syncFromBatch');
 
 // turtleDB specific
 import developerAPI from './developerAPI';
@@ -9,12 +15,21 @@ import developerAPI from './developerAPI';
 class TurtleDB {
   constructor() {
     this.idb = new IDBShell('turtleDB');
+    this.syncInProgress = false;
 
     for (const prop in developerAPI) {
       if (typeof developerAPI[prop] === 'function') {
         this[prop] = developerAPI[prop];
       }
     }
+  }
+
+  _printRevTree(_id) {
+    this._readMetaDoc(_id).then(metaDoc => {
+      console.log('-----');
+      console.log(`Revision Tree for ${_id}:`, JSON.stringify(metaDoc._revisions, undefined, 2));
+      console.log('-----');
+    });
   }
 
   _readMetaDoc(_id) {
@@ -24,53 +39,34 @@ class TurtleDB {
 
   _readRevFromIndex(_id, rev) {
     const _id_rev = _id + "::" + rev;
-    return this.idb.command(this.idb._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+    return this.idb.command(this.idb._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
   }
 
   _readWithoutDeletedError(_id) {
     return this._readMetaDoc(_id)
-      .then(meta => meta._revisions[0])
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
+      .then(metaDoc => {
+        if (!metaDoc._winningRev) { return Promise.resolve(false); }
+        return this._readRevFromIndex(_id, metaDoc._winningRev);
+      })
       .then(doc => {
-
-        if (doc._deleted) { return false; }
-
+        if (!doc) { return false; }
         const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
+        [data._id, data._rev] = data._id_rev.split('::');
         delete data._id_rev;
         return data;
       })
       .catch(err => console.log("Read error:", err));
   }
 
-  _readAllLeafDocs() {
-    return this.idb.command(this._meta, "READ_ALL")
-     .then(metaDocs => {
-       let promises = metaDocs.map(doc => this._read(doc._id));
-       return Promise.all(promises);
-     })
-     .catch(err => console.log("readAllLeafDocs error:", err));
-  }
-
-  _read(_id) {
-    return this._readMetaDoc(_id)
-      .then(meta => meta._revisions[0])
-      .then(winningRev => this._readRevFromIndex(_id, winningRev))
-      .then(doc => {
-        const data = Object.assign({}, doc);
-        [ data._id, data._rev ] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
-      })
-      .catch(err => console.log("Read error:", err));
-  }
-
-  _generateNewDoc(oldDoc, newProperties, metaDoc) {
-    const [_id, oldRev] = oldDoc._id_rev.split('::');
+  _generateNewDoc(_id, oldRev, newProperties) {
+    // const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
-
     const newDoc = Object.assign({}, newProperties);
-    const newRev = `${oldRevNumber + 1}-` + md5(JSON.stringify(metaDoc._revisions) + JSON.stringify(newDoc));
+
+    delete newDoc._rev;
+    delete newDoc._id;
+
+    const newRev = `${oldRevNumber + 1}-` + md5(oldRev + JSON.stringify(newDoc));
     newDoc._id_rev = _id + "::" + newRev;
     return newDoc;
   }
@@ -120,6 +116,105 @@ class TurtleDB {
     for (let i = 0; i < node[2].length; i++) {
       this._insertNewRev(node[2][i], newRev, oldRev, _deleted);
     }
+  }
+
+  makeRevWinner(doc) {
+    const { _id, _rev } = doc;
+
+    return this._readMetaDoc(_id)
+      .then(metaDoc => {
+        const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
+
+        let result = Promise.resolve();
+        leafRevsToDelete.forEach(rev => {
+          result = result.then(() => this.delete(_id, rev));
+        });
+
+        return result;
+      })
+      .then(() => this.update(_id, doc, _rev))
+      .catch(err => console.log("makeRevWinner error:", err));
+  }
+
+  sizeOf(bytes) {
+    if (bytes == 0) { return "0.00 B"; }
+    var e = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, e)).toFixed(2) + ' ' + ' KMGTP'.charAt(e) + 'B';
+  }
+
+  // Sync
+
+  syncTo(remoteURL) {
+    logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+      .then(() => logTo('\n ------- Turtle ==> Tortoise sync complete ------'));
+  }
+
+  syncFrom(remoteURL) {
+    logFrom('\n ------- NEW Tortoise ==> Turtle SYNC ------');
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+      .then(() => logFrom('\n ------- Tortoise ==> Turtle sync complete ------'));
+  }
+
+  // syncFrom(remoteURL) {
+  //   logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
+  //   return new Promise((resolve, reject) => {
+  //     resolve(this.syncFromUntilFinished()
+  //       .then(() => {
+  //         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
+  //       }));
+  //   })
+  // }
+
+  syncToUntilFinished() {
+    logToBatch(`\n Beginning sync to batch...`);
+    const syncTo = new SyncTo('http://localhost:3000');
+    syncTo.idb = this.idb;
+    return syncTo.start()
+      .then(() => logToBatch(`\n Finished sync to batch`))
+      .then(() => this.syncToUntilFinished())
+      .catch(() => logToBatch(`\n Finished sync to batch`));
+  }
+
+  syncFromUntilFinished() {
+    logFromBatch(`\n Beginning sync from batch...`);
+    const syncFrom = new SyncFrom('http://localhost:3000');
+    syncFrom.idb = this.idb;
+    return syncFrom.start()
+      .then(() => logFromBatch(`\n Finished sync from batch`))
+      .then(() => this.syncFromUntilFinished())
+      .catch(() => logFromBatch(`\n Finished sync to batch`));
+  }
+
+  // For Testing Purposes
+  editNDocumentsMTimes(docs, times) {
+    let result = Promise.resolve();
+    for (let i = 0; i < times; i += 1) {
+      //create promise chain
+      result = result.then(() => this.idb.editFirstNDocuments(docs));
+    }
+
+    result.then(() => console.log('finished editing'));
+  }
+
+  readAllMetaDocsAndDocs() {
+    const result = {};
+
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then(metaDocs => {
+        result.metaDocs = metaDocs.filter(doc => doc._winningRev);
+        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
+        return Promise.all(promises);
+      })
+      .then(docs => {
+        result.docs = docs.filter(doc => !!doc);
+        return result;
+      })
+      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   }
 }
 

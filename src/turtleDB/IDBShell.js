@@ -1,4 +1,5 @@
 import uuidv4 from 'uuid/v4';
+import turtleDB from './turtle'
 
 class IDBShell {
   constructor(name) {
@@ -24,6 +25,8 @@ class IDBShell {
             .add({ _id: turtleID, history: [] });
           this.db.createObjectStore(this._turtleDBMeta, { keyPath: '_id' })
             .add({ _id: turtleID });
+
+          this.db.onversionchange = e => e.target.close();
         }
       };
 
@@ -71,12 +74,14 @@ class IDBShell {
         }
         request.onerror = e => {
           console.log(`${action} error:`, e.target.error);
+          console.log()
           reject(e.target.error);
         }
       })
     })
   }
 
+  // BULK OPERATIONS
   // currently won't work for _id in store
   // need to filter by winning & non-deleted docs
   filterBy(selector) { // selector format: {eyeColor: 'green', gender: 'male'}
@@ -85,35 +90,64 @@ class IDBShell {
       .then(docs => docs.filter(doc => fields.every(field => {
         return doc[field] === selector[field]
       }))
-    );
+      );
   }
 
   deleteBetweenNumbers(start, end) {
     return new Promise((resolve, reject) => {
+      let deletePromises = [];
       let counter = 0;
-        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          let cursor = e.target.result;
-          if (cursor) {
+      this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+        const cursor = e.target.result;
+        if (!cursor) {
+          console.log("cursor finished!");
+          resolve(Promise.all(deletePromises));
+        } else {
+          if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
+            const _id = e.target.result.value._id;
+            deletePromises.push(turtleDB.delete(_id));
             counter += 1;
-            if (counter >= start && counter <= end) {
-              cursor.delete();
-            }
-            cursor.continue();
           }
+          cursor.continue()
         }
-        resolve();
+      }
+    })
+  }
+
+  editFirstNDocuments(n) {
+    return new Promise((resolve, reject) => {
+      let updatePromises = [];
+      let counter = 0;
+        this.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+          const cursor = e.target.result;
+          if (!cursor) {
+            console.log('Cursor finished!');
+            resolve(Promise.all(updatePromises));
+          } else {
+            if (!!e.target.result.value._winningRev && counter < n) {
+              const _id = e.target.result.value._id;
+              updatePromises.push(
+                turtleDB.read(_id)
+                .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
+                .then(data => turtleDB.update(_id, data))
+            );
+          }
+          counter++;
+          cursor.continue();
+        }
+      }
     })
   }
 
   getStoreDocsByIdRevs(idRevsArr) {
     const promises = idRevsArr.map(_id_rev => {
-      return this.command(this._store, "INDEX_READ", {data: { indexName: '_id_rev', key: _id_rev }});
+      return this.command(this._store, "INDEX_READ", { data: { indexName: '_id_rev', key: _id_rev } });
     });
 
     return Promise.all(promises);
   }
 
-// STORE OPERATIONS
+  // STORE OPERATIONS
 
   getStore(store, op) {
     if (this.hasStoreName(store)) {
@@ -132,32 +166,6 @@ class IDBShell {
 
   hasStoreName(store) {
     return this.getAllStoreNames().includes(store);
-  }
-
-// need to clean up:
-  editFirstNDocuments(amount) {
-    return new Promise((resolve, reject) => {
-      let counter = 0;
-        this.getStore(this._store, 'readwrite').openCursor().onsuccess = (e) => {
-          let cursor = e.target.result;
-          if (!cursor) {
-            console.log('Cursor finished!');
-            resolve();
-          }
-          if (cursor) {
-            counter += 1;
-            if (counter <= amount) {
-              let updateData = cursor.value;
-              updateData.eyeColor = 'green';
-              let request = cursor.update(updateData);
-              // request.onsuccess = function() {
-              //   console.log(counter);
-              // };
-            }
-            cursor.continue();
-          }
-        }
-    })
   }
 
   // DATABASE OPERATIONS

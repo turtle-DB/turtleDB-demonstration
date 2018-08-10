@@ -9,3 +9,24 @@ body {
 #app-container {
   padding: 30px;
 }
+
+.table-condensed {
+  font-size: 0.8rem;
+}
+
+.display-pages {
+  margin: 6px 0 0 20px;
+}
+
+.margin-bottom {
+  margin-bottom: 1.25rem;
+}
+
+.row-butttons-header {
+  width: 270px;
+}
+
+.row-buttons-container {
+  width: 270px;
+  display: flex;
+}
