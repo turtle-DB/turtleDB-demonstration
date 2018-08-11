@@ -1,20 +1,18 @@
-import IDBShell from './IDBShell';
 import md5 from 'md5';
-import SyncTo from './syncTo';
-import SyncFrom from './syncFrom';
 
 const debug = require('debug');
 var logTo = debug('turtleDB:syncToSummary');
 var logFrom = debug('turtleDB:syncFromSummary');
-var logToBatch = debug('turtleDB:syncToBatch');
-var logFromBatch = debug('turtleDB:syncFromBatch');
 
 // turtleDB specific
 import developerAPI from './developerAPI';
+import SyncTo from './syncTo';
+import SyncFrom from './syncFrom';
+import IDBShell from './IDBShell';
 
 class TurtleDB {
-  constructor() {
-    this.idb = new IDBShell('turtleDB');
+  constructor(dbName = 'default') {
+    this.idb = new IDBShell(`turtleDB-${dbName}`);
     this.syncInProgress = false;
 
     for (const prop in developerAPI) {
@@ -144,53 +142,22 @@ class TurtleDB {
 
   // Sync
 
-  syncTo(remoteURL) {
+  syncTo() {
     logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
-    const syncTo = new SyncTo('http://localhost:3000');
+    const syncTo = new SyncTo(this.remoteUrl);
     syncTo.idb = this.idb;
     return syncTo.start()
       .then(() => logTo('\n ------- Turtle ==> Tortoise sync complete ------'));
   }
 
-  syncFrom(remoteURL) {
+  syncFrom() {
     logFrom('\n ------- NEW Tortoise ==> Turtle SYNC ------');
-    const syncFrom = new SyncFrom('http://localhost:3000');
+    const syncFrom = new SyncFrom(this.remoteUrl);
     syncFrom.idb = this.idb;
     return syncFrom.start()
       .then(() => logFrom('\n ------- Tortoise ==> Turtle sync complete ------'));
   }
 
-  // syncFrom(remoteURL) {
-  //   logFrom('\n\n\n ------- NEW Tortoise ==> Turtle SYNC ------');
-  //   return new Promise((resolve, reject) => {
-  //     resolve(this.syncFromUntilFinished()
-  //       .then(() => {
-  //         logFrom('\n ------- Tortoise ==> Turtle sync complete ------');
-  //       }));
-  //   })
-  // }
-
-  syncToUntilFinished() {
-    logToBatch(`\n Beginning sync to batch...`);
-    const syncTo = new SyncTo('http://localhost:3000');
-    syncTo.idb = this.idb;
-    return syncTo.start()
-      .then(() => logToBatch(`\n Finished sync to batch`))
-      .then(() => this.syncToUntilFinished())
-      .catch(() => logToBatch(`\n Finished sync to batch`));
-  }
-
-  syncFromUntilFinished() {
-    logFromBatch(`\n Beginning sync from batch...`);
-    const syncFrom = new SyncFrom('http://localhost:3000');
-    syncFrom.idb = this.idb;
-    return syncFrom.start()
-      .then(() => logFromBatch(`\n Finished sync from batch`))
-      .then(() => this.syncFromUntilFinished())
-      .catch(() => logFromBatch(`\n Finished sync to batch`));
-  }
-
-  // For Testing Purposes
   editNDocumentsMTimes(docs, times) {
     let result = Promise.resolve();
     for (let i = 0; i < times; i += 1) {
@@ -216,9 +183,54 @@ class TurtleDB {
       })
       .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   }
+
+  deleteBetweenNumbers(start, end) {
+    return new Promise((resolve, reject) => {
+      let deletePromises = [];
+      let counter = 0;
+      this.idb.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+        const cursor = e.target.result;
+        if (!cursor) {
+          console.log("cursor finished!");
+          resolve(Promise.all(deletePromises));
+        } else {
+          if (!!e.target.result.value._winningRev && counter >= start && counter < end) {
+            const _id = e.target.result.value._id;
+            deletePromises.push(this.delete(_id));
+            counter += 1;
+          }
+          cursor.continue()
+        }
+      }
+    })
+  }
+
+  editFirstNDocuments(n) {
+    return new Promise((resolve, reject) => {
+      let updatePromises = [];
+      let counter = 0;
+      this.idb.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+        const cursor = e.target.result;
+        if (!cursor) {
+          console.log('Cursor finished!');
+          resolve(Promise.all(updatePromises));
+        } else {
+          if (!!e.target.result.value._winningRev && counter < n) {
+            const _id = e.target.result.value._id;
+            updatePromises.push(
+              this.read(_id)
+                .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
+                .then(data => this.update(_id, data))
+            );
+          }
+          counter++;
+          cursor.continue();
+        }
+      }
+    })
+  }
 }
 
-// for development purposes, putting turtleDB on window
-window.turtleDB = new TurtleDB('turtleDB');
 
-export default turtleDB;
+
+export default TurtleDB;

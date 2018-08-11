@@ -8,7 +8,7 @@ import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import TreeComponent from './TreeComponent/TreeComponent';
 import StorageDisplay from './StorageComponent/StorageDisplay';
 
-import turtleDB from '../turtleDB/turtle';
+import TurtleDB from '../turtleDB/turtle';
 
 // import data
 import peopleData from './../data/PeopleData';
@@ -35,6 +35,11 @@ class Dashboard extends React.Component {
         totalQuota: "0 B"
       }
     }
+
+    this.turtleDB = new TurtleDB('demo');
+    this.turtleDB.setRemote('http://localhost:3000');
+    // for development purposes, putting turtleDB on window
+    window.turtleDB = this.turtleDB;
   }
 
   componentDidMount() {

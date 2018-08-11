@@ -2,6 +2,10 @@ import md5 from 'md5';
 import uuidv4 from 'uuid/v4';
 
 const developerAPI = {
+  setRemote(remoteUrl) {
+    this.remoteUrl = remoteUrl;
+  },
+
   sync() {
     if (!this.syncInProgress) {
       this.syncInProgress = true;
