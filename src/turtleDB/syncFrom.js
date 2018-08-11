@@ -22,8 +22,8 @@ class SyncFrom {
       .then(() => this.getTurtleID())
       .then(() => this.getLastTurtleKey())
       .then(() => this.sendRequestForTortoiseMetaDocs('/_changed_meta_docs'))
-      .then(() => this.findMissingRevIds()) // this.missingRevIds, this.updatedMetaDocs, this.newTortoiseMetaDocs
-      .then(() => this.sendRequestForTortoiseDocs('/_changed_docs')) // this.syncToTurtleDoc, this.docsFromTortoise
+      .then(() => this.findMissingRevIds())
+      .then(() => this.sendRequestForTortoiseDocs('/_changed_docs'))
       .then(() => this.insertUpdatedMetaDocs())
       .then(() => this.insertNewDocsIntoStore())
       .then(() => this.updateSyncFromTortoiseDoc())

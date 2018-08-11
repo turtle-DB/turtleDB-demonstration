@@ -5,7 +5,7 @@ const debug = require('debug');
 var log = debug('turtleDB:syncTo');
 var httpLog = debug('turtleDB:http');
 
-const BATCH_LIMIT = 5;
+const BATCH_LIMIT = 20;
 
 class SyncTo {
   constructor(targetUrl) {
@@ -16,16 +16,13 @@ class SyncTo {
 
   start() {
     return this.checkServerConnection('/connect')
-      .then(() => this.getSyncToTortoiseDoc()) //this.syncToTortoiseDoc
-      .then(() => this.getHighestTurtleKey()) //this.highestTurtleKey
-
-      // Skip this step?? Just get it and store it locally? We don't even do any checks to see if they match??
-      .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key')) //this.lastTortoiseKey
-
-      .then(() => this.getChangedMetaDocsForTortoise()) //this.changedTurtleMetaDocs
-      .then(() => this.batchSendChangedMetaDocsToTortoise('/_missing_rev_ids')) // this.revIdsFromTortoise
+      .then(() => this.getSyncToTortoiseDoc())
+      .then(() => this.getHighestTurtleKey())
+      .then(() => this.sendRequestForLastTortoiseKey('/_last_tortoise_key'))
+      .then(() => this.getChangedMetaDocsForTortoise())
+      .then(() => this.batchSendChangedMetaDocsToTortoise('/_missing_rev_ids'))
       .then(() => this.getStoreDocsForTortoise())
-      .then(() => this.createNewSyncToTortoiseDoc()) //this.newSyncToTortoiseDoc
+      .then(() => this.createNewSyncToTortoiseDoc())
       .then(() => this.batchSendTurtleDocsToTortoise('/_insert_docs'))
       .then(() => this.updateSyncToTortoiseDoc())
       .catch(err => console.log('Sync To Error:', err));
@@ -72,18 +69,6 @@ class SyncTo {
   }
 
   getChangedMetaDocsForTortoise() {
-    // Do a check here w/ the session history in turtle and the lastTortoiseKey just recieved from Tortoise?
-    // this.idb.command(this.idb._syncToStore, "READ_ALL", {})
-    // .then((syncToDocs) => {
-    //   let syncToTortoiseDoc = syncToDocs[0];
-    //   let lastTortoiseKey = syncToTortoiseDoc.history.length === 0 ?
-    //     '0' : syncFromTortoiseDoc.history[0].lastKey;
-    //     // Could just return this?
-    //   return localLastTortoiseKey;
-    //   // Or, could compare to see if keys match, start from 0 if not:
-    //   return localLastTortoiseKey === this.lastTortoiseKey ? localLastTortoiseKey : '0'
-    // })
-
     return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
       .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
       .then(() => {
@@ -167,7 +152,9 @@ class SyncTo {
   // Utility Methods
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
-    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey + 1, y: highestTurtleKey })
+    lastTortoiseKey = lastTortoiseKey === undefined ? 0 : lastTortoiseKey;
+    highestTurtleKey = highestTurtleKey === undefined ? 0 : highestTurtleKey;
+    return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey, y: highestTurtleKey })
       .then(docs => this.getUniqueIDs(docs))
       .then(ids => this.getMetaDocsByIDs(ids))
   }
