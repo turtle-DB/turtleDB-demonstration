@@ -13,6 +13,11 @@ import TurtleDB from '../turtleDB/turtle';
 // import data
 import peopleData from './../data/PeopleData';
 
+const dbName = "demo";
+const turtleDB = new TurtleDB(dbName);
+turtleDB.setRemote('http://localhost:3000');
+window.turtleDB = turtleDB;
+
 class Dashboard extends React.Component {
   constructor() {
     super()
@@ -35,11 +40,6 @@ class Dashboard extends React.Component {
         totalQuota: "0 B"
       }
     }
-
-    this.turtleDB = new TurtleDB('demo');
-    this.turtleDB.setRemote('http://localhost:3000');
-    // for development purposes, putting turtleDB on window
-    window.turtleDB = this.turtleDB;
   }
 
   componentDidMount() {
@@ -150,7 +150,7 @@ class Dashboard extends React.Component {
   }
 
   handleDropDatabase = () => {
-    turtleDB.dropDB()
+    turtleDB.dropDB(dbName)
       .then(() => this.setDefaultState());
   }
 

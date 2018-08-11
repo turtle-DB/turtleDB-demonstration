@@ -197,8 +197,8 @@ const developerAPI = {
     return this.idb.command(this.idb._store, "DELETE_ALL", {});
   },
 
-  dropDB() {
-    return this.idb.dropDB();
+  dropDB(name) {
+    return this.idb.dropDB(name);
   },
 }
 
