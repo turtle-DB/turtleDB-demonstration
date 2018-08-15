@@ -73,7 +73,8 @@ class TurtleDB {
         doc.conflicts = true;
         doc.conflictVersions = [];
 
-        let promises = metaDoc._leafRevs.map(rev => {
+        let conflictRevs = metaDoc._leafRevs.filter(rev => rev !== metaDoc._winningRev);
+        let promises = conflictRevs.map(rev => {
           return this._readRevFromIndex(metaDoc._id, rev)
           .then(version => {
             [version._id, version._rev] = version._id_rev.split('::');
@@ -267,7 +268,7 @@ class TurtleDB {
             const _id = e.target.result.value._id;
             updatePromises.push(
               this.read(_id)
-                .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
+                .then(d => Object.assign(d.data, { age: Math.floor(Math.random() * 100 + 1) }))
                 .then(data => this.update(_id, data))
             );
           }
