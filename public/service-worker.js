@@ -2,13 +2,12 @@ const cacheName = 'turtleDB v1';
 
 const cacheAssets = [
   'index.html',
-  'images/spinning-turtle.gif',
   'images/turtle.png',
   'bundle.js',
 ]
 
 self.addEventListener("install", e => {
-  console.log("ServiceWorker Installed :) ");
+  console.log("ServiceWorker Installed");
 
   e.waitUntil(
     caches
@@ -17,13 +16,12 @@ self.addEventListener("install", e => {
         console.log("Service Worker: Caching static files...");
         cache.addAll(cacheAssets);
       })
-      .then(() => self.skipWaiting())
       .catch(err => console.log("Failed to cache static files...", err))
   )
 })
 
 self.addEventListener("activate", e => {
-  console.log("ServiceWorker Activated :) ")
+  console.log("ServiceWorker Activated")
   // clean up unwanted caches
   e.waitUntil(
     caches.keys().then(cacheNames => {
@@ -40,23 +38,8 @@ self.addEventListener("activate", e => {
 })
 
 self.addEventListener("fetch", e => {
-  console.log("ServiceWorker Fetching :)", e.request.url)
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)))
-  // Attempts to cache entire response but breaks
-  // e.respondWith(
-  //   fetch(e.request)
-  //     .then(res => {
-  //       // cache entire response (site)
-  //       const resClone = res.clone();
-  //       // open a cache
-  //       caches
-  //         .open(cacheName)
-  //         .then(cache => {
-  //           // Add response to cache
-  //           cache.put(e.request, resClone);
-  //         });
-  //       return res;
-  //     })
-  //     .catch(err => caches.match(e.request))
-  // )
+  console.log("ServiceWorker Fetching", e.request.url)
+  e.respondWith(
+    caches.match(e.request).then(res => res || fetch(e.request))
+  )
 })
