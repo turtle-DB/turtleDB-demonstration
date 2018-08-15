@@ -41,16 +41,25 @@ const developerAPI = {
       };
 
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
-        .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
-        .catch(err => console.log("Create error:", err));
+      .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
+      .then(() => {
+        const data = Object.assign({}, newDoc);
+        [data._id, data._rev] = data._id_rev.split('::');
+        delete data._id_rev;
+        return data;
+      })
+      .catch(err => console.log("Create error:", err));
     } else {
       console.log('Please pass in a valid object.');
     }
   },
 
   read(_id, revId = null) {
+    let metaDoc;
+
     return this._readMetaDoc(_id)
-      .then(metaDoc => {
+      .then(returnedMetadoc => {
+        metaDoc = returnedMetadoc;
         let rev;
 
         if (!metaDoc._winningRev) {
@@ -67,11 +76,11 @@ const developerAPI = {
 
         return this._readRevFromIndex(_id, rev);
       })
+      .then(returnedDoc => {
+        return this._packageUpDoc(metaDoc, returnedDoc);
+      })
       .then(doc => {
-        const data = Object.assign({}, doc);
-        [data._id, data._rev] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
+        return doc;
       })
       .catch(err => console.log("Read error:", err));
   },
@@ -136,6 +145,15 @@ const developerAPI = {
 
   delete(_id, revId = null) {
     return this.update(_id, { _deleted: true }, revId);
+  },
+
+  setConflictWinner(doc) {
+    const { _id, _rev } = doc;
+
+    return this._readMetaDoc(_id)
+      .then(metaDoc => this._deleteAllOtherLeafRevs(metaDoc, _rev))
+      .then(() => this.update(_id, doc, _rev))
+      .catch(err => console.log("setConflictWinner error:", err));
   },
 
 

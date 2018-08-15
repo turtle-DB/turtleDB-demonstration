@@ -135,7 +135,7 @@ class Dashboard extends React.Component {
 
   handleUpdateClick = (n) => {
     let startTime = Date.now();
-    turtleDB.idb.editFirstNDocuments(n)
+    turtleDB.editFirstNDocuments(n)
       .then(() => {
         let timeSpent = Date.now() - startTime;
         this.setState({
