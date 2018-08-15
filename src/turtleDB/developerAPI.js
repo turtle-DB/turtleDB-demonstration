@@ -42,12 +42,8 @@ const developerAPI = {
 
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
       .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
-      .then(() => {
-        const data = Object.assign({}, newDoc);
-        [data._id, data._rev] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
-      })
+      .then(() => this._packageUpDoc(metaDoc, newDoc))
+      .then(doc => doc)
       .catch(err => console.log("Create error:", err));
     } else {
       console.log('Please pass in a valid object.');
@@ -83,6 +79,22 @@ const developerAPI = {
         return doc;
       })
       .catch(err => console.log("Read error:", err));
+  },
+
+  readAll() {
+    const result = {};
+
+    return this.idb.command(this.idb._meta, "READ_ALL", {})
+      .then(metaDocs => {
+        metaDocs = metaDocs.filter(doc => doc._winningRev);
+        let promises = metaDocs.map(metaDoc => this._readWithoutDeletedError(metaDoc._id));
+        return Promise.all(promises);
+      })
+      .then(docs => {
+        docs = docs.filter(doc => !!doc);
+        return docs;
+      })
+      .catch(err => console.log("readAllMetaDocsAndDocs error:", err));
   },
 
   //requires a full document. will not append updates.
@@ -134,12 +146,14 @@ const developerAPI = {
 
         return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
       })
-      .then(() => {
-        const data = Object.assign({}, newDoc);
-        [data._id, data._rev] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
-      })
+      .then(() => this._packageUpDoc(metaDoc, newDoc))
+      .then(doc => doc)
+      // .then(() => {
+      //   const data = Object.assign({}, newDoc);
+      //   [data._id, data._rev] = data._id_rev.split('::');
+      //   delete data._id_rev;
+      //   return data;
+      // })
       .catch(err => console.log("Update error:", err));
   },
 

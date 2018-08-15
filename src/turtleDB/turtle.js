@@ -62,16 +62,18 @@ class TurtleDB {
   }
 
   _packageUpDoc(metaDoc, docData) {
-    const data = Object.assign({}, docData);
+    let doc = Object.assign({}, docData);
+    [doc._id, doc._rev] = doc._id_rev.split('::');
+    delete doc._id_rev;
 
-    let doc = {};
-    doc._id = metaDoc._id;
-    doc.data = data;
+    //let doc = {};
+    //doc._id = metaDoc._id;
+    //doc.data = data;
 
     return new Promise((resolve, reject) => {
       if (metaDoc._leafRevs.length > 1) {
-        doc.conflicts = true;
-        doc.conflictVersions = [];
+        doc._conflicts = true;
+        doc._conflictVersions = [];
 
         let conflictRevs = metaDoc._leafRevs.filter(rev => rev !== metaDoc._winningRev);
         let promises = conflictRevs.map(rev => {
@@ -79,7 +81,7 @@ class TurtleDB {
           .then(version => {
             [version._id, version._rev] = version._id_rev.split('::');
             delete version._id_rev;
-            doc.conflictVersions.push(version);
+            doc._conflictVersions.push(version);
           });
         });
 
