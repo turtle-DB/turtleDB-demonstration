@@ -41,19 +41,70 @@ class TurtleDB {
   }
 
   _readWithoutDeletedError(_id) {
+    let metaDoc;
+    let doc = {};
+
     return this._readMetaDoc(_id)
-      .then(metaDoc => {
-        if (!metaDoc._winningRev) { return Promise.resolve(false); }
-        return this._readRevFromIndex(_id, metaDoc._winningRev);
+      .then(returnedMetadoc => {
+        if (!returnedMetadoc._winningRev) { return Promise.resolve(false); }
+        metaDoc = returnedMetadoc;
+
+        return this._readRevFromIndex(_id, returnedMetadoc._winningRev);
+      })
+      .then(returnedDoc => {
+        if (!returnedDoc) { return false; }
+        return this._packageUpDoc(metaDoc, returnedDoc)
       })
       .then(doc => {
-        if (!doc) { return false; }
-        const data = Object.assign({}, doc);
-        [data._id, data._rev] = data._id_rev.split('::');
-        delete data._id_rev;
-        return data;
+        return doc;
       })
       .catch(err => console.log("Read error:", err));
+  }
+
+  _packageUpDoc(metaDoc, docData) {
+    let doc = Object.assign({}, docData);
+    [doc._id, doc._rev] = doc._id_rev.split('::');
+    delete doc._id_rev;
+
+    //let doc = {};
+    //doc._id = metaDoc._id;
+    //doc.data = data;
+
+    return new Promise((resolve, reject) => {
+      if (metaDoc._leafRevs.length > 1) {
+        doc._conflicts = true;
+        doc._conflictVersions = [];
+
+        let conflictRevs = metaDoc._leafRevs.filter(rev => rev !== metaDoc._winningRev);
+        let promises = conflictRevs.map(rev => {
+          return this._readRevFromIndex(metaDoc._id, rev)
+          .then(version => {
+            [version._id, version._rev] = version._id_rev.split('::');
+            delete version._id_rev;
+            doc._conflictVersions.push(version);
+          });
+        });
+
+        Promise.all(promises)
+        .then(() => {
+          resolve(doc);
+        });
+
+      } else {
+        resolve(doc);
+      }
+    })
+  }
+
+  _deleteAllOtherLeafRevs(metaDoc, _rev) {
+    const leafRevsToDelete = metaDoc._leafRevs.filter(rev => rev !== _rev);
+
+    let result = Promise.resolve();
+    leafRevsToDelete.forEach(rev => {
+      result = result.then(() => this.delete(metaDoc._id, rev));
+    });
+
+    return result;
   }
 
   _generateNewDoc(_id, oldRev, newProperties) {
@@ -209,7 +260,7 @@ class TurtleDB {
     return new Promise((resolve, reject) => {
       let updatePromises = [];
       let counter = 0;
-      this.idb.getStore(this._meta, 'readonly').openCursor().onsuccess = e => {
+      this.idb.getStore(this.idb._meta, 'readonly').openCursor().onsuccess = e => {
         const cursor = e.target.result;
         if (!cursor) {
           console.log('Cursor finished!');
@@ -219,7 +270,7 @@ class TurtleDB {
             const _id = e.target.result.value._id;
             updatePromises.push(
               this.read(_id)
-                .then(d => Object.assign(d, { age: Math.floor(Math.random() * 100 + 1) }))
+                .then(d => Object.assign(d.data, { age: Math.floor(Math.random() * 100 + 1) }))
                 .then(data => this.update(_id, data))
             );
           }
