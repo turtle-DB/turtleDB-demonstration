@@ -49,16 +49,15 @@ class TableComponent extends React.Component {
 
   generateRows = () => {
     return this.props.data.docs.slice((this.state.page - 1) * this.state.tableMax, this.state.page * this.state.tableMax).map(doc => {
-      const data = doc.data;
-      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{data[header.toLowerCase()]}</td>);
+
+      const cells = HEADERS.map((header, j) => <td key={doc._id + j}>{doc[header.toLowerCase()]}</td>);
 
       const metaDoc = this.props.data.metaDocs.find(metaDoc => metaDoc._id === doc._id);
-      //const conflictBoolean = metaDoc._leafRevs.length > 1;
       const conflictBoolean = doc.conflicts;
       const treeBtnColor = conflictBoolean ? 'warning' : 'success';
 
       return (
-        <tr key={data._id}>
+        <tr key={doc._id}>
           <td className="row-buttons-container">
             <span>{conflictBoolean ? '⚠️' : '✅'}</span>
             <button
@@ -67,7 +66,7 @@ class TableComponent extends React.Component {
             >View Tree</button>
             <button
               className="btn btn-dark btn-sm mx-2"
-              onClick={() => this.props.handleSingleDeleteClick(data._id)}
+              onClick={() => this.props.handleSingleDeleteClick(doc._id)}
             >Del</button>
             <button
               className="btn btn-info btn-sm mx-2"
