@@ -3,9 +3,8 @@ import axios from 'axios';
 const debug = require('debug');
 
 var log = debug('turtleDB:syncTo');
-var httpLog = debug('turtleDB:http');
 
-const BATCH_LIMIT = 20;
+const BATCH_LIMIT = 1000;
 
 class SyncTo {
   constructor(targetUrl) {
@@ -28,6 +27,8 @@ class SyncTo {
       .catch(err => console.log('Sync To Error:', err));
   }
 
+  // #0 HTTP GET '/connect'
+
   checkServerConnection(path) {
     return axios.get(this.targetUrl + path)
       .then(res => {
@@ -43,6 +44,8 @@ class SyncTo {
         }
       });
   }
+
+  // #1 - #2 HTTP POST '/_last_tortoise_key'
 
   getSyncToTortoiseDoc() {
     return this.idb.command(this.idb._syncToStore, "READ_ALL", {})
@@ -68,7 +71,10 @@ class SyncTo {
       })
   }
 
+  // #3 - 4 HTTP POST '/_missing_rev_ids'
+
   getChangedMetaDocsForTortoise() {
+<<<<<<< HEAD
     return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
       .then(metaDocs => {
         this.changedTurtleMetaDocs = metaDocs
@@ -76,6 +82,18 @@ class SyncTo {
         log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
       }
     )
+=======
+    if (this.lastTortoiseKey === this.highestTurtleKey) {
+      return Promise.reject("No sync needed - last key and highest key are equal");
+    } else {
+      return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
+        .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
+        .then(() => {
+          log(`\n getChangedMetaDocsForTortoise() - Get metadocs for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`);
+          log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
+        })
+    }
+>>>>>>> 16bfe511913c600a4b414145bb330c849327aa5d
   }
 
   batchSendChangedMetaDocsToTortoise(path) {
@@ -100,6 +118,8 @@ class SyncTo {
         this.revIdsFromTortoise.push(...revIdsFromTortoise.data);
       });
   }
+
+  // #5 - 6 HTTP POST '/_insert_docs'
 
   getStoreDocsForTortoise() {
     const promises = this.revIdsFromTortoise.map(_id_rev => {
@@ -152,8 +172,6 @@ class SyncTo {
   // Utility Methods
 
   getMetaDocsBetweenStoreKeys(lastTortoiseKey, highestTurtleKey) {
-    lastTortoiseKey = lastTortoiseKey === undefined ? 0 : lastTortoiseKey;
-    highestTurtleKey = highestTurtleKey === undefined ? 0 : highestTurtleKey;
     return this.idb.command(this.idb._store, "READ_BETWEEN", { x: lastTortoiseKey, y: highestTurtleKey })
       .then(docs => this.getUniqueIDs(docs))
       .then(ids => this.getMetaDocsByIDs(ids))
