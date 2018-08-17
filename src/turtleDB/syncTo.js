@@ -30,7 +30,7 @@ class SyncTo {
 
   checkServerConnection(path) {
     return axios.get(this.targetUrl + path)
-      .then((res) => {
+      .then(res => {
         log(`\n #0 HTTP <==> Tortoise connection checked`);
         return res.status === 200 ? true : false;
       })
@@ -70,11 +70,12 @@ class SyncTo {
 
   getChangedMetaDocsForTortoise() {
     return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
-      .then(metaDocs => this.changedTurtleMetaDocs = metaDocs)
-      .then(() => {
+      .then(metaDocs => {
+        this.changedTurtleMetaDocs = metaDocs
         log(`\n getChangedMetaDocsForTortoise() - Get metadocs for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`);
         log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
-      })
+      }
+    )
   }
 
   batchSendChangedMetaDocsToTortoise(path) {
@@ -88,7 +89,6 @@ class SyncTo {
       .then(() => {
         return this.batchSendChangedMetaDocsToTortoise(path);
       });
-
   }
 
   sendBatchOfMetaDocs(path, batch) {
