@@ -15,7 +15,7 @@ import peopleData from './../data/PeopleData';
 
 const dbName = "demo";
 const turtleDB = new TurtleDB(dbName);
-turtleDB.setRemote('http://localhost:3000');
+turtleDB.setRemote('http://138.68.229.63:3000');
 window.turtleDB = turtleDB;
 
 class Dashboard extends React.Component {
