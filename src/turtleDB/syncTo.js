@@ -74,15 +74,6 @@ class SyncTo {
   // #3 - 4 HTTP POST '/_missing_rev_ids'
 
   getChangedMetaDocsForTortoise() {
-<<<<<<< HEAD
-    return this.getMetaDocsBetweenStoreKeys(this.lastTortoiseKey, this.highestTurtleKey)
-      .then(metaDocs => {
-        this.changedTurtleMetaDocs = metaDocs
-        log(`\n getChangedMetaDocsForTortoise() - Get metadocs for all records between ${this.lastTortoiseKey} - ${this.highestTurtleKey} in the store`);
-        log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
-      }
-    )
-=======
     if (this.lastTortoiseKey === this.highestTurtleKey) {
       return Promise.reject("No sync needed - last key and highest key are equal");
     } else {
@@ -93,7 +84,6 @@ class SyncTo {
           log(`\n getChangedMetaDocsForTortoise() - Found ${this.changedTurtleMetaDocs.length} metadocs to send to Tortoise`);
         })
     }
->>>>>>> 16bfe511913c600a4b414145bb330c849327aa5d
   }
 
   batchSendChangedMetaDocsToTortoise(path) {
