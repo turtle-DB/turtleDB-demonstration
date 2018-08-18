@@ -1,5 +1,6 @@
 .tree-container {
-  background: #FAFAFA;
+  /* background: #FAFAFA; */
+  background: white;
   padding-top: 10px;
   border-radius: 10px;
   border: solid rgb(138, 138, 138) 1px;

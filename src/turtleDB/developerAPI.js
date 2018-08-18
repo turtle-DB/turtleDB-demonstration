@@ -41,10 +41,10 @@ const developerAPI = {
       };
 
       return this.idb.command(this.idb._meta, "CREATE", { data: metaDoc })
-      .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
-      .then(() => this._packageUpDoc(metaDoc, newDoc))
-      .then(doc => doc)
-      .catch(err => console.log("Create error:", err));
+        .then(() => this.idb.command(this.idb._store, "CREATE", { data: newDoc }))
+        .then(() => this._packageUpDoc(metaDoc, newDoc))
+        .then(doc => doc)
+        .catch(err => console.log("Create error:", err));
     } else {
       console.log('Please pass in a valid object.');
     }
@@ -52,11 +52,11 @@ const developerAPI = {
 
   read(_id, revId = null) {
     let metaDoc;
+    let rev;
 
     return this._readMetaDoc(_id)
       .then(returnedMetadoc => {
         metaDoc = returnedMetadoc;
-        let rev;
 
         if (!metaDoc._winningRev) {
           throw new Error("This document has been deleted.");

@@ -66,29 +66,25 @@ class TurtleDB {
     [doc._id, doc._rev] = doc._id_rev.split('::');
     delete doc._id_rev;
 
-    //let doc = {};
-    //doc._id = metaDoc._id;
-    //doc.data = data;
-
     return new Promise((resolve, reject) => {
       if (metaDoc._leafRevs.length > 1) {
         doc._conflicts = true;
         doc._conflictVersions = [];
 
-        let conflictRevs = metaDoc._leafRevs.filter(rev => rev !== metaDoc._winningRev);
+        let conflictRevs = metaDoc._leafRevs.filter(rev => rev !== doc._rev);
         let promises = conflictRevs.map(rev => {
           return this._readRevFromIndex(metaDoc._id, rev)
-          .then(version => {
-            [version._id, version._rev] = version._id_rev.split('::');
-            delete version._id_rev;
-            doc._conflictVersions.push(version);
-          });
+            .then(version => {
+              [version._id, version._rev] = version._id_rev.split('::');
+              delete version._id_rev;
+              doc._conflictVersions.push(version);
+            });
         });
 
         Promise.all(promises)
-        .then(() => {
-          resolve(doc);
-        });
+          .then(() => {
+            resolve(doc);
+          });
 
       } else {
         resolve(doc);
@@ -114,6 +110,8 @@ class TurtleDB {
 
     delete newDoc._rev;
     delete newDoc._id;
+    delete newDoc._conflicts;
+    delete newDoc._conflictVersions;
 
     const newRev = `${oldRevNumber + 1}-` + md5(oldRev + JSON.stringify(newDoc));
     newDoc._id_rev = _id + "::" + newRev;
@@ -213,7 +211,7 @@ class TurtleDB {
     let result = Promise.resolve();
     for (let i = 0; i < times; i += 1) {
       //create promise chain
-      result = result.then(() => this.idb.editFirstNDocuments(docs));
+      result = result.then(() => this.editFirstNDocuments(docs));
     }
 
     result.then(() => console.log('finished editing'));
@@ -270,8 +268,10 @@ class TurtleDB {
             const _id = e.target.result.value._id;
             updatePromises.push(
               this.read(_id)
-                .then(d => Object.assign(d.data, { age: Math.floor(Math.random() * 100 + 1) }))
-                .then(data => this.update(_id, data))
+                .then(doc => {
+                  let newDoc = Object.assign(doc, { age: Math.floor(Math.random() * 100000000000 + 1) });
+                  return this.update(_id, newDoc);
+                })
             );
           }
           counter++;
