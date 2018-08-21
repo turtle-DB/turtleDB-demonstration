@@ -105,9 +105,24 @@ class TurtleDB {
   }
 
   _generateNewDoc(_id, oldRev, newProperties) {
-    // const [_id, oldRev] = oldDoc._id_rev.split('::');
     const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
     const newDoc = Object.assign({}, newProperties);
+
+    delete newDoc._rev;
+    delete newDoc._id;
+    delete newDoc._conflicts;
+    delete newDoc._conflictVersions;
+
+    const newRev = `${oldRevNumber + 1}-` + md5(oldRev + JSON.stringify(newDoc));
+    newDoc._id_rev = _id + "::" + newRev;
+    return newDoc;
+  }
+
+  _mergeDocs(oldDoc, newProperties) {
+    const [_id, oldRev] = oldDoc._id_rev.split('::');
+    const oldRevNumber = parseInt(oldRev.split('-')[0], 10);
+    const oldDocCopy = JSON.parse(JSON.stringify(oldDoc));
+    const newDoc = Object.assign(oldDocCopy, newProperties);
 
     delete newDoc._rev;
     delete newDoc._id;
