@@ -14,6 +14,7 @@ class TurtleDB {
   constructor(dbName = 'default') {
     this.idb = new IDBShell(`turtleDB-${dbName}`);
     this.syncInProgress = false;
+    this.batchLimit = 1000;
 
     for (const prop in developerAPI) {
       if (typeof developerAPI[prop] === 'function') {
@@ -193,7 +194,7 @@ class TurtleDB {
 
   syncTo() {
     logTo('\n ------- NEW Turtle ==> Tortoise SYNC ------');
-    const syncTo = new SyncTo(this.remoteUrl);
+    const syncTo = new SyncTo(this.remoteUrl, this.batchLimit);
     syncTo.idb = this.idb;
     return syncTo.start()
       .then(() => logTo('\n ------- Turtle ==> Tortoise sync complete ------'));

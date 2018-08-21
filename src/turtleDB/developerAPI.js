@@ -6,6 +6,10 @@ const developerAPI = {
     this.remoteUrl = remoteUrl;
   },
 
+  setBatchLimit(number) {
+    this.batchLimit = number;
+  },
+
   sync() {
     if (!this.syncInProgress) {
       this.syncInProgress = true;
@@ -217,12 +221,6 @@ const developerAPI = {
           totalQuota: this.sizeOf(quota)
         };
       });
-  },
-
-  // BULK OPERATIONS
-
-  filterBy(selector) {
-    return this.idb.filterBy(selector);
   },
 
   deleteAll() {

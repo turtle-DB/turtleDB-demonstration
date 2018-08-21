@@ -1,9 +1,7 @@
-import uuidv4 from 'uuid/v4';
 import axios from 'axios';
 
 const debug = require('debug');
 var log = debug('turtleDB:syncFrom');
-var httpLog = debug('turtleDB:http');
 
 class SyncFrom {
   constructor(targetUrl) {
