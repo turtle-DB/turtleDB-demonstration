@@ -161,6 +161,62 @@ const developerAPI = {
       .catch(err => console.log("Update error:", err));
   },
 
+  appendUpdate(_id, newProperties, revId = null) {
+    let metaDoc;
+    let rev;
+    let newDoc;
+
+    return this._readMetaDoc(_id)
+      .then(returnedMetadoc => {
+        metaDoc = returnedMetadoc;
+
+        if (!metaDoc._winningRev) {
+          throw new Error("This document has been deleted.");
+        } else if (!revId) {
+          rev = metaDoc._winningRev;
+        } else {
+          if (metaDoc._leafRevs.includes(revId)) {
+            rev = revId;
+          } else {
+            throw new Error("Invalid Revision Id");
+          }
+        }
+        return this._readRevFromIndex(_id, rev);
+      })
+      .then(oldDoc => {
+        newDoc = this._mergeDocs(oldDoc, newProperties);
+        this.idb.command(this.idb._store, "CREATE", { data: newDoc });
+
+        return {
+          newRev: newDoc._id_rev.split('::')[1],
+          oldRev: oldDoc._id_rev.split('::')[1]
+        };
+      })
+      .then(({ newRev, oldRev }) => {
+        // updating the meta doc:
+        this._updateMetaDocRevisionTree(metaDoc._revisions, newRev, oldRev, newProperties._deleted);
+
+        if (newProperties._deleted) {
+          metaDoc._leafRevs.splice(metaDoc._leafRevs.indexOf(oldRev), 1);
+        } else {
+          metaDoc._leafRevs[metaDoc._leafRevs.indexOf(oldRev)] = newRev;
+        }
+
+        metaDoc._winningRev = this._getWinningRev(metaDoc._leafRevs) || null;
+
+        return this.idb.command(this.idb._meta, "UPDATE", { data: metaDoc });
+      })
+      .then(() => this._packageUpDoc(metaDoc, newDoc))
+      .then(doc => doc)
+      // .then(() => {
+      //   const data = Object.assign({}, newDoc);
+      //   [data._id, data._rev] = data._id_rev.split('::');
+      //   delete data._id_rev;
+      //   return data;
+      // })
+      .catch(err => console.log("Update error:", err));
+  },
+
   delete(_id, revId = null) {
     return this.update(_id, { _deleted: true }, revId);
   },
