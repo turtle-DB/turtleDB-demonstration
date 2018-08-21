@@ -4,13 +4,12 @@ const debug = require('debug');
 
 var log = debug('turtleDB:syncTo');
 
-const BATCH_LIMIT = 1000;
-
 class SyncTo {
-  constructor(targetUrl) {
+  constructor(targetUrl, batchLimit) {
     this.targetUrl = targetUrl;
     this.sessionID = new Date().toISOString();
     this.revIdsFromTortoise = [];
+    this.batchLimit = batchLimit;
   }
 
   start() {
@@ -91,7 +90,7 @@ class SyncTo {
       log(`\n finished sending all batches of metadocs to Tortoise`);
       return;
     }
-    let currentBatch = this.changedTurtleMetaDocs.splice(0, BATCH_LIMIT);
+    let currentBatch = this.changedTurtleMetaDocs.splice(0, this.batchLimit);
 
     return this.sendBatchOfMetaDocs(path, currentBatch)
       .then(() => {
@@ -129,7 +128,7 @@ class SyncTo {
   }
 
   batchSendTurtleDocsToTortoise(path) {
-    let currentBatch = this.storeDocsForTortoise.splice(0, BATCH_LIMIT);
+    let currentBatch = this.storeDocsForTortoise.splice(0, this.batchLimit);
 
     if (this.storeDocsForTortoise.length === 0) {
       return this.sendBatchOfDocs(path, currentBatch, true)
