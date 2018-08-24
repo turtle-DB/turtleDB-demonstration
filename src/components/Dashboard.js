@@ -8,7 +8,10 @@ import BenchmarkBox from './BenchmarkBox/BenchmarkBox';
 import TreeComponent from './TreeComponent/TreeComponent';
 import StorageDisplay from './StorageComponent/StorageDisplay';
 
-import TurtleDB from '../turtleDB/turtle';
+// import TurtleDB from '../turtleDB/turtle';
+
+// import TurtleDB from '../turtleDB.min.js';
+import TurtleDB from 'turtledb';
 
 // import data
 import peopleData from './../data/PeopleData';
